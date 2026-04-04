@@ -3480,10 +3480,13 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
 // ─── Integrations Page ────────────────────────────────────────────
 /** Dot — connection status indicator. Hoisted to module scope to prevent recreation on every render. */
 function Dot({connected, syncing}) {
+  const _bg = syncing?T.amber:connected?T.emerald:T.textDim;
+  const _sh = connected?"0 0 6px "+T.emerald+"60":syncing?"0 0 6px "+T.amber+"60":"none";
+  const _lb = syncing?"Syncing...":connected?"Connected":"Not connected";
   return (
     <div style={{display:"flex",alignItems:"center",gap:6}}>
-      <div style={{width:8,height:8,borderRadius:"50%",background:syncing?T.amber:connected?T.emerald:T.textDim,boxShadow:connected?`0 0 6px ${T.emerald}60`:syncing?`0 0 6px ${T.amber}60`:"none"}}/>
-      <span style={{fontSize:10,color:syncing?T.amber:connected?T.emerald:T.textDim,fontFamily:T.mono}}>{syncing?"Syncing...":connected?"Connected":"Not connected"}</span>
+      <div style={{width:8,height:8,borderRadius:"50%",background:_bg,boxShadow:_sh}}/>
+      <span style={{fontSize:10,color:_bg,fontFamily:T.mono}}>{_lb}</span>
     </div>
   );
 }
