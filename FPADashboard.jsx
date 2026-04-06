@@ -17,12 +17,12 @@ import React, { useState, useEffect, useRef, useMemo, useCallback, Component } f
 const api = (() => {
   const req = async (method, path, body) => {
     try {
-      const res = await fetch("/api"+path, {
+      const res = await fetch("/api"+(path), {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: body !== undefined ? JSON.stringify(body) : undefined,
       });
-      if (!res.ok) throw new Error("API "+res.status);
+      if (!res.ok) throw new Error("API "+(res.status));
       return res.json();
     } catch (e) {
       throw e;
@@ -53,15 +53,15 @@ const api = (() => {
       disconnect: ()          => req('POST', '/plaid/disconnect'),
     },
     data: {
-      pnl:           (y)       => req('GET',  "/data/pnl?year="+y),
-      cashflow:      (y)       => req('GET',  "/data/cashflow?year="+y),
+      pnl:           (y)       => req('GET',  "/data/pnl?year="+(y)),
+      cashflow:      (y)       => req('GET',  "/data/cashflow?year="+(y)),
       ar:            ()        => req('GET',  '/data/ar'),
-      balanceSheet:  (y)       => req('GET',  "/data/balance-sheet?year="+y),
+      balanceSheet:  (y)       => req('GET',  "/data/balance-sheet?year="+(y)),
       headcount:     ()        => req('GET',  '/data/headcount'),
-      saas:          (y)       => req('GET',  "/data/saas?year="+y),
+      saas:          (y)       => req('GET',  "/data/saas?year="+(y)),
       clients:       ()        => req('GET',  '/data/clients'),
       company:       ()        => req('GET',  '/data/company'),
-      auditLog:      (n=50)    => req('GET',  "/data/audit-log?limit="+n),
+      auditLog:      (n=50)    => req('GET',  "/data/audit-log?limit="+(n)),
     },
     onboarding: {
       complete: (b) => req('POST', '/onboarding/complete', b),
@@ -72,24 +72,24 @@ const api = (() => {
     scenarios: {
       list:       ()          => req('GET',    '/scenarios'),
       create:     (body)      => req('POST',   '/scenarios', body),
-      get:        (id)        => req('GET',    "/scenarios/"+id),
-      update:     (id, body)  => req('PATCH',  "/scenarios/"+id, body),
-      del:        (id)        => req('DELETE', "/scenarios/"+id),
-      addVersion: (id, body)  => req('POST',   "/scenarios/"+id+"/versions", body),
-      duplicate:  (id)        => req('POST',   "/scenarios/"+id+"/duplicate"),
+      get:        (id)        => req('GET',    "/scenarios/"+(id)),
+      update:     (id, body)  => req('PATCH',  "/scenarios/"+(id), body),
+      del:        (id)        => req('DELETE', "/scenarios/"+(id)),
+      addVersion: (id, body)  => req('POST',   "/scenarios/"+(id)+"/versions", body),
+      duplicate:  (id)        => req('POST',   "/scenarios/"+(id)+"/duplicate"),
     },
     budgets: {
-      list:       (year)           => req('GET',   "/budgets?fiscalYear="+year||''),
+      list:       (year)           => req('GET',   "/budgets?fiscalYear="+(year||'')),
       create:     (body)           => req('POST',  '/budgets', body),
-      get:        (id)             => req('GET',   "/budgets/"+id),
-      saveItems:  (id, items)      => req('PATCH', "/budgets/"+id+"/items", { items }),
-      submit:     (id)             => req('POST',  "/budgets/"+id+"/submit"),
-      approve:    (id, note)       => req('POST',  "/budgets/"+id+"/approve", { note }),
-      reject:     (id, note)       => req('POST',  "/budgets/"+id+"/reject", { note }),
-      addComment: (id, body, itemId) => req('POST', "/budgets/"+id+"/comments", { body, budgetItemId: itemId }),
+      get:        (id)             => req('GET',   "/budgets/"+(id)),
+      saveItems:  (id, items)      => req('PATCH', "/budgets/"+(id)+"/items", { items }),
+      submit:     (id)             => req('POST',  "/budgets/"+(id)+"/submit"),
+      approve:    (id, note)       => req('POST',  "/budgets/"+(id)+"/approve", { note }),
+      reject:     (id, note)       => req('POST',  "/budgets/"+(id)+"/reject", { note }),
+      addComment: (id, body, itemId) => req('POST', "/budgets/"+(id)+"/comments", { body, budgetItemId: itemId }),
     },
     csv: {
-      template: (type) => "/api/csv/template/"+type,
+      template: (type) => "/api/csv/template/"+(type),
     },
   };
 })();
@@ -125,16 +125,16 @@ const fmt = (n, short = false) => {
   if (n === null || n === undefined || !isFinite(n)) return short ? "$0" : "$0";
   if (short) {
     const abs = Math.abs(n);
-    if (abs >= 1e6) return n < 0 ? "-" : ""+"$"+(Math.abs(n) / 1e6).toFixed(1)+"M";
-    if (abs >= 1e3) return n < 0 ? "-" : ""+"$"+(Math.abs(n) / 1e3).toFixed(0)+"K";
-    return n < 0 ? "-" : ""+"$"+Math.round(Math.abs(n));
+    if (abs >= 1e6) return (n < 0 ? "-" : "")+"$"+((Math.abs(n) / 1e6).toFixed(1))+"M";
+    if (abs >= 1e3) return (n < 0 ? "-" : "")+"$"+((Math.abs(n) / 1e3).toFixed(0))+"K";
+    return (n < 0 ? "-" : "")+"$"+(Math.round(Math.abs(n)));
   }
   return n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 };
 
 const pct = (n) => {
   if (!isFinite(n)) return "0.0%";
-  return (n * 100).toFixed(1)+"%";
+  return ((n * 100).toFixed(1))+"%";
 };
 
 const sum = (arr) => {
@@ -470,12 +470,12 @@ class ErrorBoundary extends React.Component {
 let _sparkId = 0;
 function Spark({ data, color, w = 80, h = 28 }) {
   const idRef = useRef(null);
-  if (!idRef.current) idRef.current = "sg"+++_sparkId+"_"+color.replace(/[^a-z0-9]/gi, "");
+  if (!idRef.current) idRef.current = "sg"+(++_sparkId)+"_"+(color.replace(/[^a-z0-9]/gi, ""));
   const uid = idRef.current;
   if (!data?.length || data.every(v => !isFinite(v))) return null;
   const clean = data.map(v => (isFinite(v) ? v : 0));
   const max = Math.max(...clean), min = Math.min(...clean), r = max - min || 1;
-  const pts = clean.map((v, i) => safeDiv((i) * w, clean.length - 1)+","+h - safeDiv((v - min) * h, r));
+  const pts = clean.map((v, i) => (safeDiv((i) * w, clean.length - 1))+","+(h - safeDiv((v - min) * h, r)));
   return (
     <svg width={w} height={h} style={{ overflow:"visible" }} aria-hidden="true">
       <defs>
@@ -484,7 +484,7 @@ function Spark({ data, color, w = 80, h = 28 }) {
           <stop offset="100%" stopColor={color} stopOpacity="0"/>
         </linearGradient>
       </defs>
-      <path d={"M"+pts[0]+" L"+pts.join(" L")+" L"+w+","+h+" L0,"+h+" Z"} fill={"url(#"+uid+")"}/>
+      <path d={"M"+(pts[0])+" L"+(pts.join(" L"))+" L"+(w)+","+(h)+" L0,"+(h)+" Z"} fill={"url(#"+(uid)+")"}/>
       <polyline points={pts.join(" ")} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
@@ -524,22 +524,22 @@ function PlanGate({ requiredPlan, featureName, features, onUpgrade, lockedCopy }
   // GATE_CONFIG is the rich visual config; lockedCopy (from LOCKED_COPY) provides
   // a customer-facing description fallback when GATE_CONFIG pitch is absent.
   const config = GATE_CONFIG[featureName] || {};
-  const pitchFallback = lockedCopy?.description || "Upgrade to "+meta.label+" to unlock "+featureName+".";
+  const pitchFallback = lockedCopy?.description || "Upgrade to "+(meta.label)+" to unlock "+(featureName)+".";
   const isEnt  = requiredPlan === "enterprise";
   return (
     <div style={{display:"flex",justifyContent:"center",padding:"40px 20px",animation:"fadeIn 0.35s ease forwards"}}>
       <div style={{maxWidth:680,width:"100%"}}>
         {/* Hero card */}
-        <div style={{background:"linear-gradient(135deg,"+color+"10,"+T.violet+"08)",border:"1.5px solid "+color+"35",borderRadius:20,padding:"40px",marginBottom:20,position:"relative",overflow:"hidden"}}>
+        <div style={{background:"linear-gradient(135deg,"+(color)+"10,"+(T.violet)+"08)",border:"1.5px solid "+(color)+"35",borderRadius:20,padding:"40px",marginBottom:20,position:"relative",overflow:"hidden"}}>
           {/* bg glow */}
-          <div style={{position:"absolute",top:-60,right:-60,width:200,height:200,borderRadius:"50%",background:color+"10",filter:"blur(40px)",pointerEvents:"none"}}/>
+          <div style={{position:"absolute",top:-60,right:-60,width:200,height:200,borderRadius:"50%",background:(color)+"10",filter:"blur(40px)",pointerEvents:"none"}}/>
           <div style={{position:"relative"}}>
             <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:20}}>
-              <div style={{width:52,height:52,borderRadius:14,background:color+"18",border:"1.5px solid "+color+"40",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24}}>
+              <div style={{width:52,height:52,borderRadius:14,background:(color)+"18",border:"1.5px solid "+(color)+"40",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24}}>
                 {config.emoji||"🔒"}
               </div>
               <div>
-                <div style={{display:"inline-flex",alignItems:"center",gap:6,background:color+"15",border:"1px solid "+color+"40",borderRadius:20,padding:"3px 12px",marginBottom:5}}>
+                <div style={{display:"inline-flex",alignItems:"center",gap:6,background:(color)+"15",border:"1px solid "+(color)+"40",borderRadius:20,padding:"3px 12px",marginBottom:5}}>
                   <span style={{fontSize:9,color,fontFamily:T.mono,fontWeight:800,textTransform:"uppercase",letterSpacing:1.5}}>{isEnt?"Enterprise Only":"Professional Feature"}</span>
                 </div>
                 <div style={{color:T.text,fontFamily:T.display,fontWeight:800,fontSize:22,lineHeight:1.2}}>{config.headline||featureName}</div>
@@ -550,23 +550,23 @@ function PlanGate({ requiredPlan, featureName, features, onUpgrade, lockedCopy }
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px 24px",marginBottom:28}}>
               {(config.outcomes||features.slice(0,4)).map((f,i)=>(
                 <div key={i} style={{display:"flex",alignItems:"flex-start",gap:9}}>
-                  <div style={{width:18,height:18,borderRadius:6,background:color+"20",border:"1px solid "+color+"40",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,color,fontWeight:800,flexShrink:0,marginTop:1}}>✓</div>
+                  <div style={{width:18,height:18,borderRadius:6,background:(color)+"20",border:"1px solid "+(color)+"40",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,color,fontWeight:800,flexShrink:0,marginTop:1}}>✓</div>
                   <span style={{fontSize:12,color:T.textMid,fontFamily:T.sans,lineHeight:1.5}}>{f}</span>
                 </div>
               ))}
             </div>
             {/* Social proof */}
             {config.social&&(
-              <div style={{background:color+"08",border:"1px solid "+color+"20",borderRadius:10,padding:"10px 14px",marginBottom:24,display:"flex",alignItems:"center",gap:8}}>
+              <div style={{background:(color)+"08",border:"1px solid "+(color)+"20",borderRadius:10,padding:"10px 14px",marginBottom:24,display:"flex",alignItems:"center",gap:8}}>
                 <span style={{fontSize:14}}>💬</span>
                 <span style={{fontSize:11,color:T.textMid,fontFamily:T.sans,fontStyle:"italic"}}>{config.social}</span>
               </div>
             )}
             <div style={{display:"flex",alignItems:"center",gap:14,flexWrap:"wrap"}}>
               <button onClick={onUpgrade}
-                style={{background:"linear-gradient(135deg,"+color+","+T.violet+")",border:"none",borderRadius:11,padding:"13px 32px",color:T.bg,fontSize:13,fontFamily:T.sans,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 20px "+color+"40",letterSpacing:0.3,transition:"all 0.2s"}}
-                onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 8px 28px "+color+"50";}}
-                onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 4px 20px "+color+"40";}}>
+                style={{background:"linear-gradient(135deg,"+(color)+","+(T.violet)+")",border:"none",borderRadius:11,padding:"13px 32px",color:T.bg,fontSize:13,fontFamily:T.sans,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 20px "+(color)+"40",letterSpacing:0.3,transition:"all 0.2s"}}
+                onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 8px 28px "+(color)+"50";}}
+                onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 4px 20px "+(color)+"40";}}>
                 {isEnt?"Contact Sales →":"Start 14-Day Free Trial →"}
               </button>
               <div style={{fontSize:11,color:T.textDim,fontFamily:T.sans}}>
@@ -577,7 +577,7 @@ function PlanGate({ requiredPlan, featureName, features, onUpgrade, lockedCopy }
         </div>
 
         {/* Also included */}
-        <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:14,padding:"18px 22px"}}>
+        <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:14,padding:"18px 22px"}}>
           <div style={{fontSize:9,color:T.textDim,fontFamily:T.mono,textTransform:"uppercase",letterSpacing:1.5,marginBottom:12}}>Also included in {meta.label}</div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"7px 12px"}}>
             {features.map((f,i)=>(
@@ -643,7 +643,7 @@ function DataSourceBadge({ source = "demo", lastSync = null }) {
   const meta = {
     live:  { color: T.emerald, bg: T.emeraldDim, icon: "●", label: "Live Data",  tip: "Synced from QuickBooks" },
     demo:  { color: T.amber,   bg: T.amberDim,   icon: "◎", label: "Demo Data",  tip: "Connect QuickBooks to see live numbers" },
-    stale: { color: T.orange,  bg: T.orangeDim,  icon: "◔", label: "Stale",      tip: lastSync ? "Last synced "+new Date(lastSync).toLocaleDateString() : "Data may be outdated" },
+    stale: { color: T.orange,  bg: T.orangeDim,  icon: "◔", label: "Stale",      tip: lastSync ? "Last synced "+(new Date(lastSync).toLocaleDateString()) : "Data may be outdated" },
     error: { color: T.rose,    bg: T.roseDim,    icon: "✕", label: "Sync Error", tip: "Integration disconnected — check Integrations tab" },
     csv:   { color: T.violet,  bg: T.violetDim,  icon: "↑", label: "CSV Import", tip: "Imported from CSV" },
   };
@@ -654,7 +654,7 @@ function DataSourceBadge({ source = "demo", lastSync = null }) {
       style={{
         display:"inline-flex",alignItems:"center",gap:4,
         fontSize:9,fontFamily:T.mono,fontWeight:700,letterSpacing:0.8,
-        color:m.color,background:m.bg,border:"1px solid "+m.color+"30",
+        color:m.color,background:m.bg,border:"1px solid "+(m.color)+"30",
         borderRadius:99,padding:"2px 8px",cursor:"help",flexShrink:0,
       }}
     >
@@ -700,20 +700,20 @@ function OnboardingChecklist({ onNavigate, onDismiss }) {
   if (allDone) return null;
 
   return (
-    <div style={{background:T.surface,border:"1.5px solid "+T.cyan+"30",borderRadius:14,marginBottom:20,overflow:"hidden"}}>
+    <div style={{background:T.surface,border:"1.5px solid "+(T.cyan)+"30",borderRadius:14,marginBottom:20,overflow:"hidden"}}>
       {/* Header */}
       <div
         onClick={()=>setCollapsed(c=>!c)}
-        style={{display:"flex",alignItems:"center",gap:10,padding:"12px 18px",cursor:"pointer",background:"linear-gradient(135deg,"+T.cyan+"08,transparent)"}}
+        style={{display:"flex",alignItems:"center",gap:10,padding:"12px 18px",cursor:"pointer",background:"linear-gradient(135deg,"+(T.cyan)+"08,transparent)"}}
       >
-        <div style={{width:28,height:28,borderRadius:8,background:T.cyan+"20",border:"1px solid "+T.cyan+"30",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0}}>🚀</div>
+        <div style={{width:28,height:28,borderRadius:8,background:(T.cyan)+"20",border:"1px solid "+(T.cyan)+"30",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0}}>🚀</div>
         <div style={{flex:1}}>
           <div style={{fontSize:12,fontWeight:700,color:T.text,fontFamily:T.display}}>Get started with FinanceOS</div>
           <div style={{fontSize:10,color:T.textDim,fontFamily:T.sans,marginTop:1}}>{completed}/{CHECKLIST_STEPS.length} steps complete · {pct}%</div>
         </div>
         {/* Progress bar */}
         <div style={{width:80,height:4,background:T.border,borderRadius:99,overflow:"hidden",flexShrink:0}}>
-          <div style={{height:"100%",width:pct+"%",background:"linear-gradient(90deg,"+T.cyan+","+T.violet+")",borderRadius:99,transition:"width 0.5s ease"}}/>
+          <div style={{height:"100%",width:(pct)+"%",background:"linear-gradient(90deg,"+(T.cyan)+","+(T.violet)+")",borderRadius:99,transition:"width 0.5s ease"}}/>
         </div>
         <button onClick={e=>{e.stopPropagation();onDismiss?.();}} style={{background:"none",border:"none",color:T.textDim,fontSize:14,cursor:"pointer",padding:"0 4px",flexShrink:0}} title="Dismiss checklist">×</button>
         <span style={{fontSize:10,color:T.textDim,transform:collapsed?"none":"rotate(180deg)",display:"inline-block",transition:"transform 0.2s"}}>▾</span>
@@ -723,10 +723,10 @@ function OnboardingChecklist({ onNavigate, onDismiss }) {
           {CHECKLIST_STEPS.map(step => {
             const isDone = !!done[step.id];
             return (
-              <div key={step.id} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 10px",borderRadius:9,background:isDone?T.emeraldDim:T.card,border:"1px solid "+isDone?T.emerald+"30":T.border,opacity:isDone?0.7:1,transition:"all 0.2s"}}>
+              <div key={step.id} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 10px",borderRadius:9,background:isDone?T.emeraldDim:T.card,border:"1px solid "+(isDone?T.emerald+"30":T.border),opacity:isDone?0.7:1,transition:"all 0.2s"}}>
                 <button
                   onClick={()=>markDone(step.id)}
-                  style={{width:18,height:18,borderRadius:"50%",border:"2px solid "+isDone?T.emerald:T.border,background:isDone?T.emerald:"transparent",flexShrink:0,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:10,fontWeight:700}}
+                  style={{width:18,height:18,borderRadius:"50%",border:"2px solid "+(isDone?T.emerald:T.border),background:isDone?T.emerald:"transparent",flexShrink:0,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:10,fontWeight:700}}
                 >
                   {isDone?"✓":""}
                 </button>
@@ -736,7 +736,7 @@ function OnboardingChecklist({ onNavigate, onDismiss }) {
                   <div style={{fontSize:10,color:T.textDim,fontFamily:T.sans,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{step.desc}</div>
                 </div>
                 {!isDone && (
-                  <button onClick={()=>{onNavigate(step.tab);markDone(step.id);}} style={{background:T.cyan+"15",border:"1px solid "+T.cyan+"30",borderRadius:7,padding:"4px 10px",color:T.cyan,fontSize:10,fontFamily:T.sans,fontWeight:700,cursor:"pointer",flexShrink:0}}>
+                  <button onClick={()=>{onNavigate(step.tab);markDone(step.id);}} style={{background:(T.cyan)+"15",border:"1px solid "+(T.cyan)+"30",borderRadius:7,padding:"4px 10px",color:T.cyan,fontSize:10,fontFamily:T.sans,fontWeight:700,cursor:"pointer",flexShrink:0}}>
                     Go →
                   </button>
                 )}
@@ -810,9 +810,9 @@ function CFOScorecard({ plan, hasQBO = false, hasPlaid = false }) {
   const gradeColor = grade === "A" ? T.emerald : grade === "B" ? T.cyan : grade === "C" ? T.amber : T.rose;
 
   return (
-    <div style={{background:T.surface,border:"1px solid "+T.border,borderRadius:14,marginBottom:20,overflow:"hidden"}}>
+    <div style={{background:T.surface,border:"1px solid "+(T.border),borderRadius:14,marginBottom:20,overflow:"hidden"}}>
       <div onClick={()=>setOpen(o=>!o)} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 18px",cursor:"pointer"}}>
-        <div style={{width:36,height:36,borderRadius:9,background:gradeColor+"18",border:"1.5px solid "+gradeColor+"40",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+        <div style={{width:36,height:36,borderRadius:9,background:(gradeColor)+"18",border:"1.5px solid "+(gradeColor)+"40",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
           <span style={{fontSize:16,fontWeight:900,color:gradeColor,fontFamily:T.mono}}>{grade}</span>
         </div>
         <div style={{flex:1}}>
@@ -825,7 +825,7 @@ function CFOScorecard({ plan, hasQBO = false, hasPlaid = false }) {
         </div>
       </div>
       {open && (
-        <div style={{padding:"4px 18px 18px",borderTop:"1px solid "+T.border}}>
+        <div style={{padding:"4px 18px 18px",borderTop:"1px solid "+(T.border)}}>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"6px 24px",marginTop:12}}>
             {CFO_SCORECARD_DIMENSIONS.map(d => {
               const score = scores[d.id] || 0;
@@ -835,7 +835,7 @@ function CFOScorecard({ plan, hasQBO = false, hasPlaid = false }) {
                   <div style={{flex:1,minWidth:0}}>
                     <div style={{fontSize:10,color:T.textMid,fontFamily:T.sans,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{d.label}</div>
                     <div style={{height:3,background:T.border,borderRadius:99,marginTop:3,overflow:"hidden"}}>
-                      <div style={{height:"100%",width:score*10+"%",background:sc,borderRadius:99,transition:"width 0.6s ease"}}/>
+                      <div style={{height:"100%",width:(score*10)+"%",background:sc,borderRadius:99,transition:"width 0.6s ease"}}/>
                     </div>
                   </div>
                   <span style={{fontSize:11,fontWeight:700,color:sc,fontFamily:T.mono,flexShrink:0,width:28,textAlign:"right"}}>{score.toFixed(1)}</span>
@@ -843,7 +843,7 @@ function CFOScorecard({ plan, hasQBO = false, hasPlaid = false }) {
               );
             })}
           </div>
-          <div style={{marginTop:14,background:gradeColor+"10",border:"1px solid "+gradeColor+"25",borderRadius:9,padding:"10px 14px",fontSize:11,color:T.textMid,fontFamily:T.sans,lineHeight:1.5}}>
+          <div style={{marginTop:14,background:(gradeColor)+"10",border:"1px solid "+(gradeColor)+"25",borderRadius:9,padding:"10px 14px",fontSize:11,color:T.textMid,fontFamily:T.sans,lineHeight:1.5}}>
             <strong style={{color:gradeColor}}>Grade {grade} · {overall}/10</strong>
             {" — "}{grade==="A"?"FinanceOS is production-ready and closeable with the current feature set.":grade==="B"?"Strong product. Connect integrations and unlock Professional to reach Grade A.":grade==="C"?"Good foundation. Upgrade to Professional and connect live data to unlock planning tools.":"Upgrade to Professional and connect an integration to build buyer confidence."}
             {!hasFeature(plan, FEATURES.CSUITE_REPORT) && " C-Suite Report on Professional closes the biggest reporting gap."}
@@ -883,14 +883,14 @@ function ExportButton({ reportType, data, companyName="FinanceOS", fiscalYear=20
       });
       if (!res.ok) {
         const d = await res.json().catch(()=>({}));
-        throw new Error(d.message || "Export failed ("+res.status+")");
+        throw new Error(d.message || "Export failed ("+(res.status)+")");
       }
       const blob = await res.blob();
       const ext  = format === "pptx" ? "pptx" : format === "csv" ? "csv" : "pdf";
       const url  = URL.createObjectURL(blob);
       const a    = document.createElement("a");
       a.href     = url;
-      a.download = companyName.replace(/\s+/g,"_")+"_"+reportType+"_FY"+fiscalYear+"."+ext;
+      a.download = (companyName.replace(/\s+/g,"_"))+"_"+(reportType)+"_FY"+(fiscalYear)+"."+(ext);
       a.click();
       URL.revokeObjectURL(url);
     } catch(e) {
@@ -906,8 +906,8 @@ function ExportButton({ reportType, data, companyName="FinanceOS", fiscalYear=20
         title={canExport ? "Export report" : "Upgrade to Professional to export"}
         style={{
           display:"flex",alignItems:"center",gap:6,
-          background:canExport?T.surface:T.surface+"80",
-          border:"1px solid "+canExport?T.border:T.amber+"40",
+          background:canExport?T.surface:(T.surface)+"80",
+          border:"1px solid "+(canExport?T.border:T.amber+"40"),
           borderRadius:8,padding:"6px 13px",cursor:canExport?"pointer":"not-allowed",
           color:canExport?T.textMid:T.amber,fontSize:11,fontFamily:T.sans,fontWeight:600,
           transition:"border-color 0.15s",
@@ -919,7 +919,7 @@ function ExportButton({ reportType, data, companyName="FinanceOS", fiscalYear=20
       {open && canExport && (
         <div style={{
           position:"absolute",top:"110%",right:0,zIndex:300,
-          background:T.card,border:"1px solid "+T.border,
+          background:T.card,border:"1px solid "+(T.border),
           borderRadius:10,boxShadow:"0 8px 32px rgba(0,0,0,0.4)",
           minWidth:160,overflow:"hidden",
         }}>
@@ -945,7 +945,7 @@ function ExportButton({ reportType, data, companyName="FinanceOS", fiscalYear=20
           ))}
         </div>
       )}
-      {err && <div style={{position:"absolute",top:"110%",right:0,zIndex:300,background:T.roseDim,border:"1px solid "+T.rose+"40",borderRadius:8,padding:"8px 12px",fontSize:10,color:T.rose,fontFamily:T.sans,whiteSpace:"nowrap"}}>{err}</div>}
+      {err && <div style={{position:"absolute",top:"110%",right:0,zIndex:300,background:T.roseDim,border:"1px solid "+(T.rose)+"40",borderRadius:8,padding:"8px 12px",fontSize:10,color:T.rose,fontFamily:T.sans,whiteSpace:"nowrap"}}>{err}</div>}
     </div>
   );
 }
@@ -978,11 +978,11 @@ function ScenarioSaveModal({ multipliers, onSave, onClose }) {
     setSaving(false);
   };
 
-  const inp = { background:T.surface,border:"1px solid "+T.border,borderRadius:8,padding:"9px 12px",color:T.text,fontSize:12,fontFamily:T.sans,outline:"none",width:"100%",boxSizing:"border-box" };
+  const inp = { background:T.surface,border:"1px solid "+(T.border),borderRadius:8,padding:"9px 12px",color:T.text,fontSize:12,fontFamily:T.sans,outline:"none",width:"100%",boxSizing:"border-box" };
 
   return (
     <div style={{position:"fixed",inset:0,zIndex:500,background:"rgba(0,0,0,0.7)",display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
-      <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:16,padding:28,width:"100%",maxWidth:420,boxShadow:"0 24px 64px rgba(0,0,0,0.6)"}}>
+      <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:16,padding:28,width:"100%",maxWidth:420,boxShadow:"0 24px 64px rgba(0,0,0,0.6)"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20}}>
           <div style={{fontSize:15,fontWeight:700,color:T.text,fontFamily:T.display}}>💾 Save Scenario</div>
           <button onClick={onClose} style={{background:"none",border:"none",color:T.textDim,fontSize:18,cursor:"pointer"}}>×</button>
@@ -1000,7 +1000,7 @@ function ScenarioSaveModal({ multipliers, onSave, onClose }) {
             <div style={{fontSize:10,color:T.textDim,fontFamily:T.mono,textTransform:"uppercase",letterSpacing:1,marginBottom:5}}>Notes</div>
             <textarea style={{...inp,height:68,resize:"none"}} value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Assumptions, context, or decision rationale…"/>
           </div>
-          <div style={{background:T.surface,border:"1px solid "+T.border,borderRadius:8,padding:"10px 14px"}}>
+          <div style={{background:T.surface,border:"1px solid "+(T.border),borderRadius:8,padding:"10px 14px"}}>
             <div style={{fontSize:9,color:T.textDim,fontFamily:T.mono,textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>Multipliers Being Saved</div>
             <div style={{display:"flex",gap:16}}>
               {[["Revenue",multipliers.revenue],["COGS",multipliers.cogs],["OpEx",multipliers.opex]].map(([k,v])=>(
@@ -1013,8 +1013,8 @@ function ScenarioSaveModal({ multipliers, onSave, onClose }) {
           </div>
           {err && <div style={{fontSize:11,color:T.rose,fontFamily:T.sans}}>{err}</div>}
           <div style={{display:"flex",gap:8,marginTop:4}}>
-            <button onClick={onClose} style={{flex:1,background:"transparent",border:"1px solid "+T.border,borderRadius:9,padding:"10px",color:T.textDim,fontSize:12,fontFamily:T.sans,cursor:"pointer"}}>Cancel</button>
-            <button onClick={save} disabled={saving} style={{flex:2,background:"linear-gradient(135deg,"+T.cyan+","+T.violet+")",border:"none",borderRadius:9,padding:"10px",color:T.bg,fontSize:12,fontFamily:T.display,fontWeight:800,cursor:saving?"not-allowed":"pointer"}}>
+            <button onClick={onClose} style={{flex:1,background:"transparent",border:"1px solid "+(T.border),borderRadius:9,padding:"10px",color:T.textDim,fontSize:12,fontFamily:T.sans,cursor:"pointer"}}>Cancel</button>
+            <button onClick={save} disabled={saving} style={{flex:2,background:"linear-gradient(135deg,"+(T.cyan)+","+(T.violet)+")",border:"none",borderRadius:9,padding:"10px",color:T.bg,fontSize:12,fontFamily:T.display,fontWeight:800,cursor:saving?"not-allowed":"pointer"}}>
               {saving ? "Saving…" : "Save Scenario →"}
             </button>
           </div>
@@ -1050,7 +1050,7 @@ function ScenarioLibrary({ onLoad, onClose }) {
 
   return (
     <div style={{position:"fixed",inset:0,zIndex:500,background:"rgba(0,0,0,0.7)",display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
-      <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:16,padding:28,width:"100%",maxWidth:560,maxHeight:"80vh",display:"flex",flexDirection:"column",boxShadow:"0 24px 64px rgba(0,0,0,0.6)"}}>
+      <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:16,padding:28,width:"100%",maxWidth:560,maxHeight:"80vh",display:"flex",flexDirection:"column",boxShadow:"0 24px 64px rgba(0,0,0,0.6)"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18}}>
           <div style={{fontSize:15,fontWeight:700,color:T.text,fontFamily:T.display}}>📚 Scenario Library</div>
           <button onClick={onClose} style={{background:"none",border:"none",color:T.textDim,fontSize:18,cursor:"pointer"}}>×</button>
@@ -1067,22 +1067,22 @@ function ScenarioLibrary({ onLoad, onClose }) {
           {scenarios.map(sc => {
             const latest = sc.scenario_versions?.sort((a,b)=>b.version-a.version)?.[0];
             return (
-              <div key={sc.id} style={{background:T.surface,border:"1px solid "+T.border,borderRadius:10,padding:"14px 16px",display:"flex",alignItems:"center",gap:12}}>
+              <div key={sc.id} style={{background:T.surface,border:"1px solid "+(T.border),borderRadius:10,padding:"14px 16px",display:"flex",alignItems:"center",gap:12}}>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontSize:13,fontWeight:700,color:T.text,fontFamily:T.display,marginBottom:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{sc.name}</div>
                   <div style={{fontSize:10,color:T.textDim,fontFamily:T.mono}}>
                     v{latest?.version || 1} · {latest?.label || "—"}
-                    {latest?.multipliers && " · Rev "+((latest.multipliers.revenue||1)*100).toFixed(0)+"% / OpEx "+((latest.multipliers.opex||1)*100).toFixed(0)+"%"}
+                    {latest?.multipliers && " · Rev "+(((latest.multipliers.revenue||1)*100).toFixed(0))+"% / OpEx "+(((latest.multipliers.opex||1)*100).toFixed(0))+"%"}
                   </div>
                   <div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,marginTop:2}}>{new Date(sc.updated_at).toLocaleDateString()}</div>
                 </div>
                 <div style={{display:"flex",gap:6,flexShrink:0}}>
                   {latest?.multipliers && (
-                    <button onClick={()=>{ onLoad(latest.multipliers, sc.name); onClose(); }} style={{background:T.cyan+"15",border:"1px solid "+T.cyan+"30",borderRadius:7,padding:"5px 11px",color:T.cyan,fontSize:10,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>
+                    <button onClick={()=>{ onLoad(latest.multipliers, sc.name); onClose(); }} style={{background:(T.cyan)+"15",border:"1px solid "+(T.cyan)+"30",borderRadius:7,padding:"5px 11px",color:T.cyan,fontSize:10,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>
                       Load
                     </button>
                   )}
-                  <button onClick={()=>del(sc.id)} disabled={deleting===sc.id} style={{background:T.roseDim,border:"1px solid "+T.rose+"30",borderRadius:7,padding:"5px 10px",color:T.rose,fontSize:10,fontFamily:T.sans,cursor:"pointer"}}>
+                  <button onClick={()=>del(sc.id)} disabled={deleting===sc.id} style={{background:T.roseDim,border:"1px solid "+(T.rose)+"30",borderRadius:7,padding:"5px 10px",color:T.rose,fontSize:10,fontFamily:T.sans,cursor:"pointer"}}>
                     {deleting===sc.id?"…":"✕"}
                   </button>
                 </div>
@@ -1115,7 +1115,7 @@ function CSVImportModal({ onClose, onSuccess }) {
     if (!csvText.trim()) { setErr("Paste your CSV data above."); return; }
     setStatus("uploading"); setErr("");
     try {
-      const res = await fetch("/api/csv/upload?dataType="+dataType, {
+      const res = await fetch("/api/csv/upload?dataType="+(dataType), {
         method: "POST",
         headers: { "Content-Type": "text/plain" },
         body: csvText,
@@ -1137,7 +1137,7 @@ function CSVImportModal({ onClose, onSuccess }) {
 
   return (
     <div style={{position:"fixed",inset:0,zIndex:500,background:"rgba(0,0,0,0.75)",display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
-      <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:16,padding:28,width:"100%",maxWidth:560,boxShadow:"0 24px 64px rgba(0,0,0,0.6)"}}>
+      <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:16,padding:28,width:"100%",maxWidth:560,boxShadow:"0 24px 64px rgba(0,0,0,0.6)"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20}}>
           <div style={{fontSize:15,fontWeight:700,color:T.text,fontFamily:T.display}}>📤 Import CSV Data</div>
           <button onClick={onClose} style={{background:"none",border:"none",color:T.textDim,fontSize:18,cursor:"pointer"}}>×</button>
@@ -1148,14 +1148,14 @@ function CSVImportModal({ onClose, onSuccess }) {
             <div style={{fontSize:40,marginBottom:12}}>✅</div>
             <div style={{fontSize:15,fontWeight:700,color:T.emerald,fontFamily:T.display,marginBottom:6}}>{result?.imported} rows imported</div>
             <div style={{fontSize:12,color:T.textMid,fontFamily:T.sans,marginBottom:20}}>Your {dataType.toUpperCase()} data has been updated successfully.</div>
-            <button onClick={onClose} style={{background:"linear-gradient(135deg,"+T.cyan+","+T.violet+")",border:"none",borderRadius:9,padding:"10px 28px",color:T.bg,fontSize:12,fontFamily:T.display,fontWeight:800,cursor:"pointer"}}>Done</button>
+            <button onClick={onClose} style={{background:"linear-gradient(135deg,"+(T.cyan)+","+(T.violet)+")",border:"none",borderRadius:9,padding:"10px 28px",color:T.bg,fontSize:12,fontFamily:T.display,fontWeight:800,cursor:"pointer"}}>Done</button>
           </div>
         ) : (
           <>
             {/* Data type selector */}
             <div style={{display:"flex",gap:6,marginBottom:16,flexWrap:"wrap"}}>
               {DATA_TYPES.map(dt=>(
-                <button key={dt.id} onClick={()=>setDataType(dt.id)} style={{background:dataType===dt.id?T.cyanDim:"transparent",border:"1px solid "+dataType===dt.id?T.cyan+"50":T.border,borderRadius:8,padding:"6px 12px",color:dataType===dt.id?T.cyan:T.textMid,fontSize:11,fontFamily:T.sans,cursor:"pointer"}}>
+                <button key={dt.id} onClick={()=>setDataType(dt.id)} style={{background:dataType===dt.id?T.cyanDim:"transparent",border:"1px solid "+(dataType===dt.id?T.cyan+"50":T.border),borderRadius:8,padding:"6px 12px",color:dataType===dt.id?T.cyan:T.textMid,fontSize:11,fontFamily:T.sans,cursor:"pointer"}}>
                   {dt.icon} {dt.label}
                 </button>
               ))}
@@ -1166,7 +1166,7 @@ function CSVImportModal({ onClose, onSuccess }) {
               <div style={{fontSize:11,color:T.textDim,fontFamily:T.sans,flex:1}}>
                 Paste CSV below. Column headers must match the template exactly.
               </div>
-              <button onClick={downloadTemplate} style={{background:T.surface,border:"1px solid "+T.border,borderRadius:7,padding:"5px 11px",color:T.textMid,fontSize:10,fontFamily:T.sans,cursor:"pointer",flexShrink:0,whiteSpace:"nowrap"}}>
+              <button onClick={downloadTemplate} style={{background:T.surface,border:"1px solid "+(T.border),borderRadius:7,padding:"5px 11px",color:T.textMid,fontSize:10,fontFamily:T.sans,cursor:"pointer",flexShrink:0,whiteSpace:"nowrap"}}>
                 ⬇ Template
               </button>
             </div>
@@ -1174,15 +1174,15 @@ function CSVImportModal({ onClose, onSuccess }) {
             <textarea
               value={csvText}
               onChange={e=>setCsvText(e.target.value)}
-              placeholder={"Paste "+dataType.toUpperCase()+" CSV here…\nFirst row must be column headers."}
-              style={{width:"100%",height:160,background:T.surface,border:"1px solid "+T.border,borderRadius:9,padding:"10px 12px",color:T.text,fontSize:11,fontFamily:T.mono,outline:"none",resize:"vertical",boxSizing:"border-box"}}
+              placeholder={"Paste "+(dataType.toUpperCase())+" CSV here…\nFirst row must be column headers."}
+              style={{width:"100%",height:160,background:T.surface,border:"1px solid "+(T.border),borderRadius:9,padding:"10px 12px",color:T.text,fontSize:11,fontFamily:T.mono,outline:"none",resize:"vertical",boxSizing:"border-box"}}
             />
 
             {err && <div style={{fontSize:11,color:T.rose,fontFamily:T.sans,marginTop:8}}>{err}</div>}
 
             <div style={{display:"flex",gap:8,marginTop:14}}>
-              <button onClick={onClose} style={{flex:1,background:"transparent",border:"1px solid "+T.border,borderRadius:9,padding:"10px",color:T.textDim,fontSize:12,fontFamily:T.sans,cursor:"pointer"}}>Cancel</button>
-              <button onClick={upload} disabled={status==="uploading"} style={{flex:2,background:"linear-gradient(135deg,"+T.cyan+","+T.violet+")",border:"none",borderRadius:9,padding:"10px",color:T.bg,fontSize:12,fontFamily:T.display,fontWeight:800,cursor:status==="uploading"?"not-allowed":"pointer"}}>
+              <button onClick={onClose} style={{flex:1,background:"transparent",border:"1px solid "+(T.border),borderRadius:9,padding:"10px",color:T.textDim,fontSize:12,fontFamily:T.sans,cursor:"pointer"}}>Cancel</button>
+              <button onClick={upload} disabled={status==="uploading"} style={{flex:2,background:"linear-gradient(135deg,"+(T.cyan)+","+(T.violet)+")",border:"none",borderRadius:9,padding:"10px",color:T.bg,fontSize:12,fontFamily:T.display,fontWeight:800,cursor:status==="uploading"?"not-allowed":"pointer"}}>
                 {status==="uploading" ? "Importing…" : "Import Data →"}
               </button>
             </div>
@@ -1306,8 +1306,8 @@ function BudgetingPage({ plan }) {
 
   const fmt2 = n => {
     if (!n) return "";
-    if (Math.abs(n)>=1000) return "$"+(n/1000).toFixed(0)+"K";
-    return "$"+Math.round(n);
+    if (Math.abs(n)>=1000) return "$"+((n/1000).toFixed(0))+"K";
+    return "$"+(Math.round(n));
   };
 
   if (loading && !activeBudget) return (
@@ -1325,7 +1325,7 @@ function BudgetingPage({ plan }) {
             return (
               <button key={b.id} onClick={()=>loadBudget(b.id)} style={{
                 background: activeBudget?.id===b.id ? T.cyanDim : T.surface,
-                border:"1px solid "+activeBudget?.id===b.id ? T.cyan+"40" : T.border,
+                border:"1px solid "+(activeBudget?.id===b.id ? T.cyan+"40" : T.border),
                 borderRadius:9,padding:"10px 12px",cursor:"pointer",textAlign:"left",transition:"all 0.15s",
               }}>
                 <div style={{fontSize:12,fontWeight:600,color:T.text,fontFamily:T.sans}}>{b.department}</div>
@@ -1341,9 +1341,9 @@ function BudgetingPage({ plan }) {
             value={newDept} onChange={e=>setNewDept(e.target.value)}
             onKeyDown={e=>e.key==="Enter"&&createBudget()}
             placeholder="New department…"
-            style={{flex:1,background:T.surface,border:"1px solid "+T.border,borderRadius:8,padding:"7px 10px",color:T.text,fontSize:11,fontFamily:T.sans,outline:"none"}}
+            style={{flex:1,background:T.surface,border:"1px solid "+(T.border),borderRadius:8,padding:"7px 10px",color:T.text,fontSize:11,fontFamily:T.sans,outline:"none"}}
           />
-          <button onClick={createBudget} disabled={creating||!newDept.trim()} style={{background:T.cyanDim,border:"1px solid "+T.cyan+"30",borderRadius:8,padding:"7px 10px",color:T.cyan,fontSize:12,cursor:"pointer",fontWeight:700}}>+</button>
+          <button onClick={createBudget} disabled={creating||!newDept.trim()} style={{background:T.cyanDim,border:"1px solid "+(T.cyan)+"30",borderRadius:8,padding:"7px 10px",color:T.cyan,fontSize:12,cursor:"pointer",fontWeight:700}}>+</button>
         </div>
         {err && <div style={{fontSize:10,color:T.rose,fontFamily:T.sans,marginTop:8,lineHeight:1.4}}>{err}</div>}
       </div>
@@ -1363,44 +1363,44 @@ function BudgetingPage({ plan }) {
               <div style={{fontSize:10,color:T.textDim,fontFamily:T.mono,marginTop:2}}>FY{year} · {STATUS_META[activeBudget.status]?.label}</div>
             </div>
             <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
-              <button onClick={()=>setView(v=>v==="grid"?"comments":"grid")} style={{background:T.surface,border:"1px solid "+T.border,borderRadius:8,padding:"6px 12px",color:T.textMid,fontSize:11,fontFamily:T.sans,cursor:"pointer"}}>
-                {view==="grid" ? "💬 Comments ("+comments.length+")" : "📊 Grid"}
+              <button onClick={()=>setView(v=>v==="grid"?"comments":"grid")} style={{background:T.surface,border:"1px solid "+(T.border),borderRadius:8,padding:"6px 12px",color:T.textMid,fontSize:11,fontFamily:T.sans,cursor:"pointer"}}>
+                {view==="grid" ? "💬 Comments ("+(comments.length)+")" : "📊 Grid"}
               </button>
               {activeBudget.status==="draft" && (
                 <>
-                  <button onClick={saveItems} disabled={saving} style={{background:T.surface,border:"1px solid "+T.border,borderRadius:8,padding:"6px 13px",color:T.textMid,fontSize:11,fontFamily:T.sans,cursor:"pointer"}}>
+                  <button onClick={saveItems} disabled={saving} style={{background:T.surface,border:"1px solid "+(T.border),borderRadius:8,padding:"6px 13px",color:T.textMid,fontSize:11,fontFamily:T.sans,cursor:"pointer"}}>
                     {saving?"Saving…":"💾 Save"}
                   </button>
-                  <button onClick={()=>doAction("submit")} style={{background:T.cyan+"18",border:"1px solid "+T.cyan+"30",borderRadius:8,padding:"6px 13px",color:T.cyan,fontSize:11,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>
+                  <button onClick={()=>doAction("submit")} style={{background:(T.cyan)+"18",border:"1px solid "+(T.cyan)+"30",borderRadius:8,padding:"6px 13px",color:T.cyan,fontSize:11,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>
                     📤 Submit for Review
                   </button>
                 </>
               )}
               {activeBudget.status==="submitted" && canApprove && (
                 <>
-                  <button onClick={()=>doAction("approve")} style={{background:T.emeraldDim,border:"1px solid "+T.emerald+"40",borderRadius:8,padding:"6px 13px",color:T.emerald,fontSize:11,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>✅ Approve</button>
-                  <button onClick={()=>setShowReject(true)} style={{background:T.roseDim,border:"1px solid "+T.rose+"40",borderRadius:8,padding:"6px 13px",color:T.rose,fontSize:11,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>❌ Reject</button>
+                  <button onClick={()=>doAction("approve")} style={{background:T.emeraldDim,border:"1px solid "+(T.emerald)+"40",borderRadius:8,padding:"6px 13px",color:T.emerald,fontSize:11,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>✅ Approve</button>
+                  <button onClick={()=>setShowReject(true)} style={{background:T.roseDim,border:"1px solid "+(T.rose)+"40",borderRadius:8,padding:"6px 13px",color:T.rose,fontSize:11,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>❌ Reject</button>
                 </>
               )}
               {activeBudget.status==="rejected" && (
-                <button onClick={()=>setActive(b=>({...b,status:"draft"}))} style={{background:T.amberDim,border:"1px solid "+T.amber+"40",borderRadius:8,padding:"6px 13px",color:T.amber,fontSize:11,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>✏️ Revise</button>
+                <button onClick={()=>setActive(b=>({...b,status:"draft"}))} style={{background:T.amberDim,border:"1px solid "+(T.amber)+"40",borderRadius:8,padding:"6px 13px",color:T.amber,fontSize:11,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>✏️ Revise</button>
               )}
             </div>
           </div>
 
           {/* Reviewer note */}
           {activeBudget.reviewer_note && (
-            <div style={{background:activeBudget.status==="approved"?T.emeraldDim:T.roseDim,border:"1px solid "+activeBudget.status==="approved"?T.emerald:T.rose+"30",borderRadius:8,padding:"10px 14px",marginBottom:14,fontSize:11,color:activeBudget.status==="approved"?T.emerald:T.rose,fontFamily:T.sans}}>
+            <div style={{background:activeBudget.status==="approved"?T.emeraldDim:T.roseDim,border:"1px solid "+(activeBudget.status==="approved"?T.emerald:T.rose)+"30",borderRadius:8,padding:"10px 14px",marginBottom:14,fontSize:11,color:activeBudget.status==="approved"?T.emerald:T.rose,fontFamily:T.sans}}>
               <strong>Reviewer note:</strong> {activeBudget.reviewer_note}
             </div>
           )}
 
           {showReject && (
-            <div style={{background:T.roseDim,border:"1px solid "+T.rose+"30",borderRadius:10,padding:"14px 16px",marginBottom:14}}>
+            <div style={{background:T.roseDim,border:"1px solid "+(T.rose)+"30",borderRadius:10,padding:"14px 16px",marginBottom:14}}>
               <div style={{fontSize:12,color:T.rose,fontFamily:T.sans,marginBottom:8}}>Reason for rejection</div>
               <div style={{display:"flex",gap:8}}>
-                <input value={rejectNote} onChange={e=>setRejectNote(e.target.value)} placeholder="e.g. Marketing budget exceeds approved cap…" style={{flex:1,background:T.surface,border:"1px solid "+T.border,borderRadius:7,padding:"7px 10px",color:T.text,fontSize:11,fontFamily:T.sans,outline:"none"}}/>
-                <button onClick={()=>doAction("reject",rejectNote)} style={{background:T.roseDim,border:"1px solid "+T.rose+"40",borderRadius:7,padding:"7px 13px",color:T.rose,fontSize:11,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>Reject</button>
+                <input value={rejectNote} onChange={e=>setRejectNote(e.target.value)} placeholder="e.g. Marketing budget exceeds approved cap…" style={{flex:1,background:T.surface,border:"1px solid "+(T.border),borderRadius:7,padding:"7px 10px",color:T.text,fontSize:11,fontFamily:T.sans,outline:"none"}}/>
+                <button onClick={()=>doAction("reject",rejectNote)} style={{background:T.roseDim,border:"1px solid "+(T.rose)+"40",borderRadius:7,padding:"7px 13px",color:T.rose,fontSize:11,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>Reject</button>
                 <button onClick={()=>setShowReject(false)} style={{background:"none",border:"none",color:T.textDim,fontSize:13,cursor:"pointer"}}>×</button>
               </div>
             </div>
@@ -1421,7 +1421,7 @@ function BudgetingPage({ plan }) {
                 </thead>
                 <tbody>
                   {BUDGET_CATEGORIES.map((cat,ci) => (
-                    <tr key={cat} style={{borderBottom:"1px solid "+T.border+"30",background:ci%2===0?"transparent":T.surface+"60"}}>
+                    <tr key={cat} style={{borderBottom:"1px solid "+(T.border)+"30",background:ci%2===0?"transparent":T.surface+"60"}}>
                       <td style={{padding:"6px 10px",color:T.text,fontWeight:600,position:"sticky",left:0,background:ci%2===0?T.bg:T.surface+"60"}}>{cat}</td>
                       {Array.from({length:12},(_,i)=>i+1).map(month=>(
                         <td key={month} style={{padding:"4px 4px"}}>
@@ -1431,7 +1431,7 @@ function BudgetingPage({ plan }) {
                             onChange={e=>activeBudget.status==="draft"&&updateCell(cat,month,e.target.value)}
                             disabled={activeBudget.status!=="draft"}
                             placeholder="0"
-                            style={{width:64,background:"transparent",border:"none",borderBottom:"1px solid "+T.border+"60",padding:"3px 4px",color:T.text,fontSize:11,fontFamily:T.mono,textAlign:"right",outline:"none",cursor:activeBudget.status==="draft"?"text":"default"}}
+                            style={{width:64,background:"transparent",border:"none",borderBottom:"1px solid "+(T.border)+"60",padding:"3px 4px",color:T.text,fontSize:11,fontFamily:T.mono,textAlign:"right",outline:"none",cursor:activeBudget.status==="draft"?"text":"default"}}
                             onFocus={e=>{e.target.style.borderColor=T.cyan;}}
                             onBlur={e=>{e.target.style.borderColor=T.border+"60";}}
                           />
@@ -1442,7 +1442,7 @@ function BudgetingPage({ plan }) {
                   ))}
                 </tbody>
                 <tfoot>
-                  <tr style={{background:T.surface,borderTop:"2px solid "+T.border}}>
+                  <tr style={{background:T.surface,borderTop:"2px solid "+(T.border)}}>
                     <td style={{padding:"8px 10px",color:T.text,fontWeight:700,position:"sticky",left:0,background:T.surface}}>Total</td>
                     {Array.from({length:12},(_,i)=>i+1).map(m=>(
                       <td key={m} style={{padding:"8px 8px",color:T.text,fontWeight:700,textAlign:"right"}}>{fmt2(monthTotal(m))}</td>
@@ -1456,15 +1456,15 @@ function BudgetingPage({ plan }) {
             /* ── Comments ── */
             <div>
               <div style={{display:"flex",gap:8,marginBottom:16}}>
-                <input value={comment} onChange={e=>setComment(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addComment()} placeholder="Add a comment or question…" style={{flex:1,background:T.surface,border:"1px solid "+T.border,borderRadius:9,padding:"9px 12px",color:T.text,fontSize:12,fontFamily:T.sans,outline:"none"}}/>
-                <button onClick={addComment} disabled={!comment.trim()} style={{background:T.cyan+"15",border:"1px solid "+T.cyan+"30",borderRadius:9,padding:"9px 16px",color:T.cyan,fontSize:12,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>Post</button>
+                <input value={comment} onChange={e=>setComment(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addComment()} placeholder="Add a comment or question…" style={{flex:1,background:T.surface,border:"1px solid "+(T.border),borderRadius:9,padding:"9px 12px",color:T.text,fontSize:12,fontFamily:T.sans,outline:"none"}}/>
+                <button onClick={addComment} disabled={!comment.trim()} style={{background:(T.cyan)+"15",border:"1px solid "+(T.cyan)+"30",borderRadius:9,padding:"9px 16px",color:T.cyan,fontSize:12,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>Post</button>
               </div>
               <div style={{display:"flex",flexDirection:"column",gap:10}}>
                 {comments.length===0 && <div style={{color:T.textDim,fontFamily:T.sans,fontSize:12,textAlign:"center",padding:"24px 0"}}>No comments yet.</div>}
                 {comments.map(c=>(
-                  <div key={c.id} style={{background:T.surface,border:"1px solid "+T.border,borderRadius:10,padding:"12px 14px"}}>
+                  <div key={c.id} style={{background:T.surface,border:"1px solid "+(T.border),borderRadius:10,padding:"12px 14px"}}>
                     <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
-                      <div style={{width:22,height:22,borderRadius:"50%",background:T.violet+"30",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:800,color:T.violet}}>{(c.user_name||"?")[0].toUpperCase()}</div>
+                      <div style={{width:22,height:22,borderRadius:"50%",background:(T.violet)+"30",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:800,color:T.violet}}>{(c.user_name||"?")[0].toUpperCase()}</div>
                       <span style={{fontSize:11,fontWeight:600,color:T.text,fontFamily:T.sans}}>{c.user_name}</span>
                       <span style={{fontSize:9,color:T.textDim,fontFamily:T.mono}}>{new Date(c.created_at).toLocaleDateString()}</span>
                     </div>
@@ -1507,17 +1507,17 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
   };
 
   const welcome = {
-    pnl:      () => "📊 P&L loaded. YTD revenue: **"+fmt(context.ytdRevenue)+"** | Net: **"+fmt(context.ytdNet)+"** | Margin: **"+pct(context.ytdNetMargin)+"**\n\nAsk me anything about your financials.",
-    scenario: () => "🔮 Scenarios ready. **Bear:** "+fmt(context.bearAnnualNet,true)+" | **Base:** "+fmt(context.baseAnnualNet,true)+" | **Bull:** "+fmt(context.bullAnnualNet,true)+"\n\nRisk spread: **"+fmt((context.bullAnnualNet||0)-(context.bearAnnualNet||0),true)+"**. What would you like to model?",
-    cashflow: () => "💧 Cash Flow loaded. Balance: **"+fmt(context.openingBalance)+"** → projected **"+fmt(context.endBalance)+"**. Min: **"+fmt(context.minBalance)+"** at Week "+context.minWeek+". Ask about timing risks.",
-    ar:       () => "📬 AR Aging loaded. Outstanding: **"+fmt(context.totalAR)+"** | DSO: **"+context.dso+" days** | At-risk: **"+fmt((context.d60||0)+(context.d90plus||0),true)+"**. Who do you want to prioritize?",
-    regional: () => "🗺️ Client Comparison — **"+context.clientCount+" clients** | Portfolio: **"+fmt(context.totalRevenue,true)+"** | Avg margin: **"+pct(context.avgMargin||0)+"**. Ask about regional performance.",
-    bva:      () => "📐 Budget vs. Actuals loaded. Revenue variance: **"+fmt(context.revVariance,true)+"** | OpEx variance: **"+fmt(context.opexVariance,true)+"**. Ask about any line item.",
-    balancesheet:()=>"🏦 Balance Sheet loaded. Total assets: **"+fmt(context.totalAssets,true)+"** | Working capital: **"+fmt(context.workingCapital,true)+"**. Ask about ratios or trends.",
-    headcount:() => "👥 Headcount: **"+context.totalHC+" employees** ("+context.openReqs+" open reqs) | Payroll cost: **"+fmt(context.totalPayrollCost,true)+"/yr**. Ask about team structure or costs.",
-    saas:     () => "📈 SaaS Metrics — MRR: **"+fmt(context.latestMrr,true)+"** | ARR: **"+fmt(context.latestMrr*12,true)+"** | NRR: **"+pct(context.latestNrr)+"**. Ask about growth or churn.",
-    csuite:   () => "◈ C-Suite Report loaded. Revenue: **"+fmt(context.ytdRevenue,true)+"** (+81% YoY) | Net: **"+fmt(context.ytdNet,true)+"** | ARR: **"+fmt(context.latestMrr*12,true)+"**\n\nSwitch between CEO, CFO, and CIO views on the panel. Ask me about any executive's priorities or action items.",
-    "cfo-sim": () => `🎯 CFO Simulation ready. Run the 30-day evaluation to get a brutally honest CFO verdict — competitive gaps, scorecard, and top 10 improvements ranked by impact.`,
+    pnl:      () => "📊 P&L loaded. YTD revenue: **"+(fmt(context.ytdRevenue))+"** | Net: **"+(fmt(context.ytdNet))+"** | Margin: **"+(pct(context.ytdNetMargin))+"**\n\nAsk me anything about your financials.",
+    scenario: () => "🔮 Scenarios ready. **Bear:** "+(fmt(context.bearAnnualNet,true))+" | **Base:** "+(fmt(context.baseAnnualNet,true))+" | **Bull:** "+(fmt(context.bullAnnualNet,true))+"\n\nRisk spread: **"+(fmt((context.bullAnnualNet||0)-(context.bearAnnualNet||0),true))+"**. What would you like to model?",
+    cashflow: () => "💧 Cash Flow loaded. Balance: **"+(fmt(context.openingBalance))+"** → projected **"+(fmt(context.endBalance))+"**. Min: **"+(fmt(context.minBalance))+"** at Week "+(context.minWeek)+". Ask about timing risks.",
+    ar:       () => "📬 AR Aging loaded. Outstanding: **"+(fmt(context.totalAR))+"** | DSO: **"+(context.dso)+" days** | At-risk: **"+(fmt((context.d60||0)+(context.d90plus||0),true))+"**. Who do you want to prioritize?",
+    regional: () => "🗺️ Client Comparison — **"+(context.clientCount)+" clients** | Portfolio: **"+(fmt(context.totalRevenue,true))+"** | Avg margin: **"+(pct(context.avgMargin||0))+"**. Ask about regional performance.",
+    bva:      () => "📐 Budget vs. Actuals loaded. Revenue variance: **"+(fmt(context.revVariance,true))+"** | OpEx variance: **"+(fmt(context.opexVariance,true))+"**. Ask about any line item.",
+    balancesheet:()=>"🏦 Balance Sheet loaded. Total assets: **"+(fmt(context.totalAssets,true))+"** | Working capital: **"+(fmt(context.workingCapital,true))+"**. Ask about ratios or trends.",
+    headcount:() => "👥 Headcount: **"+(context.totalHC)+" employees** ("+(context.openReqs)+" open reqs) | Payroll cost: **"+(fmt(context.totalPayrollCost,true))+"/yr**. Ask about team structure or costs.",
+    saas:     () => "📈 SaaS Metrics — MRR: **"+(fmt(context.latestMrr,true))+"** | ARR: **"+(fmt(context.latestMrr*12,true))+"** | NRR: **"+(pct(context.latestNrr))+"**. Ask about growth or churn.",
+    csuite:   () => "◈ C-Suite Report loaded. Revenue: **"+(fmt(context.ytdRevenue,true))+"** (+81% YoY) | Net: **"+(fmt(context.ytdNet,true))+"** | ARR: **"+(fmt(context.latestMrr*12,true))+"**\n\nSwitch between CEO, CFO, and CIO views on the panel. Ask me about any executive's priorities or action items.",
+    "cfo-sim": () => "🎯 CFO Simulation ready. Run the 30-day evaluation to get a brutally honest CFO verdict — competitive gaps, scorecard, and top 10 improvements ranked by impact.",
   };
 
   useEffect(() => {
@@ -1531,17 +1531,17 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
     sendingRef.current = true;
     setInput(""); const nm = [...msgs, { role:"user", content:msg }]; setMsgs(nm); setLoading(true);
     const sys = {
-      pnl:"FP&A AI. Revenue:"+fmt(context.ytdRevenue)+", Net:"+fmt(context.ytdNet)+", Gross Margin:"+pct(context.ytdGrossMargin)+", Net Margin:"+pct(context.ytdNetMargin)+", Payroll:"+fmt(context.ytdPayroll)+", Marketing:"+fmt(context.ytdMarketing)+". 2-3 concise paragraphs with specific numbers.",
-      scenario:"Scenario planner. Bear:"+fmt(context.bearAnnualNet)+", Base:"+fmt(context.baseAnnualNet)+", Bull:"+fmt(context.bullAnnualNet)+". Strategic advice. 2-3 paragraphs.",
-      cashflow:"Cash flow advisor. Opening:"+fmt(context.openingBalance)+", End:"+fmt(context.endBalance)+", Min:"+fmt(context.minBalance)+" Wk"+context.minWeek+", In:"+fmt(context.totalInflows)+", Out:"+fmt(context.totalOutflows)+". 2-3 paragraphs.",
-      ar:"AR specialist. Total:"+fmt(context.totalAR)+", Current:"+fmt(context.current)+", 30d:"+fmt(context.d30)+", 60d:"+fmt(context.d60)+", 90d+:"+fmt(context.d90plus)+", DSO:"+context.dso+"d. High-risk: Apex Logistics, Pinnacle Retail. 2-3 paragraphs.",
-      regional:"Client analyst TX. "+context.clientCount+" clients, "+context.regionCount+" regions, rev:"+fmt(context.totalRevenue)+", margin:"+pct(context.avgMargin||0)+", NPS:"+context.avgNps+". Top: Solaris $412K. High-risk: Apex, Pinnacle. 2-3 paragraphs.",
-      bva:"Budget vs Actuals analyst. Revenue variance: "+fmt(context.revVariance)+", OpEx variance: "+fmt(context.opexVariance)+", Net variance: "+fmt(context.netVariance)+". Explain drivers, 2-3 paragraphs.",
-      balancesheet:"Balance sheet analyst. Total assets:"+fmt(context.totalAssets)+", Working capital:"+fmt(context.workingCapital)+", Current ratio:"+context.currentRatio?.toFixed(2)+", Debt-to-equity:"+context.debtToEquity?.toFixed(2)+". 2-3 paragraphs.",
-      headcount:"HR/Payroll analyst. "+context.totalHC+" employees, "+context.openReqs+" open reqs, payroll cost:"+fmt(context.totalPayrollCost)+"/yr. Dept breakdown available. 2-3 paragraphs.",
-      saas:"SaaS metrics analyst. MRR:"+fmt(context.latestMrr)+", ARR:"+fmt(context.latestMrr*12)+", NRR:"+pct(context.latestNrr)+", LTV:CAC ratio:"+safeDiv(context.latestLtv,context.latestCac).toFixed(1)+"x, Churn rate:"+pct(context.churnRate)+". 2-3 paragraphs.",
-      csuite:"Executive strategic advisor. FY 2024: Revenue "+fmt(context.ytdRevenue)+" (+81% YoY), Net income "+fmt(context.ytdNet)+" (7.5% margin), ARR "+fmt(context.latestMrr*12)+", NRR "+pct(context.latestNrr)+", "+context.openReqs+" open reqs, Rev variance "+fmt(context.revVariance)+", AR 90d+ $7,900. CEO priorities: revenue plan rebuild, open headcount, churn. CFO priorities: AR collections, budget model, marketing ROI. CIO priorities: Engineer hire, CRM integration, payroll integration. Be direct and specific. 2-3 paragraphs per question.",
-      "cfo-sim":`CFO simulation advisor for FinanceOS. The user has run a 30-day CFO evaluation of FinanceOS. Help them interpret the results, understand competitive gaps, and prioritize the top improvements. Reference specific metrics like scorecard ratings, competitor gaps, and CFO verdict. Be direct and actionable. 2-3 paragraphs.`,
+      pnl:"FP&A AI. Revenue:"+(fmt(context.ytdRevenue))+", Net:"+(fmt(context.ytdNet))+", Gross Margin:"+(pct(context.ytdGrossMargin))+", Net Margin:"+(pct(context.ytdNetMargin))+", Payroll:"+(fmt(context.ytdPayroll))+", Marketing:"+(fmt(context.ytdMarketing))+". 2-3 concise paragraphs with specific numbers.",
+      scenario:"Scenario planner. Bear:"+(fmt(context.bearAnnualNet))+", Base:"+(fmt(context.baseAnnualNet))+", Bull:"+(fmt(context.bullAnnualNet))+". Strategic advice. 2-3 paragraphs.",
+      cashflow:"Cash flow advisor. Opening:"+(fmt(context.openingBalance))+", End:"+(fmt(context.endBalance))+", Min:"+(fmt(context.minBalance))+" Wk"+(context.minWeek)+", In:"+(fmt(context.totalInflows))+", Out:"+(fmt(context.totalOutflows))+". 2-3 paragraphs.",
+      ar:"AR specialist. Total:"+(fmt(context.totalAR))+", Current:"+(fmt(context.current))+", 30d:"+(fmt(context.d30))+", 60d:"+(fmt(context.d60))+", 90d+:"+(fmt(context.d90plus))+", DSO:"+(context.dso)+"d. High-risk: Apex Logistics, Pinnacle Retail. 2-3 paragraphs.",
+      regional:"Client analyst TX. "+(context.clientCount)+" clients, "+(context.regionCount)+" regions, rev:"+(fmt(context.totalRevenue))+", margin:"+(pct(context.avgMargin||0))+", NPS:"+(context.avgNps)+". Top: Solaris $412K. High-risk: Apex, Pinnacle. 2-3 paragraphs.",
+      bva:"Budget vs Actuals analyst. Revenue variance: "+(fmt(context.revVariance))+", OpEx variance: "+(fmt(context.opexVariance))+", Net variance: "+(fmt(context.netVariance))+". Explain drivers, 2-3 paragraphs.",
+      balancesheet:"Balance sheet analyst. Total assets:"+(fmt(context.totalAssets))+", Working capital:"+(fmt(context.workingCapital))+", Current ratio:"+(context.currentRatio?.toFixed(2))+", Debt-to-equity:"+(context.debtToEquity?.toFixed(2))+". 2-3 paragraphs.",
+      headcount:"HR/Payroll analyst. "+(context.totalHC)+" employees, "+(context.openReqs)+" open reqs, payroll cost:"+(fmt(context.totalPayrollCost))+"/yr. Dept breakdown available. 2-3 paragraphs.",
+      saas:"SaaS metrics analyst. MRR:"+(fmt(context.latestMrr))+", ARR:"+(fmt(context.latestMrr*12))+", NRR:"+(pct(context.latestNrr))+", LTV:CAC ratio:"+(safeDiv(context.latestLtv,context.latestCac).toFixed(1))+"x, Churn rate:"+(pct(context.churnRate))+". 2-3 paragraphs.",
+      csuite:"Executive strategic advisor. FY 2024: Revenue "+(fmt(context.ytdRevenue))+" (+81% YoY), Net income "+(fmt(context.ytdNet))+" (7.5% margin), ARR "+(fmt(context.latestMrr*12))+", NRR "+(pct(context.latestNrr))+", "+(context.openReqs)+" open reqs, Rev variance "+(fmt(context.revVariance))+", AR 90d+ $7,900. CEO priorities: revenue plan rebuild, open headcount, churn. CFO priorities: AR collections, budget model, marketing ROI. CIO priorities: Engineer hire, CRM integration, payroll integration. Be direct and specific. 2-3 paragraphs per question.",
+      "cfo-sim":"CFO simulation advisor for FinanceOS. The user has run a 30-day CFO evaluation of FinanceOS. Help them interpret the results, understand competitive gaps, and prioritize the top improvements. Reference specific metrics like scorecard ratings, competitor gaps, and CFO verdict. Be direct and actionable. 2-3 paragraphs.",
     };
     try {
       const res = await fetch("/api/ai", {
@@ -1559,7 +1559,7 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
           : res.status >= 500
             ? "AI service is temporarily unavailable. Please try again."
             : "Something went wrong. Please try again.");
-        setMsgs(m => [...m, { role:"assistant", content:"⚠️ "+msg }]);
+        setMsgs(m => [...m, { role:"assistant", content:"⚠️ "+(msg) }]);
       } else {
         setMsgs(m => [...m, { role:"assistant", content: d.text || "No response received." }]);
       }
@@ -1567,7 +1567,7 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
       const msg = err.name === "AbortError"
         ? "Request timed out. Please try again."
         : "Connection error. Check your internet and try again.";
-      setMsgs(m => [...m, { role:"assistant", content:"⚠️ "+msg }]);
+      setMsgs(m => [...m, { role:"assistant", content:"⚠️ "+(msg) }]);
     }
     setLoading(false);
     sendingRef.current = false;
@@ -1581,23 +1581,23 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
   return (
     <div style={{
       position:"fixed", bottom:0, left:0, right:0, zIndex:200,
-      background:T.surface, borderTop:"1px solid "+T.border,
+      background:T.surface, borderTop:"1px solid "+(T.border),
       height: open ? panelH : 52,
       transition:"height 0.28s cubic-bezier(0.4,0,0.2,1)",
       display:"flex", flexDirection:"column",
       boxShadow:"0 -4px 32px rgba(0,0,0,0.45)",
     }}>
       {/* ── Header bar ── */}
-      <div style={{height:52,flexShrink:0,display:"flex",alignItems:"center",gap:12,padding:"0 18px",borderBottom:"1px solid "+T.border,background:T.card,cursor:"pointer"}} onClick={()=>setOpen(o=>!o)}>
-        <div style={{width:26,height:26,borderRadius:"50%",background:"linear-gradient(135deg,"+T.cyan+","+T.violet+")",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,boxShadow:"0 0 10px "+T.cyan+"50",flexShrink:0}}>✦</div>
+      <div style={{height:52,flexShrink:0,display:"flex",alignItems:"center",gap:12,padding:"0 18px",borderBottom:"1px solid "+(T.border),background:T.card,cursor:"pointer"}} onClick={()=>setOpen(o=>!o)}>
+        <div style={{width:26,height:26,borderRadius:"50%",background:"linear-gradient(135deg,"+(T.cyan)+","+(T.violet)+")",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,boxShadow:"0 0 10px "+(T.cyan)+"50",flexShrink:0}}>✦</div>
         <div style={{display:"flex",alignItems:"baseline",gap:8}}>
           <span style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:13}}>FP&A Intelligence</span>
-          <span style={{color:T.cyan,fontFamily:T.mono,fontSize:9,textTransform:"capitalize",background:T.cyanDim,border:"1px solid "+T.cyanMid,borderRadius:20,padding:"1px 7px"}}>{activeTab} · Live</span>
+          <span style={{color:T.cyan,fontFamily:T.mono,fontSize:9,textTransform:"capitalize",background:T.cyanDim,border:"1px solid "+(T.cyanMid),borderRadius:20,padding:"1px 7px"}}>{activeTab} · Live</span>
         </div>
         {!open && anomalies.length>0 && (
           <div style={{display:"flex",gap:4,marginLeft:8}}>
             {anomalies.slice(0,3).map((a,i)=>(
-              <span key={i} style={{fontSize:9,color:SEVER[a.severity]||T.amber,background:(SEVER[a.severity]||T.amber)+"18",border:"1px solid "+(SEVER[a.severity]||T.amber)+"40",borderRadius:20,padding:"1px 8px",fontFamily:T.sans}}>{a.emoji} {a.title}</span>
+              <span key={i} style={{fontSize:9,color:SEVER[a.severity]||T.amber,background:(SEVER[a.severity]||T.amber)+"18",border:"1px solid "+((SEVER[a.severity]||T.amber))+"40",borderRadius:20,padding:"1px 8px",fontFamily:T.sans}}>{a.emoji} {a.title}</span>
             ))}
           </div>
         )}
@@ -1609,7 +1609,7 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
             <div style={{display:"flex",gap:4}}>
               {[220,300,420].map(h=>(
                 <button key={h} onClick={e=>{e.stopPropagation();setPanelH(h);setOpen(true);}}
-                  style={{background:panelH===h?T.cyanDim:"transparent",border:"1px solid "+panelH===h?T.cyanMid:T.border,borderRadius:5,padding:"2px 8px",color:panelH===h?T.cyan:T.textDim,fontSize:9,fontFamily:T.mono,cursor:"pointer"}}>
+                  style={{background:panelH===h?T.cyanDim:"transparent",border:"1px solid "+(panelH===h?T.cyanMid:T.border),borderRadius:5,padding:"2px 8px",color:panelH===h?T.cyan:T.textDim,fontSize:9,fontFamily:T.mono,cursor:"pointer"}}>
                   {h===220?"S":h===300?"M":"L"}
                 </button>
               ))}
@@ -1624,17 +1624,17 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
         <div style={{flex:1,display:"grid",gridTemplateColumns:"1fr 380px",overflow:"hidden"}}>
 
           {/* Messages */}
-          <div role="log" aria-live="polite" aria-label="AI assistant conversation" style={{overflowY:"auto",padding:"10px 16px",display:"flex",flexDirection:"column",gap:7,borderRight:"1px solid "+T.border}}>
+          <div role="log" aria-live="polite" aria-label="AI assistant conversation" style={{overflowY:"auto",padding:"10px 16px",display:"flex",flexDirection:"column",gap:7,borderRight:"1px solid "+(T.border)}}>
             {msgs.map((m,i)=>(
               <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start"}}>
-                <div style={{maxWidth:"82%",background:m.role==="user"?T.cyanDim:T.card,border:"1px solid "+m.role==="user"?T.cyanMid:T.border,borderRadius:m.role==="user"?"12px 12px 2px 12px":"12px 12px 12px 2px",padding:"8px 12px",color:T.textMid,fontSize:11.5,lineHeight:1.6,fontFamily:T.sans,whiteSpace:"pre-line"}}>
+                <div style={{maxWidth:"82%",background:m.role==="user"?T.cyanDim:T.card,border:"1px solid "+(m.role==="user"?T.cyanMid:T.border),borderRadius:m.role==="user"?"12px 12px 2px 12px":"12px 12px 12px 2px",padding:"8px 12px",color:T.textMid,fontSize:11.5,lineHeight:1.6,fontFamily:T.sans,whiteSpace:"pre-line"}}>
                   {render(m.content)}
                 </div>
               </div>
             ))}
             {loading && (
               <div style={{display:"flex",alignItems:"center",gap:6,padding:"4px 2px"}}>
-                <div style={{display:"flex",gap:3}}>{[0,1,2].map(i=><div key={i} style={{width:5,height:5,borderRadius:"50%",background:T.cyan,animation:"bounce 0.9s "+i*0.15+"s infinite"}}/>)}</div>
+                <div style={{display:"flex",gap:3}}>{[0,1,2].map(i=><div key={i} style={{width:5,height:5,borderRadius:"50%",background:T.cyan,animation:"bounce 0.9s "+(i*0.15)+"s infinite"}}/>)}</div>
                 <span style={{color:T.textDim,fontFamily:T.sans,fontSize:10}}>Thinking...</span>
               </div>
             )}
@@ -1644,10 +1644,10 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
           {/* Right column: Alerts + Chat Input */}
           <div style={{display:"flex",flexDirection:"column",background:T.card}}>
             {/* Tab toggle */}
-            <div style={{display:"flex",borderBottom:"1px solid "+T.border}}>
-              <button onClick={()=>setRightTab("chat")} style={{flex:1,background:rightTab==="chat"?T.cyanDim:"transparent",border:"none",borderBottom:"2px solid "+rightTab==="chat"?T.cyan:"transparent",padding:"8px 0",color:rightTab==="chat"?T.cyan:T.textDim,fontSize:10,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>💬 Chat{!hasFeature(plan,FEATURES.FULL_AI)&&<span style={{fontSize:8,color:T.amber,marginLeft:4}}>LIMITED</span>}</button>
-              <button onClick={()=>setRightTab("alerts")} style={{flex:1,background:rightTab==="alerts"?T.cyanDim:"transparent",border:"none",borderBottom:"2px solid "+rightTab==="alerts"?T.cyan:"transparent",padding:"8px 0",color:rightTab==="alerts"?T.cyan:hasFeature(plan,FEATURES.FULL_AI)?T.textDim:T.textDim+"88",fontSize:10,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>
-                {hasFeature(plan,FEATURES.FULL_AI)?"🚨 Alerts"+anomalies.length?` (${anomalies.length+")":""}`:"🔒 Alerts"}
+            <div style={{display:"flex",borderBottom:"1px solid "+(T.border)}}>
+              <button onClick={()=>setRightTab("chat")} style={{flex:1,background:rightTab==="chat"?T.cyanDim:"transparent",border:"none",borderBottom:"2px solid "+(rightTab==="chat"?T.cyan:"transparent"),padding:"8px 0",color:rightTab==="chat"?T.cyan:T.textDim,fontSize:10,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>💬 Chat{!hasFeature(plan,FEATURES.FULL_AI)&&<span style={{fontSize:8,color:T.amber,marginLeft:4}}>LIMITED</span>}</button>
+              <button onClick={()=>setRightTab("alerts")} style={{flex:1,background:rightTab==="alerts"?T.cyanDim:"transparent",border:"none",borderBottom:"2px solid "+(rightTab==="alerts"?T.cyan:"transparent"),padding:"8px 0",color:rightTab==="alerts"?T.cyan:hasFeature(plan,FEATURES.FULL_AI)?T.textDim:T.textDim+"88",fontSize:10,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>
+                {hasFeature(plan,FEATURES.FULL_AI)?"🚨 Alerts"+(anomalies.length?" ("+(anomalies.length)+")":""):"🔒 Alerts"}
               </button>
             </div>
 
@@ -1655,33 +1655,33 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
               <>
                 {/* Starter limited AI banner */}
                 {!hasFeature(plan,FEATURES.FULL_AI)&&(
-                  <div style={{padding:"6px 12px",background:T.amberDim,borderBottom:"1px solid "+T.amber+"25",display:"flex",alignItems:"center",gap:6}}>
+                  <div style={{padding:"6px 12px",background:T.amberDim,borderBottom:"1px solid "+(T.amber)+"25",display:"flex",alignItems:"center",gap:6}}>
                     <span style={{fontSize:10}}>⚡</span>
                     <span style={{fontSize:9,color:T.amber,fontFamily:T.sans,fontWeight:600}}>Limited AI on Starter — upgrade for full context-aware analysis</span>
                   </div>
                 )}
                 {/* Enterprise strategic badge */}
                 {hasFeature(plan,FEATURES.ADVANCED_AI)&&(
-                  <div style={{padding:"5px 12px",background:T.violetDim,borderBottom:"1px solid "+T.violet+"25",display:"flex",alignItems:"center",gap:6}}>
+                  <div style={{padding:"5px 12px",background:T.violetDim,borderBottom:"1px solid "+(T.violet)+"25",display:"flex",alignItems:"center",gap:6}}>
                     <span style={{fontSize:10}}>🏢</span>
                     <span style={{fontSize:9,color:T.violet,fontFamily:T.sans,fontWeight:600}}>Enterprise Strategic Analysis — Full executive context enabled</span>
                   </div>
                 )}
-                <div style={{padding:"8px 12px",borderBottom:"1px solid "+T.border,display:"flex",gap:5,flexWrap:"wrap"}}>
+                <div style={{padding:"8px 12px",borderBottom:"1px solid "+(T.border),display:"flex",gap:5,flexWrap:"wrap"}}>
                   <span style={{fontSize:9,color:T.textDim,fontFamily:T.sans,alignSelf:"center",marginRight:2}}>Quick ask:</span>
                   {(hasFeature(plan,FEATURES.FULL_AI)?pills:pills.slice(0,2)).map(p=>(
-                    <button key={p} onClick={()=>send(p)} style={{background:T.cyanDim,border:"1px solid "+T.cyanMid,borderRadius:20,color:T.cyan,fontSize:9,padding:"3px 10px",cursor:"pointer",fontFamily:T.sans,fontWeight:600,whiteSpace:"nowrap",transition:"background 0.1s"}}
+                    <button key={p} onClick={()=>send(p)} style={{background:T.cyanDim,border:"1px solid "+(T.cyanMid),borderRadius:20,color:T.cyan,fontSize:9,padding:"3px 10px",cursor:"pointer",fontFamily:T.sans,fontWeight:600,whiteSpace:"nowrap",transition:"background 0.1s"}}
                       onMouseEnter={e=>e.target.style.background=T.cyanMid} onMouseLeave={e=>e.target.style.background=T.cyanDim}>{p}</button>
                   ))}
                   {!hasFeature(plan,FEATURES.FULL_AI)&&<span style={{fontSize:9,color:T.textDim,fontFamily:T.sans,alignSelf:"center"}}>+{pills.length-2} more on Pro</span>}
                 </div>
                 <div style={{flex:1,display:"flex",alignItems:"center",gap:8,padding:"10px 12px"}}>
                   <input value={input} onChange={e=>hasFeature(plan,FEATURES.FULL_AI)&&setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&hasFeature(plan,FEATURES.FULL_AI)&&send()}
-                    placeholder={hasFeature(plan,FEATURES.FULL_AI)?"Ask about your "+activeTab==="pnl"?"P&L":activeTab==="cashflow"?"cash flow":activeTab==="ar"?"AR":activeTab==="regional"?"clients":activeTab==="scenario"?"scenarios":activeTab==="bva"?"budget vs actuals":activeTab==="balancesheet"?"balance sheet":activeTab==="headcount"?"headcount":activeTab==="saas"?"SaaS metrics":"financials"+"...":"🔒 Free-form chat — Professional plan required"}
+                    placeholder={hasFeature(plan,FEATURES.FULL_AI)?"Ask about your "+(activeTab==="pnl"?"P&L":activeTab==="cashflow"?"cash flow":activeTab==="ar"?"AR":activeTab==="regional"?"clients":activeTab==="scenario"?"scenarios":activeTab==="bva"?"budget vs actuals":activeTab==="balancesheet"?"balance sheet":activeTab==="headcount"?"headcount":activeTab==="saas"?"SaaS metrics":"financials")+"...":"🔒 Free-form chat — Professional plan required"}
                     disabled={!hasFeature(plan,FEATURES.FULL_AI)}
-                    style={{flex:1,background:hasFeature(plan,FEATURES.FULL_AI)?T.surface:T.surface+"80",border:"1px solid "+hasFeature(plan,FEATURES.FULL_AI)?T.border:T.amber+"40",borderRadius:9,padding:"9px 14px",color:hasFeature(plan,FEATURES.FULL_AI)?T.text:T.textDim,fontSize:12,fontFamily:T.sans,outline:"none",transition:"border-color 0.15s",cursor:hasFeature(plan,FEATURES.FULL_AI)?"text":"not-allowed",opacity:hasFeature(plan,FEATURES.FULL_AI)?1:0.6}}
+                    style={{flex:1,background:hasFeature(plan,FEATURES.FULL_AI)?T.surface:T.surface+"80",border:"1px solid "+(hasFeature(plan,FEATURES.FULL_AI)?T.border:T.amber+"40"),borderRadius:9,padding:"9px 14px",color:hasFeature(plan,FEATURES.FULL_AI)?T.text:T.textDim,fontSize:12,fontFamily:T.sans,outline:"none",transition:"border-color 0.15s",cursor:hasFeature(plan,FEATURES.FULL_AI)?"text":"not-allowed",opacity:hasFeature(plan,FEATURES.FULL_AI)?1:0.6}}
                     onFocus={e=>{if(hasFeature(plan,FEATURES.FULL_AI))e.target.style.borderColor=T.cyan;}} onBlur={e=>e.target.style.borderColor=hasFeature(plan,FEATURES.FULL_AI)?T.border:T.amber+"40"}/>
-                  <button onClick={()=>hasFeature(plan,FEATURES.FULL_AI)&&send()} disabled={!hasFeature(plan,FEATURES.FULL_AI)} title={!hasFeature(plan,FEATURES.FULL_AI)?"Upgrade to Professional for free-form AI chat":undefined} style={{background:hasFeature(plan,FEATURES.FULL_AI)?"linear-gradient(135deg,"+T.cyan+","+T.violet+")":T.amber+"20",border:hasFeature(plan,FEATURES.FULL_AI)?"none":"1px solid "+T.amber+"40",borderRadius:9,width:38,height:38,cursor:hasFeature(plan,FEATURES.FULL_AI)?"pointer":"not-allowed",color:hasFeature(plan,FEATURES.FULL_AI)?T.bg:T.amber,fontSize:hasFeature(plan,FEATURES.FULL_AI)?16:14,fontWeight:700,flexShrink:0,boxShadow:hasFeature(plan,FEATURES.FULL_AI)?"0 2px 10px "+T.cyan+"40":"none",opacity:hasFeature(plan,FEATURES.FULL_AI)?1:0.7}}>{hasFeature(plan,FEATURES.FULL_AI)?"↑":"🔒"}</button>
+                  <button onClick={()=>hasFeature(plan,FEATURES.FULL_AI)&&send()} disabled={!hasFeature(plan,FEATURES.FULL_AI)} title={!hasFeature(plan,FEATURES.FULL_AI)?"Upgrade to Professional for free-form AI chat":undefined} style={{background:hasFeature(plan,FEATURES.FULL_AI)?"linear-gradient(135deg,"+(T.cyan)+","+(T.violet)+")":(T.amber)+"20",border:hasFeature(plan,FEATURES.FULL_AI)?"none":"1px solid "+(T.amber)+"40",borderRadius:9,width:38,height:38,cursor:hasFeature(plan,FEATURES.FULL_AI)?"pointer":"not-allowed",color:hasFeature(plan,FEATURES.FULL_AI)?T.bg:T.amber,fontSize:hasFeature(plan,FEATURES.FULL_AI)?16:14,fontWeight:700,flexShrink:0,boxShadow:hasFeature(plan,FEATURES.FULL_AI)?"0 2px 10px "+(T.cyan)+"40":"none",opacity:hasFeature(plan,FEATURES.FULL_AI)?1:0.7}}>{hasFeature(plan,FEATURES.FULL_AI)?"↑":"🔒"}</button>
                 </div>
                 {!hasFeature(plan,FEATURES.FULL_AI)&&(
                   <div style={{padding:"0 12px 8px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
@@ -1701,7 +1701,7 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
                     <span style={{fontSize:28}}>🔒</span>
                     <div style={{color:T.cyan,fontFamily:T.sans,fontWeight:700,fontSize:12}}>Anomaly Alerts</div>
                     <div style={{color:T.textDim,fontFamily:T.sans,fontSize:11,lineHeight:1.6}}>Proactive anomaly detection is a Professional feature. Upgrade to get real-time alerts on revenue misses, cash risks, AR aging, and more.</div>
-                    <div style={{background:T.cyanDim,border:"1px solid "+T.cyanMid,borderRadius:8,padding:"5px 14px",color:T.cyan,fontSize:10,fontFamily:T.sans,fontWeight:700}}>🚀 Upgrade to Professional</div>
+                    <div style={{background:T.cyanDim,border:"1px solid "+(T.cyanMid),borderRadius:8,padding:"5px 14px",color:T.cyan,fontSize:10,fontFamily:T.sans,fontWeight:700}}>🚀 Upgrade to Professional</div>
                   </div>
                 )}
                 {hasFeature(plan,FEATURES.FULL_AI)&&anomalies.length===0 && (
@@ -1711,7 +1711,7 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
                   </div>
                 )}
                 {hasFeature(plan,FEATURES.FULL_AI)&&anomalies.map((a,i)=>(
-                  <div key={i} style={{background:(SEVER[a.severity]||T.amber)+"12",border:"1px solid "+(SEVER[a.severity]||T.amber)+"35",borderRadius:9,padding:"9px 12px"}}>
+                  <div key={i} style={{background:(SEVER[a.severity]||T.amber)+"12",border:"1px solid "+((SEVER[a.severity]||T.amber))+"35",borderRadius:9,padding:"9px 12px"}}>
                     <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
                       <span style={{fontSize:14}}>{a.emoji}</span>
                       <span style={{color:T.text,fontFamily:T.sans,fontWeight:700,fontSize:11}}>{a.title}</span>
@@ -1734,7 +1734,7 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
 function PnLRow({label,monthly,isHeader,isTotal,indent,color,showSpark,negative}) {
   const tot=sum(monthly), avg=tot/12, sc=color||(negative?T.rose:T.emerald);
   return (
-    <div style={{borderBottom:"1px solid "+isHeader||isTotal?T.border:T.border+"60",background:isHeader?T.card:isTotal?T.cyanDim:"transparent"}}>
+    <div style={{borderBottom:"1px solid "+(isHeader||isTotal?T.border:T.border+"60"),background:isHeader?T.card:isTotal?T.cyanDim:"transparent"}}>
       <div style={{display:"grid",gridTemplateColumns:"200px repeat(12, 1fr) 80px 80px 60px",alignItems:"center",padding:isHeader?"10px 0":"7px 0"}}>
         <div style={{paddingLeft:indent?24:12,paddingRight:8,fontFamily:isHeader||isTotal?T.display:T.sans,fontSize:isHeader?10:11,fontWeight:isHeader||isTotal?700:400,color:isHeader?T.textDim:isTotal?T.cyan:indent?T.textMid:T.text,textTransform:isHeader?"uppercase":"none",letterSpacing:isHeader?1:0,display:"flex",alignItems:"center",gap:4,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
           {indent&&<span style={{color:T.textDim,fontSize:9}}>└</span>}{label}
@@ -1787,7 +1787,7 @@ function RevNetChart({ pnl }) {
 
   // ── Net income line path ──────────────────────────────────────────
   const netPts = nets.map((v,i) =>
-    PAD.left + (i+0.5)*slotW+","+netY(v)).join(" ");
+    (PAD.left + (i+0.5)*slotW)+","+(netY(v))).join(" ");
 
   // ── Right axis tick marks ─────────────────────────────────────────
   const rightTicks = [-5000, 0, 5000, 10000, 15000, 20000, 25000];
@@ -1815,7 +1815,7 @@ function RevNetChart({ pnl }) {
         ].map(l => (
           <div key={l.label} style={{ display:"flex", alignItems:"center", gap:6 }}>
             {l.type === "bar"
-              ? <div style={{ width:12, height:12, borderRadius:3, background:l.color+"80", border:"1px solid "+l.color }}/>
+              ? <div style={{ width:12, height:12, borderRadius:3, background:l.color+"80", border:"1px solid "+(l.color) }}/>
               : <div style={{ display:"flex", alignItems:"center", gap:4 }}>
                   <svg width="22" height="2" style={{ overflow:"visible" }}>
                     <line x1="0" y1="1" x2="22" y2="1" stroke={l.color} strokeWidth="2"/>
@@ -1836,7 +1836,7 @@ function RevNetChart({ pnl }) {
       </div>
 
       {/* ── SVG Chart ──────────────────────────────────────────────── */}
-      <svg viewBox={"0 0 "+W+" "+H} role="img" aria-label="Revenue and net income chart" style={{ width:"100%", height:"auto", display:"block", overflow:"visible" }}>
+      <svg viewBox={"0 0 "+(W)+" "+(H)} role="img" aria-label="Revenue and net income chart" style={{ width:"100%", height:"auto", display:"block", overflow:"visible" }}>
         <defs>
           <linearGradient id="rnRevGrad" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%"   stopColor={T.cyan}    stopOpacity="0.85"/>
@@ -1869,13 +1869,13 @@ function RevNetChart({ pnl }) {
         {leftTicks.map(v => {
           const y = revY(v);
           return (
-            <g key={"lg-"+v}>
+            <g key={"lg-"+(v)}>
               <line x1={PAD.left} x2={PAD.left+cW} y1={y} y2={y}
                 stroke={T.border} strokeWidth="0.5"
                 strokeDasharray={v===0?"none":"3,5"} opacity="0.8"/>
               <text x={PAD.left-7} y={y+3.5} textAnchor="end"
                 fontFamily={T.mono} fontSize="8.5" fill={T.textDim}>
-                {v===0?"$0":"$"+v/1000+"K"}
+                {v===0?"$0":"$"+(v/1000)+"K"}
               </text>
             </g>
           );
@@ -1887,10 +1887,10 @@ function RevNetChart({ pnl }) {
           if (y < PAD.top-4 || y > PAD.top+cH+4) return null;
           const isZero = v === 0;
           return (
-            <text key={"rt-"+v} x={PAD.left+cW+8} y={y+3.5} textAnchor="start"
+            <text key={"rt-"+(v)} x={PAD.left+cW+8} y={y+3.5} textAnchor="start"
               fontFamily={T.mono} fontSize="8.5"
               fill={isZero ? T.amber+"AA" : T.textDim}>
-              {v<0 ? "-$"+Math.abs(v)/1000+"K" : v===0 ? "$0" : "$"+v/1000+"K"}
+              {v<0 ? "-$"+(Math.abs(v)/1000)+"K" : v===0 ? "$0" : "$"+(v/1000)+"K"}
             </text>
           );
         })}
@@ -1901,7 +1901,7 @@ function RevNetChart({ pnl }) {
 
         {/* ── Quarterly vertical separators ── */}
         {[3,6,9].map(qi => (
-          <line key={"qs-"+qi}
+          <line key={"qs-"+(qi)}
             x1={PAD.left+qi*slotW} x2={PAD.left+qi*slotW}
             y1={PAD.top} y2={PAD.top+cH}
             stroke={T.border} strokeWidth="1" opacity="0.7"/>
@@ -1918,7 +1918,7 @@ function RevNetChart({ pnl }) {
           const barH = revH(v), barY = revY(v);
           const isHov = hovered===i;
           return (
-            <rect key={"rev-"+i} x={x} y={barY} width={REV_BW} height={barH} rx="3"
+            <rect key={"rev-"+(i)} x={x} y={barY} width={REV_BW} height={barH} rx="3"
               fill="url(#rnRevGrad)"
               stroke={isHov ? T.cyan : "none"} strokeWidth="1.5"
               opacity={hovered!==null && !isHov ? 0.35 : 1}
@@ -1932,7 +1932,7 @@ function RevNetChart({ pnl }) {
           const barH = revH(v), barY = revY(v);
           const isHov = hovered===i;
           return (
-            <rect key={"gross-"+i} x={x} y={barY} width={GROSS_BW} height={barH} rx="2"
+            <rect key={"gross-"+(i)} x={x} y={barY} width={GROSS_BW} height={barH} rx="2"
               fill="url(#rnGrossGrad)"
               opacity={hovered!==null && !isHov ? 0.35 : 1}
               style={{ transition:"opacity 0.15s" }}/>
@@ -1944,7 +1944,7 @@ function RevNetChart({ pnl }) {
           if (v >= 0) return null;
           const cx = PAD.left + (i+0.5)*slotW;
           return (
-            <line key={"drop-"+i} x1={cx} x2={cx}
+            <line key={"drop-"+(i)} x1={cx} x2={cx}
               y1={ZERO_Y} y2={netY(v)}
               stroke={T.rose} strokeWidth="1.5" strokeDasharray="2,2" opacity="0.6"/>
           );
@@ -1963,7 +1963,7 @@ function RevNetChart({ pnl }) {
           const isHov = hovered===i;
           const dc = dotColor(v);
           return (
-            <g key={"dot-"+i}>
+            <g key={"dot-"+(i)}>
               {isHov && <circle cx={cx} cy={cy} r="9" fill={dc} opacity="0.12"/>}
               <circle cx={cx} cy={cy} r={isHov ? 5.5 : 3.5}
                 fill={dc} stroke={T.surface} strokeWidth="1.5"/>
@@ -1981,10 +1981,10 @@ function RevNetChart({ pnl }) {
         {qRevTotals.map((qRev, q) => {
           const centerX = PAD.left + (q*3 + 1.5)*slotW;
           return (
-            <g key={"qa-"+q}>
+            <g key={"qa-"+(q)}>
               <text x={centerX} y={PAD.top - 5} textAnchor="middle"
                 fontFamily={T.mono} fontSize="7.5" fill={T.textDim}>
-                {"$"+Math.round(qRev/1000)+"K"}
+                {"$"+(Math.round(qRev/1000))+"K"}
               </text>
             </g>
           );
@@ -1995,7 +1995,7 @@ function RevNetChart({ pnl }) {
           const x = PAD.left + (i+0.5)*slotW;
           const isHov = hovered===i;
           return (
-            <text key={"ml-"+i} x={x} y={PAD.top+cH+13} textAnchor="middle"
+            <text key={"ml-"+(i)} x={x} y={PAD.top+cH+13} textAnchor="middle"
               fontFamily={T.mono} fontSize="8.5"
               fill={isHov ? T.cyan : T.textDim}
               fontWeight={isHov ? "700" : "400"}>
@@ -2017,18 +2017,18 @@ function RevNetChart({ pnl }) {
         })}
 
         {/* ── Axis titles ── */}
-        <text transform={"translate(12,"+PAD.top+cH/2+") rotate(-90)"}
+        <text transform={"translate(12,"+(PAD.top+cH/2)+") rotate(-90)"}
           textAnchor="middle" fontFamily={T.sans} fontSize="8" fill={T.textDim} letterSpacing="1">
           REVENUE / GROSS PROFIT
         </text>
-        <text transform={"translate("+W-10+","+PAD.top+cH/2+") rotate(90)"}
+        <text transform={"translate("+(W-10)+","+(PAD.top+cH/2)+") rotate(90)"}
           textAnchor="middle" fontFamily={T.sans} fontSize="8" fill={T.textDim} letterSpacing="1">
           NET INCOME
         </text>
 
         {/* ── Invisible hover capture zones ── */}
         {MONTHS_SHORT.map((_,i) => (
-          <rect key={"hz-"+i}
+          <rect key={"hz-"+(i)}
             x={PAD.left+i*slotW} y={PAD.top}
             width={slotW} height={cH+16}
             fill="transparent"
@@ -2049,25 +2049,25 @@ function RevNetChart({ pnl }) {
         return (
           <div style={{
             position:"absolute",
-            left:pctLeft+"%",
+            left:(pctLeft)+"%",
             top:"30px",
             transform: flipLeft ? "translateX(calc(-100% - 4px))" : "translateX(8px)",
             background:T.card,
-            border:"1px solid "+T.border,
+            border:"1px solid "+(T.border),
             borderRadius:10,
             padding:"12px 15px",
             pointerEvents:"none",
             zIndex:20,
             minWidth:180,
-            boxShadow:`0 8px 32px rgba(0,0,0,0.5)`,
+            boxShadow:"0 8px 32px rgba(0,0,0,0.5)",
           }}>
             <div style={{ fontFamily:T.mono, fontSize:10, color:T.cyan, fontWeight:700, marginBottom:10, letterSpacing:1 }}>
               {MONTHS_SHORT[i]} 2024
             </div>
             {[
-              { label:"Revenue",     value:"$"+Math.round(rev/1000)+"K",   color:T.cyan    },
-              { label:"Gross Profit",value:"$"+Math.round(gross/1000)+"K", color:T.emerald, sub:gm+"% margin" },
-              { label:"Net Income",  value:net<0?"−$"+Math.round(Math.abs(net/1000)*10)/10+"K":"$"+Math.round(net/1000*10)/10+"K", color:dotColor(net), sub:nm+"% margin" },
+              { label:"Revenue",     value:"$"+(Math.round(rev/1000))+"K",   color:T.cyan    },
+              { label:"Gross Profit",value:"$"+(Math.round(gross/1000))+"K", color:T.emerald, sub:(gm)+"% margin" },
+              { label:"Net Income",  value:net<0?"−$"+(Math.round(Math.abs(net/1000)*10)/10)+"K":"$"+(Math.round(net/1000*10)/10)+"K", color:dotColor(net), sub:(nm)+"% margin" },
             ].map(row => (
               <div key={row.label} style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", marginBottom:6, gap:12 }}>
                 <div>
@@ -2077,7 +2077,7 @@ function RevNetChart({ pnl }) {
                 <div style={{ fontFamily:T.mono, fontSize:12, fontWeight:700, color:row.color }}>{row.value}</div>
               </div>
             ))}
-            <div style={{ borderTop:"1px solid "+T.border, marginTop:8, paddingTop:8 }}>
+            <div style={{ borderTop:"1px solid "+(T.border), marginTop:8, paddingTop:8 }}>
               <div style={{ display:"flex", justifyContent:"space-between" }}>
                 <span style={{ fontFamily:T.sans, fontSize:8, color:T.textDim }}>Q{Math.floor(i/3)+1} month {i%3+1} of 3</span>
                 <span style={{ fontFamily:T.mono, fontSize:8, color:net<0?T.rose:T.emerald, fontWeight:700 }}>
@@ -2105,22 +2105,22 @@ function PnLBreakdown({aiContext}) {
     <div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:20}}>
           {[{label:"Annual Revenue",v:sum(totalRev),s:totalRev,c:T.cyan},{label:"Gross Profit",v:sum(grossProfit),s:grossProfit,c:T.emerald},{label:"EBITDA",v:sum(ebitda),s:ebitda,c:T.violet},{label:"Net Income",v:sum(netIncome),s:netIncome,c:T.amber}].map(k=>(
-            <div key={k.label} style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,padding:"14px 16px"}}>
+            <div key={k.label} style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,padding:"14px 16px"}}>
               <div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>{k.label}</div>
               <div style={{fontSize:20,fontWeight:800,fontFamily:T.mono,color:k.c}}>{fmt(k.v,true)}</div>
               <div style={{marginTop:8}}><Spark data={k.s} color={k.c} w={80} h={28}/></div>
             </div>
           ))}
         </div>
-        <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,padding:"16px 18px",marginBottom:20}}>
+        <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,padding:"16px 18px",marginBottom:20}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
             <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:13}}>📊 Monthly Revenue vs. Net Income</div>
             <div style={{fontFamily:T.mono,fontSize:8,color:T.textDim,letterSpacing:1}}>FY 2024 · Hover month for detail</div>
           </div>
           <RevNetChart pnl={pnl}/>
         </div>
-        <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,overflow:"hidden",marginBottom:20}}>
-          <div style={{padding:"14px 16px",borderBottom:"1px solid "+T.border,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,overflow:"hidden",marginBottom:20}}>
+          <div style={{padding:"14px 16px",borderBottom:"1px solid "+(T.border),display:"flex",justifyContent:"space-between",alignItems:"center"}}>
             <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:13}}>📋 Full P&L Statement — FY 2024</div>
             <div style={{color:T.textDim,fontSize:9,fontFamily:T.mono}}>All amounts in USD</div>
           </div>
@@ -2190,13 +2190,13 @@ function ScenarioPlanner({aiContext, plan="professional"}) {
       {/* ── Scenario action bar ── */}
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16,flexWrap:"wrap",gap:8}}>
         <div style={{display:"flex",alignItems:"center",gap:8}}>
-          {savedName && <span style={{fontSize:10,color:T.emerald,background:T.emeraldDim,border:"1px solid "+T.emerald+"30",borderRadius:99,padding:"2px 10px",fontFamily:T.mono,fontWeight:700}}>✓ Loaded: {savedName}</span>}
+          {savedName && <span style={{fontSize:10,color:T.emerald,background:T.emeraldDim,border:"1px solid "+(T.emerald)+"30",borderRadius:99,padding:"2px 10px",fontFamily:T.mono,fontWeight:700}}>✓ Loaded: {savedName}</span>}
         </div>
         <div style={{display:"flex",gap:8}}>
-          <button onClick={()=>canSave?setShowLibrary(true):null} title={canSave?"View saved scenarios":"Upgrade to Professional to save scenarios"} style={{background:T.surface,border:"1px solid "+canSave?T.border:T.amber+"40",borderRadius:8,padding:"6px 13px",cursor:canSave?"pointer":"not-allowed",color:canSave?T.textMid:T.amber,fontSize:11,fontFamily:T.sans,fontWeight:600}}>
+          <button onClick={()=>canSave?setShowLibrary(true):null} title={canSave?"View saved scenarios":"Upgrade to Professional to save scenarios"} style={{background:T.surface,border:"1px solid "+(canSave?T.border:T.amber+"40"),borderRadius:8,padding:"6px 13px",cursor:canSave?"pointer":"not-allowed",color:canSave?T.textMid:T.amber,fontSize:11,fontFamily:T.sans,fontWeight:600}}>
             📚 {canSave?"Library":"🔒 Library"}
           </button>
-          <button onClick={()=>canSave?setShowSave(true):null} title={canSave?"Save current scenario":"Upgrade to Professional to save scenarios"} style={{background:canSave?T.cyan+"15":T.amber+"12",border:"1px solid "+canSave?T.cyan+"40":T.amber+"40",borderRadius:8,padding:"6px 13px",cursor:canSave?"pointer":"not-allowed",color:canSave?T.cyan:T.amber,fontSize:11,fontFamily:T.sans,fontWeight:700}}>
+          <button onClick={()=>canSave?setShowSave(true):null} title={canSave?"Save current scenario":"Upgrade to Professional to save scenarios"} style={{background:canSave?(T.cyan)+"15":(T.amber)+"12",border:"1px solid "+(canSave?T.cyan+"40":T.amber+"40"),borderRadius:8,padding:"6px 13px",cursor:canSave?"pointer":"not-allowed",color:canSave?T.cyan:T.amber,fontSize:11,fontFamily:T.sans,fontWeight:700}}>
             💾 {canSave?"Save Scenario":"🔒 Save"}
           </button>
         </div>
@@ -2206,7 +2206,7 @@ function ScenarioPlanner({aiContext, plan="professional"}) {
           {Object.entries(SCENARIOS_DEF).map(([k,s])=>{
             const net=an(res[k]),rev=ar(res[k]),ebd=ae(res[k]);
             return (
-              <div key={k} onClick={()=>{setActive(k);setUseC(false);}} style={{background:(!useC&&active===k)?s.color+"15":T.card,border:"1px solid "+(!useC&&active===k)?s.color+"60":T.border,borderRadius:12,padding:16,cursor:"pointer",transition:"all 0.2s",boxShadow:(!useC&&active===k)?"0 0 20px "+s.color+"20":"none"}}>
+              <div key={k} onClick={()=>{setActive(k);setUseC(false);}} style={{background:(!useC&&active===k)?(s.color)+"15":T.card,border:"1px solid "+((!useC&&active===k)?s.color+"60":T.border),borderRadius:12,padding:16,cursor:"pointer",transition:"all 0.2s",boxShadow:(!useC&&active===k)?"0 0 20px "+(s.color)+"20":"none"}}>
                 <div style={{fontSize:20}}>{s.icon}</div>
                 <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,margin:"6px 0 2px"}}>{s.label} Case</div>
                 <div style={{color:T.textDim,fontSize:10,fontFamily:T.sans,marginBottom:10}}>{s.desc}</div>
@@ -2220,17 +2220,17 @@ function ScenarioPlanner({aiContext, plan="professional"}) {
             );
           })}
         </div>
-        <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,padding:"16px 18px",marginBottom:20}}>
+        <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,padding:"16px 18px",marginBottom:20}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
             <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:13}}>🎛️ Custom Scenario Builder</div>
             {!canUseNumInput && (
-              <div style={{display:"flex",alignItems:"center",gap:6,background:T.violetDim,border:"1px solid "+T.violet+"40",borderRadius:20,padding:"4px 12px"}}>
+              <div style={{display:"flex",alignItems:"center",gap:6,background:T.violetDim,border:"1px solid "+(T.violet)+"40",borderRadius:20,padding:"4px 12px"}}>
                 <span style={{fontSize:11}}>🔒</span>
                 <span style={{fontSize:10,color:T.violet,fontFamily:T.sans,fontWeight:600}}>Numeric inputs — Pro & Enterprise</span>
               </div>
             )}
             {canUseNumInput && (
-              <div style={{display:"flex",alignItems:"center",gap:6,background:T.emeraldDim,border:"1px solid "+T.emerald+"40",borderRadius:20,padding:"4px 12px"}}>
+              <div style={{display:"flex",alignItems:"center",gap:6,background:T.emeraldDim,border:"1px solid "+(T.emerald)+"40",borderRadius:20,padding:"4px 12px"}}>
                 <span style={{fontSize:11}}>✦</span>
                 <span style={{fontSize:10,color:T.emerald,fontFamily:T.sans,fontWeight:600}}>{plan==="enterprise"?"Enterprise":"Professional"} — Numeric inputs enabled</span>
               </div>
@@ -2250,7 +2250,7 @@ function ScenarioPlanner({aiContext, plan="professional"}) {
                           const v=Math.min(2,Math.max(0.5,parseFloat(e.target.value)||0.5));
                           setCm(m=>({...m,[k]:v}));setUseC(true);
                         }}
-                        style={{width:64,background:T.surface,border:"1px solid "+c+"60",borderRadius:6,padding:"3px 7px",color:c,fontSize:12,fontFamily:"'JetBrains Mono',monospace",fontWeight:700,textAlign:"center",outline:"none",transition:"border-color 0.15s"}}
+                        style={{width:64,background:T.surface,border:"1px solid "+(c)+"60",borderRadius:6,padding:"3px 7px",color:c,fontSize:12,fontFamily:"'JetBrains Mono',monospace",fontWeight:700,textAlign:"center",outline:"none",transition:"border-color 0.15s"}}
                         onFocus={e=>e.target.style.borderColor=c}
                         onBlur={e=>e.target.style.borderColor=c+"60"}
                       />
@@ -2279,13 +2279,13 @@ function ScenarioPlanner({aiContext, plan="professional"}) {
             ))}
           </div>}
         </div>
-        <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,padding:"16px 18px"}}>
+        <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,padding:"16px 18px"}}>
           <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:13,marginBottom:14}}>📉 Income Waterfall — {useC?"Custom":SCENARIOS_DEF[active].label} Scenario</div>
           {wf.map(d=>(
             <div key={d.label} style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
               <div style={{width:160,fontSize:10,color:T.textMid,fontFamily:T.sans,textAlign:"right",flexShrink:0}}>{d.label}</div>
               <div style={{flex:1,height:d.total?14:10,background:T.border,borderRadius:3,overflow:"hidden"}}>
-                <div style={{width:Math.abs(d.value)/wfMax*100+"%",height:"100%",borderRadius:3,background:d.total?"linear-gradient(90deg,"+d.color+","+d.color+"CC)":d.color+"BB",transition:"width 0.5s"}}/>
+                <div style={{width:(Math.abs(d.value)/wfMax*100)+"%",height:"100%",borderRadius:3,background:d.total?"linear-gradient(90deg,"+(d.color)+","+(d.color)+"CC)":d.color+"BB",transition:"width 0.5s"}}/>
               </div>
               <div style={{width:70,fontFamily:T.mono,fontSize:10,color:d.value<0?T.rose:d.color,textAlign:"right",flexShrink:0}}>{d.value<0?"-":""}{fmt(Math.abs(d.value),true)}</div>
             </div>
@@ -2299,7 +2299,7 @@ function ScenarioPlanner({aiContext, plan="professional"}) {
 function CashFlowForecast({aiContext}) {
   const [view,setView]=useState("bars");
   const [sel,setSel]=useState(null);
-  const W=Array.from({length:13},(_,i)=>"W"+i+1);
+  const W=Array.from({length:13},(_,i)=>"W"+(i+1));
   const inf=CF.inflows, out=CF.outflows;
   const inflows =W.map((_,i)=>inf.collections[i]+inf.newContracts[i]+inf.recurring[i]+inf.other[i]);
   const outflows=W.map((_,i)=>out.payroll[i]+out.vendors[i]+out.rent[i]+out.taxes[i]+out.debtService[i]+out.capex[i]+out.other[i]);
@@ -2313,8 +2313,8 @@ function CashFlowForecast({aiContext}) {
   return (
     <div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:18}}>
-          {[{l:"Current Balance",v:fmt(CF.openingBalance,true),s:"As of today",c:T.cyan},{l:"13-Wk Projected",v:fmt(endBal,true),s:endBal>CF.openingBalance?"↑ Positive trend":"↓ Watch closely",c:endBal>CF.openingBalance?T.emerald:T.rose},{l:"Minimum Balance",v:fmt(minBal,true),s:"Week "+minWk+" — lowest point",c:minBal<50000?T.rose:T.amber},{l:"Avg Weekly Net",v:fmt((endBal-CF.openingBalance)/13,true),s:"Inflows minus outflows",c:T.violet}].map(k=>(
-            <div key={k.l} style={{background:T.card,border:"1px solid "+T.border,borderRadius:10,padding:"12px 16px"}}>
+          {[{l:"Current Balance",v:fmt(CF.openingBalance,true),s:"As of today",c:T.cyan},{l:"13-Wk Projected",v:fmt(endBal,true),s:endBal>CF.openingBalance?"↑ Positive trend":"↓ Watch closely",c:endBal>CF.openingBalance?T.emerald:T.rose},{l:"Minimum Balance",v:fmt(minBal,true),s:"Week "+(minWk)+" — lowest point",c:minBal<50000?T.rose:T.amber},{l:"Avg Weekly Net",v:fmt((endBal-CF.openingBalance)/13,true),s:"Inflows minus outflows",c:T.violet}].map(k=>(
+            <div key={k.l} style={{background:T.card,border:"1px solid "+(T.border),borderRadius:10,padding:"12px 16px"}}>
               <div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>{k.l}</div>
               <div style={{fontSize:17,fontWeight:700,fontFamily:T.mono,color:k.c}}>{k.v}</div>
               <div style={{fontSize:10,color:T.textDim,fontFamily:T.sans,marginTop:2}}>{k.s}</div>
@@ -2323,12 +2323,12 @@ function CashFlowForecast({aiContext}) {
         </div>
         <div style={{display:"flex",gap:6,marginBottom:14}}>
           {[["bars","📊 Cash Flow Bars"],["table","📋 Weekly Detail"],["runway","📈 Balance Runway"]].map(([v,l])=>(
-            <button key={v} onClick={()=>setView(v)} style={{background:view===v?T.cyanDim:"transparent",border:"1px solid "+view===v?T.cyanMid:T.border,borderRadius:8,padding:"6px 12px",color:view===v?T.cyan:T.textMid,fontSize:11,fontFamily:T.sans,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>{l}</button>
+            <button key={v} onClick={()=>setView(v)} style={{background:view===v?T.cyanDim:"transparent",border:"1px solid "+(view===v?T.cyanMid:T.border),borderRadius:8,padding:"6px 12px",color:view===v?T.cyan:T.textMid,fontSize:11,fontFamily:T.sans,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>{l}</button>
           ))}
         </div>
 
         {view==="bars"&&(
-          <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,padding:"16px 18px",marginBottom:18}}>
+          <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,padding:"16px 18px",marginBottom:18}}>
             <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:13,marginBottom:14}}>💧 Weekly Cash Flow — 13-Week Forecast</div>
             <div style={{display:"flex",alignItems:"flex-end",gap:3,height:210}}>
               {W.map((w,i)=>{
@@ -2342,12 +2342,12 @@ function CashFlowForecast({aiContext}) {
                       {/* Inflow bar + label */}
                       <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-end"}}>
                         <span style={{fontSize:7,color:T.emerald,fontFamily:T.mono,fontWeight:700,lineHeight:1.2,marginBottom:1,opacity:active?1:0.75}}>{fmt(inflows[i],true)}</span>
-                        <div style={{width:"100%",height:iH+"px",background:"linear-gradient(180deg,"+T.emerald+"90,"+T.emerald+"40)",borderRadius:"2px 2px 0 0",minHeight:2}}/>
+                        <div style={{width:"100%",height:(iH)+"px",background:"linear-gradient(180deg,"+(T.emerald)+"90,"+(T.emerald)+"40)",borderRadius:"2px 2px 0 0",minHeight:2}}/>
                       </div>
                       {/* Outflow bar + label */}
                       <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-end"}}>
                         <span style={{fontSize:7,color:T.rose,fontFamily:T.mono,fontWeight:700,lineHeight:1.2,marginBottom:1,opacity:active?1:0.75}}>{fmt(outflows[i],true)}</span>
-                        <div style={{width:"100%",height:oH+"px",background:"linear-gradient(180deg,"+T.rose+"90,"+T.rose+"40)",borderRadius:"2px 2px 0 0",minHeight:2}}/>
+                        <div style={{width:"100%",height:(oH)+"px",background:"linear-gradient(180deg,"+(T.rose)+"90,"+(T.rose)+"40)",borderRadius:"2px 2px 0 0",minHeight:2}}/>
                       </div>
                     </div>
                     <span style={{fontSize:7,color:T.textDim,fontFamily:T.mono}}>{w}</span>
@@ -2362,7 +2362,7 @@ function CashFlowForecast({aiContext}) {
               <span style={{fontSize:10,color:T.textDim,fontFamily:T.sans}}>Click bar for detail</span>
             </div>
             {sel!==null&&(
-              <div style={{marginTop:14,background:T.surface,borderRadius:10,padding:"12px 14px",border:"1px solid "+T.border}}>
+              <div style={{marginTop:14,background:T.surface,borderRadius:10,padding:"12px 14px",border:"1px solid "+(T.border)}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
                   <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:12}}>Week {sel+1} Detail</div>
                   <div style={{color:nets[sel]>=0?T.emerald:T.rose,fontFamily:T.mono,fontSize:12,fontWeight:700}}>Net: {fmt(nets[sel],true)}</div>
@@ -2375,7 +2375,7 @@ function CashFlowForecast({aiContext}) {
                     {CATS.map(cat=>out[cat.k][sel]>0&&<div key={cat.k} style={{display:"flex",justifyContent:"space-between",marginBottom:4}}><span style={{fontSize:10,color:T.textMid,fontFamily:T.sans}}>{cat.l}</span><span style={{fontSize:10,color:cat.c,fontFamily:T.mono}}>{fmt(out[cat.k][sel],true)}</span></div>)}
                   </div>
                 </div>
-                <div style={{marginTop:10,paddingTop:10,borderTop:"1px solid "+T.border,display:"flex",gap:20}}>
+                <div style={{marginTop:10,paddingTop:10,borderTop:"1px solid "+(T.border),display:"flex",gap:20}}>
                   <div><span style={{fontSize:9,color:T.textDim,fontFamily:T.sans}}>Running Balance: </span><span style={{fontSize:11,color:balances[sel]<60000?T.rose:T.cyan,fontFamily:T.mono,fontWeight:700}}>{fmt(balances[sel])}</span></div>
                   {balances[sel]<60000&&<span style={{fontSize:10,color:T.rose,fontFamily:T.sans}}>⚠️ Below $60K threshold</span>}
                 </div>
@@ -2385,13 +2385,13 @@ function CashFlowForecast({aiContext}) {
         )}
 
         {view==="table"&&(
-          <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,overflow:"hidden",marginBottom:18}}>
-            <div style={{padding:"14px 16px",borderBottom:"1px solid "+T.border,color:T.text,fontFamily:T.display,fontWeight:700,fontSize:13}}>📋 13-Week Cash Flow Detail</div>
+          <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,overflow:"hidden",marginBottom:18}}>
+            <div style={{padding:"14px 16px",borderBottom:"1px solid "+(T.border),color:T.text,fontFamily:T.display,fontWeight:700,fontSize:13}}>📋 13-Week Cash Flow Detail</div>
             <div style={{overflowX:"auto"}}>
               <table style={{width:"100%",borderCollapse:"collapse",fontSize:10,fontFamily:T.mono}}>
                 <thead><tr style={{background:T.surface}}>
                   {["Category",...W,"Total"].map(h=>(
-                    <th key={h} style={{padding:"7px 8px",color:T.textDim,textAlign:h==="Category"?"left":"right",fontWeight:700,fontSize:9,textTransform:"uppercase",letterSpacing:0.5,borderBottom:"1px solid "+T.border}}>{h}</th>
+                    <th key={h} style={{padding:"7px 8px",color:T.textDim,textAlign:h==="Category"?"left":"right",fontWeight:700,fontSize:9,textTransform:"uppercase",letterSpacing:0.5,borderBottom:"1px solid "+(T.border)}}>{h}</th>
                   ))}
                 </tr></thead>
                 <tbody>
@@ -2412,7 +2412,7 @@ function CashFlowForecast({aiContext}) {
                     {l:"Net Cash Flow",d:nets,c:T.violet,b:true,net:true},
                     {l:"Running Balance",d:balances,c:T.cyan,b:true,bal:true},
                   ].map(row=>(
-                    <tr key={row.l} style={{borderBottom:"1px solid "+T.border+"60",background:row.bal?T.cyanDim:"transparent"}}>
+                    <tr key={row.l} style={{borderBottom:"1px solid "+(T.border)+"60",background:row.bal?T.cyanDim:"transparent"}}>
                       <td style={{padding:"6px 8px",color:row.b?T.text:T.textMid,paddingLeft:row.in?18:8,fontFamily:T.sans,fontSize:10,fontWeight:row.b?700:400}}>{row.l}</td>
                       {row.d.map((v,i)=>(
                         <td key={i} style={{padding:"6px 8px",textAlign:"right",color:row.net?v>=0?T.emerald:T.rose:row.bal?v<60000?T.rose:T.cyan:row.c,fontWeight:row.b?700:400}}>
@@ -2429,7 +2429,7 @@ function CashFlowForecast({aiContext}) {
         )}
 
         {view==="runway"&&(
-          <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,padding:"16px 18px",marginBottom:18}}>
+          <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,padding:"16px 18px",marginBottom:18}}>
             <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:13,marginBottom:14}}>📈 13-Week Balance Runway</div>
             <div style={{height:160,position:"relative"}}>
               <svg viewBox="0 0 400 130" style={{width:"100%",height:"100%"}} preserveAspectRatio="none">
@@ -2439,10 +2439,10 @@ function CashFlowForecast({aiContext}) {
                   const maxB=Math.max(...all),minB=Math.min(0,...all),r=maxB-minB||1;
                   const X=i=>(i/14)*400, Y=v=>10+(1-(v-minB)/r)*110;
                   const thresh=60000, ty=Y(thresh);
-                  const pts=all.map((v,i)=>X(i)+","+Y(v));
+                  const pts=all.map((v,i)=>(X(i))+","+(Y(v)));
                   return <>
                     <line x1="0" x2="400" y1={ty} y2={ty} stroke={T.rose} strokeWidth="1" strokeDasharray="4,3" opacity="0.5"/>
-                    <path d={"M"+pts[0]+" L"+pts.slice(1).join(" L")+" L400,130 L0,130 Z"} fill="url(#bg1)"/>
+                    <path d={"M"+(pts[0])+" L"+(pts.slice(1).join(" L"))+" L400,130 L0,130 Z"} fill="url(#bg1)"/>
                     <polyline points={pts.join(" ")} fill="none" stroke={T.cyan} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     {all.map((v,i)=>v<thresh&&<circle key={i} cx={X(i)} cy={Y(v)} r="3" fill={T.rose}/>)}
                   </>;
@@ -2456,7 +2456,7 @@ function CashFlowForecast({aiContext}) {
             </div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginTop:14}}>
               {W.map((w,i)=>(
-                <div key={w} style={{background:balances[i]<60000?T.roseDim:T.surface,border:"1px solid "+balances[i]<60000?T.rose+"40":T.border,borderRadius:8,padding:"8px 10px"}}>
+                <div key={w} style={{background:balances[i]<60000?T.roseDim:T.surface,border:"1px solid "+(balances[i]<60000?T.rose+"40":T.border),borderRadius:8,padding:"8px 10px"}}>
                   <div style={{fontSize:9,color:T.textDim,fontFamily:T.mono}}>{w}</div>
                   <div style={{fontSize:12,fontWeight:700,fontFamily:T.mono,color:balances[i]<60000?T.rose:T.text}}>{fmt(balances[i],true)}</div>
                   <div style={{fontSize:9,color:nets[i]>=0?T.emerald:T.rose,fontFamily:T.sans}}>{nets[i]>=0?"↑":"↓"}{fmt(Math.abs(nets[i]),true)}</div>
@@ -2466,7 +2466,7 @@ function CashFlowForecast({aiContext}) {
           </div>
         )}
 
-        <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,padding:"16px 18px"}}>
+        <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,padding:"16px 18px"}}>
           <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:13,marginBottom:14}}>💸 13-Week Outflow Composition</div>
           {CATS.map(cat=>{
             const t=sum(W.map((_,i)=>out[cat.k][i]));
@@ -2474,7 +2474,7 @@ function CashFlowForecast({aiContext}) {
               <div key={cat.k} style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
                 <div style={{width:120,fontSize:10,color:T.textMid,fontFamily:T.sans}}>{cat.l}</div>
                 <div style={{flex:1,height:8,background:T.border,borderRadius:4,overflow:"hidden"}}>
-                  <div style={{width:t/totOut*100+"%",height:"100%",background:cat.c,borderRadius:4,transition:"width 0.4s"}}/>
+                  <div style={{width:(t/totOut*100)+"%",height:"100%",background:cat.c,borderRadius:4,transition:"width 0.4s"}}/>
                 </div>
                 <div style={{width:50,fontFamily:T.mono,fontSize:10,color:cat.c,textAlign:"right"}}>{fmt(t,true)}</div>
                 <div style={{width:32,fontFamily:T.mono,fontSize:9,color:T.textDim,textAlign:"right"}}>{(t/totOut*100).toFixed(0)}%</div>
@@ -2507,19 +2507,19 @@ function ARaging({aiContext}) {
     <div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10,marginBottom:18}}>
           {[{l:"Current",v:curr,c:T.emerald},{l:"1–30 Days",v:d30,c:T.cyan},{l:"31–60 Days",v:d60,c:T.amber},{l:"61–90 Days",v:d90,c:T.orange},{l:"90+ Days",v:d90p,c:T.rose}].map(b=>(
-            <div key={b.l} style={{background:T.card,border:"1px solid "+T.border,borderRadius:10,padding:"12px 14px"}}>
+            <div key={b.l} style={{background:T.card,border:"1px solid "+(T.border),borderRadius:10,padding:"12px 14px"}}>
               <div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>{b.l}</div>
               <div style={{fontSize:17,fontWeight:700,fontFamily:T.mono,color:b.c}}>{fmt(b.v,true)}</div>
-              <div style={{marginTop:6,height:3,background:T.border,borderRadius:2}}><div style={{width:b.v/tot*100+"%",height:"100%",background:b.c,borderRadius:2}}/></div>
+              <div style={{marginTop:6,height:3,background:T.border,borderRadius:2}}><div style={{width:(b.v/tot*100)+"%",height:"100%",background:b.c,borderRadius:2}}/></div>
               <div style={{fontSize:9,color:T.textDim,fontFamily:T.mono,marginTop:3}}>{pct(b.v/tot)} of AR</div>
             </div>
           ))}
         </div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:18}}>
-          <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,padding:"16px 18px"}}>
+          <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,padding:"16px 18px"}}>
             <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:13,marginBottom:14}}>📊 AR Distribution</div>
             <div style={{display:"flex",height:20,borderRadius:6,overflow:"hidden",gap:2}}>
-              {[[curr,T.emerald],[d30,T.cyan],[d60,T.amber],[d90,T.orange],[d90p,T.rose]].map(([v,c],i)=>v>0&&<div key={i} style={{width:v/tot*100+"%",background:c}}/>)}
+              {[[curr,T.emerald],[d30,T.cyan],[d60,T.amber],[d90,T.orange],[d90p,T.rose]].map(([v,c],i)=>v>0&&<div key={i} style={{width:(v/tot*100)+"%",background:c}}/>)}
             </div>
             <div style={{display:"flex",flexWrap:"wrap",gap:"6px 14px",marginTop:10}}>
               {[["Current",curr,T.emerald],["1-30d",d30,T.cyan],["31-60d",d60,T.amber],["61-90d",d90,T.orange],["90+d",d90p,T.rose]].map(([l,v,c])=>(
@@ -2527,10 +2527,10 @@ function ARaging({aiContext}) {
               ))}
             </div>
           </div>
-          <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,padding:"16px 18px"}}>
+          <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,padding:"16px 18px"}}>
             <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:13,marginBottom:14}}>📏 Collections Health</div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-              {[{l:"Total AR",v:fmt(tot,true),c:T.cyan},{l:"DSO",v:dso+" days",c:dso<45?T.emerald:dso<60?T.amber:T.rose},{l:"Past Due",v:fmt(d30+d60+d90+d90p,true),c:T.orange},{l:"At-Risk",v:fmt(d60+d90+d90p,true),c:T.rose}].map(s=>(
+              {[{l:"Total AR",v:fmt(tot,true),c:T.cyan},{l:"DSO",v:(dso)+" days",c:dso<45?T.emerald:dso<60?T.amber:T.rose},{l:"Past Due",v:fmt(d30+d60+d90+d90p,true),c:T.orange},{l:"At-Risk",v:fmt(d60+d90+d90p,true),c:T.rose}].map(s=>(
                 <div key={s.l}><div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:0.5}}>{s.l}</div><div style={{fontSize:14,fontWeight:700,fontFamily:T.mono,color:s.c,marginTop:2}}>{s.v}</div></div>
               ))}
             </div>
@@ -2539,16 +2539,16 @@ function ARaging({aiContext}) {
         <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center",marginBottom:12}}>
           <span style={{fontSize:10,color:T.textDim,fontFamily:T.sans}}>Sort by:</span>
           {[["total","Total"],["risk","Risk"],["d90p","90+d"],["name","Name"]].map(([v,l])=>(
-            <button key={v} onClick={()=>setSort(v)} style={{background:sort===v?T.violetDim:"transparent",border:"1px solid "+sort===v?T.violet+"50":T.border,borderRadius:6,padding:"4px 10px",color:sort===v?T.violet:T.textMid,fontSize:10,fontFamily:T.sans,cursor:"pointer"}}>{l}</button>
+            <button key={v} onClick={()=>setSort(v)} style={{background:sort===v?T.violetDim:"transparent",border:"1px solid "+(sort===v?T.violet+"50":T.border),borderRadius:6,padding:"4px 10px",color:sort===v?T.violet:T.textMid,fontSize:10,fontFamily:T.sans,cursor:"pointer"}}>{l}</button>
           ))}
           <div style={{width:1,height:20,background:T.border,margin:"0 4px"}}/>
           <span style={{fontSize:10,color:T.textDim,fontFamily:T.sans}}>Risk:</span>
           {["all","Critical","High","Medium","Low"].map(r=>(
-            <button key={r} onClick={()=>setFilter(r)} style={{background:filter===r?(RC[r]||T.cyan)+"25":"transparent",border:"1px solid "+filter===r?(RC[r]||T.cyan)+"60":T.border,borderRadius:6,padding:"4px 10px",color:filter===r?(RC[r]||T.cyan):T.textMid,fontSize:10,fontFamily:T.sans,cursor:"pointer"}}>{r==="all"?"All":r}</button>
+            <button key={r} onClick={()=>setFilter(r)} style={{background:filter===r?(RC[r]||T.cyan)+"25":"transparent",border:"1px solid "+(filter===r?(RC[r]||T.cyan)+"60":T.border),borderRadius:6,padding:"4px 10px",color:filter===r?(RC[r]||T.cyan):T.textMid,fontSize:10,fontFamily:T.sans,cursor:"pointer"}}>{r==="all"?"All":r}</button>
           ))}
         </div>
-        <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,overflow:"hidden"}}>
-          <div style={{padding:"12px 16px",borderBottom:"1px solid "+T.border,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,overflow:"hidden"}}>
+          <div style={{padding:"12px 16px",borderBottom:"1px solid "+(T.border),display:"flex",justifyContent:"space-between",alignItems:"center"}}>
             <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:13}}>📬 AR Aging — {sorted.length} Clients</div>
             <div style={{color:T.textDim,fontSize:9,fontFamily:T.mono}}>As of {new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}</div>
           </div>
@@ -2556,25 +2556,25 @@ function ARaging({aiContext}) {
             <table style={{width:"100%",borderCollapse:"collapse",fontSize:10}}>
               <thead><tr style={{background:T.surface}}>
                 {["Client","Industry","Current","1-30d","31-60d","61-90d","90+d","Total","Risk","Last Pmt","Contact"].map(h=>(
-                  <th key={h} style={{padding:"8px 10px",color:T.textDim,textAlign:["Client","Industry","Contact"].includes(h)?"left":"right",fontWeight:700,fontSize:9,textTransform:"uppercase",letterSpacing:0.5,borderBottom:"1px solid "+T.border,fontFamily:T.sans,whiteSpace:"nowrap"}}>{h}</th>
+                  <th key={h} style={{padding:"8px 10px",color:T.textDim,textAlign:["Client","Industry","Contact"].includes(h)?"left":"right",fontWeight:700,fontSize:9,textTransform:"uppercase",letterSpacing:0.5,borderBottom:"1px solid "+(T.border),fontFamily:T.sans,whiteSpace:"nowrap"}}>{h}</th>
                 ))}
               </tr></thead>
               <tbody>
                 {sorted.map((c,i)=>(
-                  <tr key={i} style={{borderBottom:"1px solid "+T.border+"60",background:c.risk==="Critical"?T.roseDim:c.risk==="High"?T.orangeDim:"transparent"}}>
+                  <tr key={i} style={{borderBottom:"1px solid "+(T.border)+"60",background:c.risk==="Critical"?T.roseDim:c.risk==="High"?T.orangeDim:"transparent"}}>
                     <td style={{padding:"9px 10px",color:T.text,fontFamily:T.sans,fontWeight:600,fontSize:10,whiteSpace:"nowrap"}}>{c.name}</td>
                     <td style={{padding:"9px 10px",color:T.textMid,fontFamily:T.sans,fontSize:10}}>{c.industry}</td>
                     {[c.current,c.d30,c.d60,c.d90,c.d90p].map((v,j)=>(
                       <td key={j} style={{padding:"9px 10px",textAlign:"right",fontFamily:T.mono,fontSize:10,color:v===0?T.textDim:BC[j],fontWeight:v>0?600:400}}>{v===0?"-":fmt(v,true)}</td>
                     ))}
                     <td style={{padding:"9px 10px",textAlign:"right",fontFamily:T.mono,fontSize:10,fontWeight:700,color:T.text}}>{fmt(c.total,true)}</td>
-                    <td style={{padding:"9px 10px",textAlign:"right"}}><span style={{background:RC[c.risk]+"22",border:"1px solid "+RC[c.risk]+"50",borderRadius:20,padding:"2px 8px",fontSize:9,color:RC[c.risk],fontFamily:T.sans,fontWeight:700}}>{c.risk}</span></td>
+                    <td style={{padding:"9px 10px",textAlign:"right"}}><span style={{background:RC[c.risk]+"22",border:"1px solid "+(RC[c.risk])+"50",borderRadius:20,padding:"2px 8px",fontSize:9,color:RC[c.risk],fontFamily:T.sans,fontWeight:700}}>{c.risk}</span></td>
                     <td style={{padding:"9px 10px",textAlign:"right",fontFamily:T.mono,fontSize:10,color:T.textMid}}>{c.lastPayment}</td>
                     <td style={{padding:"9px 10px",color:T.textDim,fontFamily:T.sans,fontSize:10,whiteSpace:"nowrap"}}>{c.contact}</td>
                   </tr>
                 ))}
               </tbody>
-              <tfoot><tr style={{background:T.cyanDim,borderTop:"2px solid "+T.border}}>
+              <tfoot><tr style={{background:T.cyanDim,borderTop:"2px solid "+(T.border)}}>
                 <td colSpan="2" style={{padding:"9px 10px",color:T.cyan,fontFamily:T.display,fontWeight:700,fontSize:10}}>TOTAL</td>
                 {[curr,d30,d60,d90,d90p].map((v,j)=>(
                   <td key={j} style={{padding:"9px 10px",textAlign:"right",fontFamily:T.mono,fontSize:10,fontWeight:700,color:BC[j]}}>{fmt(v,true)}</td>
@@ -2617,8 +2617,8 @@ function RegionalComparison({aiContext}) {
   return (
     <div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:18}}>
-          {[{l:"Portfolio Revenue",v:fmt(totalRev,true),s:REGIONAL_CLIENTS.length+" clients",c:T.cyan},{l:"Avg Net Margin",v:pct(avgMargin),s:"Weighted by revenue",c:T.emerald},{l:"Avg Growth Rate",v:pct(avgGrowth),s:avgGrowth>0?"↑ Expanding":"↓ Contracting",c:avgGrowth>0?T.emerald:T.rose},{l:"Avg NPS Score",v:avgNps.toString(),s:avgNps>65?"Strong loyalty":"Needs attention",c:avgNps>65?T.emerald:T.amber}].map(s=>(
-            <div key={s.l} style={{background:T.card,border:"1px solid "+T.border,borderRadius:10,padding:"12px 16px"}}>
+          {[{l:"Portfolio Revenue",v:fmt(totalRev,true),s:(REGIONAL_CLIENTS.length)+" clients",c:T.cyan},{l:"Avg Net Margin",v:pct(avgMargin),s:"Weighted by revenue",c:T.emerald},{l:"Avg Growth Rate",v:pct(avgGrowth),s:avgGrowth>0?"↑ Expanding":"↓ Contracting",c:avgGrowth>0?T.emerald:T.rose},{l:"Avg NPS Score",v:avgNps.toString(),s:avgNps>65?"Strong loyalty":"Needs attention",c:avgNps>65?T.emerald:T.amber}].map(s=>(
+            <div key={s.l} style={{background:T.card,border:"1px solid "+(T.border),borderRadius:10,padding:"12px 16px"}}>
               <div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>{s.l}</div>
               <div style={{fontSize:18,fontWeight:700,fontFamily:T.mono,color:s.c}}>{s.v}</div>
               <div style={{fontSize:10,color:T.textDim,fontFamily:T.sans,marginTop:2}}>{s.s}</div>
@@ -2627,14 +2627,14 @@ function RegionalComparison({aiContext}) {
         </div>
         <div style={{display:"flex",gap:6,marginBottom:14}}>
           {[["overview","🗺️ Regional Overview"],["clients","👥 Client Detail"],["matrix","📊 Performance Matrix"]].map(([v,l])=>(
-            <button key={v} onClick={()=>setView(v)} style={{background:view===v?T.cyanDim:"transparent",border:"1px solid "+view===v?T.cyanMid:T.border,borderRadius:8,padding:"6px 12px",color:view===v?T.cyan:T.textMid,fontSize:11,fontFamily:T.sans,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>{l}</button>
+            <button key={v} onClick={()=>setView(v)} style={{background:view===v?T.cyanDim:"transparent",border:"1px solid "+(view===v?T.cyanMid:T.border),borderRadius:8,padding:"6px 12px",color:view===v?T.cyan:T.textMid,fontSize:11,fontFamily:T.sans,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>{l}</button>
           ))}
         </div>
 
         {view==="overview"&&(
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
             {regData.map(r=>(
-              <div key={r.region} onClick={()=>setRegion(region===r.region?"all":r.region)} style={{background:region===r.region?T.cyanDim:T.card,border:"1px solid "+region===r.region?T.cyanMid:T.border,borderRadius:12,padding:"16px 18px",cursor:"pointer",transition:"all 0.2s"}}>
+              <div key={r.region} onClick={()=>setRegion(region===r.region?"all":r.region)} style={{background:region===r.region?T.cyanDim:T.card,border:"1px solid "+(region===r.region?T.cyanMid:T.border),borderRadius:12,padding:"16px 18px",cursor:"pointer",transition:"all 0.2s"}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
                   <div>
                     <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14}}>{r.region}</div>
@@ -2646,7 +2646,7 @@ function RegionalComparison({aiContext}) {
                   </div>
                 </div>
                 <div style={{height:8,background:T.border,borderRadius:4,marginBottom:12,overflow:"hidden"}}>
-                  <div style={{width:r.revenue/maxRR*100+"%",height:"100%",background:"linear-gradient(90deg,"+T.cyan+","+T.violet+")",borderRadius:4}}/>
+                  <div style={{width:(r.revenue/maxRR*100)+"%",height:"100%",background:"linear-gradient(90deg,"+(T.cyan)+","+(T.violet)+")",borderRadius:4}}/>
                 </div>
                 <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8}}>
                   {[{l:"Avg Margin",v:pct(r.margin),c:r.margin>0.35?T.emerald:T.amber},{l:"Avg Growth",v:pct(r.growth),c:r.growth>0?T.emerald:T.rose},{l:"Avg NPS",v:r.nps,c:r.nps>65?T.emerald:T.amber},{l:"Rev/Client",v:fmt(r.revenue/r.clients,true),c:T.violet}].map(s=>(
@@ -2663,34 +2663,34 @@ function RegionalComparison({aiContext}) {
             <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
               <span style={{fontSize:10,color:T.textDim,fontFamily:T.sans}}>Region:</span>
               {["all",...regions].map(r=>(
-                <button key={r} onClick={()=>setRegion(r)} style={{background:region===r?T.cyanDim:"transparent",border:"1px solid "+region===r?T.cyanMid:T.border,borderRadius:6,padding:"4px 10px",color:region===r?T.cyan:T.textMid,fontSize:10,fontFamily:T.sans,cursor:"pointer"}}>{r==="all"?"All":r}</button>
+                <button key={r} onClick={()=>setRegion(r)} style={{background:region===r?T.cyanDim:"transparent",border:"1px solid "+(region===r?T.cyanMid:T.border),borderRadius:6,padding:"4px 10px",color:region===r?T.cyan:T.textMid,fontSize:10,fontFamily:T.sans,cursor:"pointer"}}>{r==="all"?"All":r}</button>
               ))}
               <div style={{width:1,height:20,background:T.border,margin:"0 4px"}}/>
               <span style={{fontSize:10,color:T.textDim,fontFamily:T.sans}}>Sort:</span>
               {[["revenue","Revenue"],["margin","Margin"],["growth","Growth"],["nps","NPS"]].map(([v,l])=>(
-                <button key={v} onClick={()=>setSort(v)} style={{background:sort===v?T.violetDim:"transparent",border:"1px solid "+sort===v?T.violet+"50":T.border,borderRadius:6,padding:"4px 10px",color:sort===v?T.violet:T.textMid,fontSize:10,fontFamily:T.sans,cursor:"pointer"}}>{l}</button>
+                <button key={v} onClick={()=>setSort(v)} style={{background:sort===v?T.violetDim:"transparent",border:"1px solid "+(sort===v?T.violet+"50":T.border),borderRadius:6,padding:"4px 10px",color:sort===v?T.violet:T.textMid,fontSize:10,fontFamily:T.sans,cursor:"pointer"}}>{l}</button>
               ))}
             </div>
-            <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,overflow:"hidden"}}>
+            <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,overflow:"hidden"}}>
               <table style={{width:"100%",borderCollapse:"collapse",fontSize:10}}>
                 <thead><tr style={{background:T.surface}}>
                   {["Client","Region","City","Segment","Revenue","Margin","Growth","NPS","Pay Days","Risk"].map(h=>(
-                    <th key={h} style={{padding:"8px 10px",color:T.textDim,textAlign:["Client","Region","City","Segment"].includes(h)?"left":"right",fontWeight:700,fontSize:9,textTransform:"uppercase",letterSpacing:0.5,borderBottom:"1px solid "+T.border,fontFamily:T.sans,whiteSpace:"nowrap"}}>{h}</th>
+                    <th key={h} style={{padding:"8px 10px",color:T.textDim,textAlign:["Client","Region","City","Segment"].includes(h)?"left":"right",fontWeight:700,fontSize:9,textTransform:"uppercase",letterSpacing:0.5,borderBottom:"1px solid "+(T.border),fontFamily:T.sans,whiteSpace:"nowrap"}}>{h}</th>
                   ))}
                 </tr></thead>
                 <tbody>
                   {filtered.map((c,i)=>(
-                    <tr key={i} style={{borderBottom:"1px solid "+T.border+"60"}}>
+                    <tr key={i} style={{borderBottom:"1px solid "+(T.border)+"60"}}>
                       <td style={{padding:"9px 10px",color:T.text,fontFamily:T.sans,fontWeight:600,fontSize:10,whiteSpace:"nowrap"}}>{c.name}</td>
                       <td style={{padding:"9px 10px",color:T.textMid,fontFamily:T.sans,fontSize:10,whiteSpace:"nowrap"}}>{c.region}</td>
                       <td style={{padding:"9px 10px",color:T.textDim,fontFamily:T.sans,fontSize:10}}>{c.city}</td>
-                      <td style={{padding:"9px 10px"}}><span style={{background:SC[c.segment]+"22",border:"1px solid "+SC[c.segment]+"40",borderRadius:20,padding:"2px 8px",fontSize:9,color:SC[c.segment],fontFamily:T.sans}}>{c.segment}</span></td>
+                      <td style={{padding:"9px 10px"}}><span style={{background:SC[c.segment]+"22",border:"1px solid "+(SC[c.segment])+"40",borderRadius:20,padding:"2px 8px",fontSize:9,color:SC[c.segment],fontFamily:T.sans}}>{c.segment}</span></td>
                       <td style={{padding:"9px 10px",textAlign:"right",fontFamily:T.mono,fontSize:10,fontWeight:700,color:T.cyan}}>{fmt(c.revenue,true)}</td>
                       <td style={{padding:"9px 10px",textAlign:"right",fontFamily:T.mono,fontSize:10,color:c.margin>0.35?T.emerald:T.amber}}>{pct(c.margin)}</td>
                       <td style={{padding:"9px 10px",textAlign:"right",fontFamily:T.mono,fontSize:10,color:c.growth>0?T.emerald:T.rose}}>{c.growth>0?"+":""}{pct(c.growth)}</td>
                       <td style={{padding:"9px 10px",textAlign:"right",fontFamily:T.mono,fontSize:10,color:c.nps>65?T.emerald:c.nps>50?T.amber:T.rose}}>{c.nps}</td>
                       <td style={{padding:"9px 10px",textAlign:"right",fontFamily:T.mono,fontSize:10,color:c.payDays>60?T.rose:c.payDays>45?T.amber:T.emerald}}>{c.payDays}d</td>
-                      <td style={{padding:"9px 10px",textAlign:"right"}}><span style={{background:RC[c.riskScore]+"22",border:"1px solid "+RC[c.riskScore]+"50",borderRadius:20,padding:"2px 8px",fontSize:9,color:RC[c.riskScore],fontFamily:T.sans,fontWeight:700}}>{c.riskScore}</span></td>
+                      <td style={{padding:"9px 10px",textAlign:"right"}}><span style={{background:RC[c.riskScore]+"22",border:"1px solid "+(RC[c.riskScore])+"50",borderRadius:20,padding:"2px 8px",fontSize:9,color:RC[c.riskScore],fontFamily:T.sans,fontWeight:700}}>{c.riskScore}</span></td>
                     </tr>
                   ))}
                 </tbody>
@@ -2701,11 +2701,11 @@ function RegionalComparison({aiContext}) {
 
         {view==="matrix"&&(
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
-            <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,padding:"16px 18px"}}>
+            <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,padding:"16px 18px"}}>
               <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:13,marginBottom:14}}>📊 Revenue vs. Margin Scatter (bubble = NPS)</div>
               <div style={{position:"relative",height:220,background:T.surface,borderRadius:8,overflow:"hidden"}}>
-                {[0.25,0.5,0.75].map(f=><div key={f} style={{position:"absolute",left:f*100+"%",top:0,bottom:0,width:1,background:T.border}}/>)}
-                {[0.25,0.5,0.75].map(f=><div key={f} style={{position:"absolute",top:f*100+"%",left:0,right:0,height:1,background:T.border}}/>)}
+                {[0.25,0.5,0.75].map(f=><div key={f} style={{position:"absolute",left:(f*100)+"%",top:0,bottom:0,width:1,background:T.border}}/>)}
+                {[0.25,0.5,0.75].map(f=><div key={f} style={{position:"absolute",top:(f*100)+"%",left:0,right:0,height:1,background:T.border}}/>)}
                 <div style={{position:"absolute",bottom:6,right:10,fontSize:8,color:T.textDim,fontFamily:T.sans}}>Revenue →</div>
                 <div style={{position:"absolute",top:"50%",left:4,fontSize:8,color:T.textDim,fontFamily:T.sans,transform:"translateY(-50%) rotate(-90deg)",transformOrigin:"center"}}>Margin →</div>
                 {(()=>{
@@ -2714,9 +2714,9 @@ function RegionalComparison({aiContext}) {
                     const x=((c.revenue-minRv)/(maxRv-minRv))*84+7;
                     const y=(1-c.margin/0.5)*84+5;
                     const sz=8+c.nps/10;
-                    return <div key={i} title={c.name+": "+fmt(c.revenue,true)+", "+pct(c.margin)+" margin, NPS "+c.nps}
-                      style={{position:"absolute",left:x+"%",top:y+"%",width:sz,height:sz,borderRadius:"50%",background:SC[c.segment],opacity:0.85,transform:"translate(-50%,-50%)",cursor:"pointer",transition:"all 0.2s",border:"1px solid "+SC[c.segment]}}
-                      onMouseEnter={e=>{e.target.style.opacity="1";e.target.style.transform="translate(-50%,-50%) scale(1.5)";e.target.title=c.name;}}
+                    return <div key={i} title={(c.name)+": "+(fmt(c.revenue,true))+", "+(pct(c.margin))+" margin, NPS "+(c.nps)}
+                      style={{position:"absolute",left:(x)+"%",top:(y)+"%",width:sz,height:sz,borderRadius:"50%",background:SC[c.segment],opacity:0.85,transform:"translate(-50%,-50%)",cursor:"pointer",transition:"all 0.2s",border:"1px solid "+(SC[c.segment])}}
+                      onMouseEnter={e=>{e.target.style.opacity="1";e.target.style.transform="translate(-50%,-50%) scale(1.5)";e.target.title=(c.name);}}
                       onMouseLeave={e=>{e.target.style.opacity="0.85";e.target.style.transform="translate(-50%,-50%) scale(1)";}}
                     />;
                   });
@@ -2733,13 +2733,13 @@ function RegionalComparison({aiContext}) {
                 {title:"Top Revenue",cls:[...REGIONAL_CLIENTS].sort((a,b)=>b.revenue-a.revenue).slice(0,5),m:c=>fmt(c.revenue,true),c:T.cyan},
                 {title:"Highest Margin",cls:[...REGIONAL_CLIENTS].sort((a,b)=>b.margin-a.margin).slice(0,5),m:c=>pct(c.margin),c:T.emerald},
                 {title:"Fastest Growing",cls:[...REGIONAL_CLIENTS].sort((a,b)=>b.growth-a.growth).slice(0,5),m:c=>(c.growth>0?"+":"")+pct(c.growth),c:T.violet},
-                {title:"Best NPS",cls:[...REGIONAL_CLIENTS].sort((a,b)=>b.nps-a.nps).slice(0,5),m:c=>"NPS "+c.nps,c:T.amber},
+                {title:"Best NPS",cls:[...REGIONAL_CLIENTS].sort((a,b)=>b.nps-a.nps).slice(0,5),m:c=>"NPS "+(c.nps),c:T.amber},
               ].map(({title,cls,m,c})=>(
-                <div key={title} style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,padding:"14px 16px"}}>
+                <div key={title} style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,padding:"14px 16px"}}>
                   <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:12,marginBottom:10}}>{title}</div>
                   {cls.map((cl,i)=>(
                     <div key={i} style={{display:"flex",alignItems:"center",gap:8,marginBottom:7}}>
-                      <div style={{width:16,height:16,borderRadius:"50%",background:c+"22",border:"1px solid "+c+"50",display:"flex",alignItems:"center",justifyContent:"center",fontSize:8,color:c,fontFamily:T.mono,fontWeight:700,flexShrink:0}}>{i+1}</div>
+                      <div style={{width:16,height:16,borderRadius:"50%",background:c+"22",border:"1px solid "+(c)+"50",display:"flex",alignItems:"center",justifyContent:"center",fontSize:8,color:c,fontFamily:T.mono,fontWeight:700,flexShrink:0}}>{i+1}</div>
                       <div style={{flex:1,fontSize:10,color:T.textMid,fontFamily:T.sans,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{cl.name}</div>
                       <div style={{fontSize:10,color:c,fontFamily:T.mono,fontWeight:700,flexShrink:0}}>{m(cl)}</div>
                     </div>
@@ -2760,7 +2760,7 @@ function IntegrationFieldInput({label,value,onChange,placeholder,type="text",sho
       <label style={{display:"block",fontSize:10,color:T.textDim,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>{label}</label>
       <div style={{position:"relative"}}>
         <input type={type==="password"&&!show?"password":"text"} value={value} onChange={onChange} placeholder={placeholder}
-          style={{width:"100%",background:T.surface,border:"1px solid "+T.border,borderRadius:8,padding:"10px 12px",color:T.text,fontSize:12,fontFamily:T.mono,outline:"none",paddingRight:type==="password"?40:12,boxSizing:"border-box"}}
+          style={{width:"100%",background:T.surface,border:"1px solid "+(T.border),borderRadius:8,padding:"10px 12px",color:T.text,fontSize:12,fontFamily:T.mono,outline:"none",paddingRight:type==="password"?40:12,boxSizing:"border-box"}}
           onFocus={e=>e.target.style.borderColor=T.cyan} onBlur={e=>e.target.style.borderColor=T.border}/>
         {type==="password"&&<button onClick={onToggle} style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",color:T.textDim,fontSize:12}}>{show?"🙈":"👁"}</button>}
       </div>
@@ -2895,7 +2895,7 @@ function SimScoreBar({ label, value }) {
         <span style={{fontSize:12,color:c,fontFamily:T.mono,fontWeight:700}}>{value}/10</span>
       </div>
       <div style={{height:4,background:T.border,borderRadius:99,overflow:"hidden"}}>
-        <div style={{height:"100%",width:value*10+"%",borderRadius:99,background:"linear-gradient(90deg,"+c+"80,"+c+")",boxShadow:"0 0 8px "+c+"40"}}/>
+        <div style={{height:"100%",width:(value*10)+"%",borderRadius:99,background:"linear-gradient(90deg,"+(c)+"80,"+(c)+")",boxShadow:"0 0 8px "+(c)+"40"}}/>
       </div>
     </div>
   );
@@ -2903,7 +2903,7 @@ function SimScoreBar({ label, value }) {
 
 function SimCard({ children, style={} }) {
   return (
-    <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:16,padding:20,...style}}>
+    <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:16,padding:20,...style}}>
       {children}
     </div>
   );
@@ -2926,7 +2926,7 @@ function SimBullet({ items, icon="›", color=T.textMid }) {
 function SimSectionLabel({ text, color=T.cyan }) {
   return (
     <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}>
-      <div style={{width:3,height:16,borderRadius:99,background:color,boxShadow:"0 0 6px "+color+"80"}}/>
+      <div style={{width:3,height:16,borderRadius:99,background:color,boxShadow:"0 0 6px "+(color)+"80"}}/>
       <span style={{fontSize:9,color,fontFamily:T.mono,fontWeight:700,textTransform:"uppercase",letterSpacing:2}}>{text}</span>
     </div>
   );
@@ -2967,12 +2967,12 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          system: `CFO simulation advisor for FinanceOS. The user is reviewing a 30-day CFO evaluation of FinanceOS against Mosaic, Cube, Runway, Fathom, and Jirav. Help them interpret results, prioritise improvements, and understand competitive gaps. Be direct and specific. 2-3 paragraphs max.`,
+          system: "CFO simulation advisor for FinanceOS. The user is reviewing a 30-day CFO evaluation of FinanceOS against Mosaic, Cube, Runway, Fathom, and Jirav. Help them interpret results, prioritise improvements, and understand competitive gaps. Be direct and specific. 2-3 paragraphs max.",
           messages: next.map(m => ({ role: m.role, content: m.content })),
         }),
       });
       const d = await res.json();
-      const reply = res.ok ? (d.text || "No response.") : "⚠️ "+d?.message || "AI unavailable.";
+      const reply = res.ok ? (d.text || "No response.") : "⚠️ "+(d?.message || "AI unavailable.");
       setAiMsgs(m => [...m, { role:"assistant", content: reply }]);
     } catch {
       setAiMsgs(m => [...m, { role:"assistant", content:"⚠️ Connection error — check your internet and try again." }]);
@@ -3003,7 +3003,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
     try {
       // POST to the server route — prompts live server-side
       const data = await api.ai.cfoSimulation({});
-      const raw  = (data?.text || "").replace(/```json|```/g,"").trim();
+      const raw  = (data?.text || "").replace(/"""json|"""/g,"").trim();
       const parsed = JSON.parse(raw);
       setResult(parsed);
       setSimStatus("done");
@@ -3032,18 +3032,18 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
   ];
 
   const inlineAIPanel = (
-    <div style={{marginBottom:20,background:T.surface,border:"1.5px solid "+T.cyan+"35",borderRadius:14,overflow:"hidden",boxShadow:"0 0 24px "+T.cyan+"08"}}>
+    <div style={{marginBottom:20,background:T.surface,border:"1.5px solid "+(T.cyan)+"35",borderRadius:14,overflow:"hidden",boxShadow:"0 0 24px "+(T.cyan)+"08"}}>
       {/* Header */}
       <div
         onClick={()=>setAiOpen(o=>!o)}
-        style={{display:"flex",alignItems:"center",gap:10,padding:"12px 18px",cursor:"pointer",borderBottom: aiOpen ? "1px solid "+T.border : "none"}}
+        style={{display:"flex",alignItems:"center",gap:10,padding:"12px 18px",cursor:"pointer",borderBottom: aiOpen ? "1px solid "+(T.border) : "none"}}
       >
-        <div style={{width:28,height:28,borderRadius:8,background:"linear-gradient(135deg,"+T.cyan+","+T.violet+")",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0}}>🤖</div>
+        <div style={{width:28,height:28,borderRadius:8,background:"linear-gradient(135deg,"+(T.cyan)+","+(T.violet)+")",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0}}>🤖</div>
         <div style={{flex:1}}>
           <div style={{fontSize:12,fontWeight:700,color:T.cyan,fontFamily:T.display,lineHeight:1}}>AI FP&A Assistant</div>
           <div style={{fontSize:9,color:T.textDim,fontFamily:T.mono,marginTop:2,letterSpacing:1}}>CFO SIMULATION ADVISOR</div>
         </div>
-        {!canUseAI && <span style={{fontSize:9,color:T.amber,background:T.amberDim,border:"1px solid "+T.amber+"30",borderRadius:99,padding:"2px 8px",fontFamily:T.mono,fontWeight:700}}>PROFESSIONAL</span>}
+        {!canUseAI && <span style={{fontSize:9,color:T.amber,background:T.amberDim,border:"1px solid "+(T.amber)+"30",borderRadius:99,padding:"2px 8px",fontFamily:T.mono,fontWeight:700}}>PROFESSIONAL</span>}
         <span style={{fontSize:11,color:T.textDim,transform:aiOpen?"rotate(180deg)":"none",transition:"transform 0.2s",display:"inline-block"}}>▾</span>
       </div>
 
@@ -3054,12 +3054,12 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
             {aiMsgs.map((m,i) => (
               <div key={i} style={{display:"flex",gap:8,justifyContent:m.role==="user"?"flex-end":"flex-start"}}>
                 {m.role==="assistant" && (
-                  <div style={{width:22,height:22,borderRadius:6,background:T.cyan+"20",border:"1px solid "+T.cyan+"30",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,flexShrink:0,marginTop:1}}>🤖</div>
+                  <div style={{width:22,height:22,borderRadius:6,background:(T.cyan)+"20",border:"1px solid "+(T.cyan)+"30",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,flexShrink:0,marginTop:1}}>🤖</div>
                 )}
                 <div style={{
                   maxWidth:"82%",fontSize:12,lineHeight:1.6,fontFamily:T.sans,
-                  background: m.role==="user" ? T.cyan+"18" : T.card,
-                  border: "1px solid "+m.role==="user" ? T.cyan+"35" : T.border,
+                  background: m.role==="user" ? (T.cyan)+"18" : T.card,
+                  border: "1px solid "+(m.role==="user" ? T.cyan+"35" : T.border),
                   borderRadius: m.role==="user" ? "12px 12px 4px 12px" : "12px 12px 12px 4px",
                   padding:"8px 12px",
                   color: m.role==="user" ? T.cyan : T.textMid,
@@ -3070,9 +3070,9 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
             ))}
             {aiLoading && (
               <div style={{display:"flex",gap:8}}>
-                <div style={{width:22,height:22,borderRadius:6,background:T.cyan+"20",border:"1px solid "+T.cyan+"30",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,flexShrink:0}}>🤖</div>
-                <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:"12px 12px 12px 4px",padding:"8px 12px",display:"flex",gap:4,alignItems:"center"}}>
-                  {[0,1,2].map(i=><div key={i} style={{width:5,height:5,borderRadius:"50%",background:T.cyan,animation:"bounce 1s ease-in-out "+i*0.15+"s infinite"}}/>)}
+                <div style={{width:22,height:22,borderRadius:6,background:(T.cyan)+"20",border:"1px solid "+(T.cyan)+"30",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,flexShrink:0}}>🤖</div>
+                <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:"12px 12px 12px 4px",padding:"8px 12px",display:"flex",gap:4,alignItems:"center"}}>
+                  {[0,1,2].map(i=><div key={i} style={{width:5,height:5,borderRadius:"50%",background:T.cyan,animation:"bounce 1s ease-in-out "+(i*0.15)+"s infinite"}}/>)}
                 </div>
               </div>
             )}
@@ -3083,7 +3083,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
           <div style={{padding:"0 18px 10px",display:"flex",gap:6,flexWrap:"wrap"}}>
             {AI_PILLS.map(p=>(
               <button key={p} onClick={()=>canUseAI&&sendAI(p)} style={{
-                background:T.cyanDim,border:"1px solid "+T.cyanMid,borderRadius:99,
+                background:T.cyanDim,border:"1px solid "+(T.cyanMid),borderRadius:99,
                 padding:"4px 11px",fontSize:10,fontFamily:T.sans,color:T.cyan,
                 cursor:canUseAI?"pointer":"not-allowed",opacity:canUseAI?1:0.45,
                 whiteSpace:"nowrap",
@@ -3098,12 +3098,12 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
               onChange={e=>canUseAI&&setAiInput(e.target.value)}
               onKeyDown={e=>e.key==="Enter"&&canUseAI&&sendAI()}
               placeholder={canUseAI ? "Ask about the simulation results…" : "Upgrade to Professional to use AI assistant"}
-              style={{flex:1,background:T.card,border:"1px solid "+T.border,borderRadius:9,padding:"9px 13px",color:T.text,fontSize:12,fontFamily:T.sans,outline:"none"}}
+              style={{flex:1,background:T.card,border:"1px solid "+(T.border),borderRadius:9,padding:"9px 13px",color:T.text,fontSize:12,fontFamily:T.sans,outline:"none"}}
             />
             <button
               onClick={()=>canUseAI&&sendAI()}
               disabled={!canUseAI||!aiInput.trim()||aiLoading}
-              style={{background:canUseAI&&aiInput.trim()?"linear-gradient(135deg,"+T.cyan+","+T.violet+")":T.border,border:"none",borderRadius:9,padding:"9px 16px",color:T.bg,fontSize:12,fontFamily:T.sans,fontWeight:700,cursor:canUseAI&&aiInput.trim()?"pointer":"not-allowed"}}
+              style={{background:canUseAI&&aiInput.trim()?"linear-gradient(135deg,"+(T.cyan)+","+(T.violet)+")":T.border,border:"none",borderRadius:9,padding:"9px 16px",color:T.bg,fontSize:12,fontFamily:T.sans,fontWeight:700,cursor:canUseAI&&aiInput.trim()?"pointer":"not-allowed"}}
             >
               {aiLoading?"…":"Send"}
             </button>
@@ -3119,10 +3119,10 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
       {inlineAIPanel}
     <div style={{maxWidth:840,margin:"0 auto"}}>
       {/* Header card */}
-      <div style={{background:"linear-gradient(135deg,"+T.cyan+"10,"+T.violet+"08)",border:"1.5px solid "+T.cyan+"30",borderRadius:18,padding:36,marginBottom:20,position:"relative",overflow:"hidden"}}>
-        <div style={{position:"absolute",top:-40,right:-40,width:220,height:220,borderRadius:"50%",background:T.cyan+"08",filter:"blur(50px)",pointerEvents:"none"}}/>
+      <div style={{background:"linear-gradient(135deg,"+(T.cyan)+"10,"+(T.violet)+"08)",border:"1.5px solid "+(T.cyan)+"30",borderRadius:18,padding:36,marginBottom:20,position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",top:-40,right:-40,width:220,height:220,borderRadius:"50%",background:(T.cyan)+"08",filter:"blur(50px)",pointerEvents:"none"}}/>
         <div style={{position:"relative"}}>
-          <div style={{display:"inline-flex",alignItems:"center",gap:7,background:T.cyan+"15",border:"1px solid "+T.cyan+"30",borderRadius:99,padding:"3px 12px",marginBottom:14}}>
+          <div style={{display:"inline-flex",alignItems:"center",gap:7,background:(T.cyan)+"15",border:"1px solid "+(T.cyan)+"30",borderRadius:99,padding:"3px 12px",marginBottom:14}}>
             <span style={{fontSize:9,color:T.cyan,fontFamily:T.mono,fontWeight:700,letterSpacing:2}}>AI-POWERED PRODUCT EVALUATION</span>
           </div>
           <div style={{color:T.text,fontFamily:T.display,fontWeight:800,fontSize:26,lineHeight:1.2,marginBottom:10}}>
@@ -3138,7 +3138,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
               {icon:"🎯",label:"10 top fixes",sub:"Prioritised by impact"},
               {icon:"📋",label:"7-category scorecard",sub:"Honest ratings"},
             ].map(({icon,label,sub})=>(
-              <div key={label} style={{background:T.surface,border:"1px solid "+T.border,borderRadius:10,padding:"10px 14px",display:"flex",alignItems:"center",gap:10}}>
+              <div key={label} style={{background:T.surface,border:"1px solid "+(T.border),borderRadius:10,padding:"10px 14px",display:"flex",alignItems:"center",gap:10}}>
                 <span style={{fontSize:18}}>{icon}</span>
                 <div>
                   <div style={{fontSize:12,fontWeight:700,color:T.text,fontFamily:T.display}}>{label}</div>
@@ -3147,7 +3147,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
               </div>
             ))}
           </div>
-          <button onClick={runSimulation} style={{background:"linear-gradient(135deg,"+T.cyan+","+T.violet+")",border:"none",borderRadius:11,padding:"13px 32px",color:T.bg,fontSize:14,fontFamily:T.display,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 24px "+T.cyan+"35",letterSpacing:0.2}}>
+          <button onClick={runSimulation} style={{background:"linear-gradient(135deg,"+(T.cyan)+","+(T.violet)+")",border:"none",borderRadius:11,padding:"13px 32px",color:T.bg,fontSize:14,fontFamily:T.display,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 24px "+(T.cyan)+"35",letterSpacing:0.2}}>
             Run 30-Day CFO Simulation →
           </button>
           <span style={{marginLeft:16,fontSize:10,color:T.textDim,fontFamily:T.mono}}>~30 seconds · Powered by Claude Sonnet</span>
@@ -3176,14 +3176,14 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
     <div>
       {inlineAIPanel}
       <div style={{maxWidth:520,margin:"60px auto 0",textAlign:"center",padding:"0 20px"}}>
-      <div style={{width:52,height:52,borderRadius:"50%",border:"2px solid "+T.border,borderTop:"2px solid "+T.cyan,margin:"0 auto 24px",animation:"spin 1s linear infinite"}}/>
+      <div style={{width:52,height:52,borderRadius:"50%",border:"2px solid "+(T.border),borderTop:"2px solid "+(T.cyan),margin:"0 auto 24px",animation:"spin 1s linear infinite"}}/>
       <div style={{fontSize:16,fontWeight:700,color:T.text,fontFamily:T.display,marginBottom:8}}>Simulation running…</div>
       <div style={{fontSize:11,color:T.cyan,fontFamily:T.mono,minHeight:18,animation:"pulse 2s ease-in-out infinite"}}>
         {LOADING_STEPS[loadingStep]}
       </div>
       <div style={{marginTop:28,display:"flex",flexDirection:"column",gap:8}}>
         {["Day 1–10: First impressions + financial monitoring","Day 11–20: Forecasting + board meeting prep","Day 21–30: Ops planning + strategic review + verdict"].map((s,i)=>(
-          <div key={i} style={{fontSize:10,color:T.textDim,fontFamily:T.sans,background:T.surface,borderRadius:8,padding:"8px 14px",border:"1px solid "+T.border,textAlign:"left"}}>{s}</div>
+          <div key={i} style={{fontSize:10,color:T.textDim,fontFamily:T.sans,background:T.surface,borderRadius:8,padding:"8px 14px",border:"1px solid "+(T.border),textAlign:"left"}}>{s}</div>
         ))}
       </div>
     </div>
@@ -3196,17 +3196,17 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
       {inlineAIPanel}
       {/* Fallback/demo notice */}
       {simError && (
-        <div style={{background:T.amberDim,border:"1px solid "+T.amber+"30",borderRadius:10,padding:"10px 16px",marginBottom:16,display:"flex",alignItems:"center",gap:10}}>
+        <div style={{background:T.amberDim,border:"1px solid "+(T.amber)+"30",borderRadius:10,padding:"10px 16px",marginBottom:16,display:"flex",alignItems:"center",gap:10}}>
           <span style={{fontSize:14}}>⚠️</span>
           <span style={{fontSize:11,color:T.amber,fontFamily:T.sans}}>{simError}</span>
-          <button onClick={runSimulation} style={{marginLeft:"auto",background:"transparent",border:"1px solid "+T.amber+"40",borderRadius:7,padding:"5px 12px",color:T.amber,fontSize:10,fontFamily:T.sans,cursor:"pointer",flexShrink:0}}>Retry</button>
+          <button onClick={runSimulation} style={{marginLeft:"auto",background:"transparent",border:"1px solid "+(T.amber)+"40",borderRadius:7,padding:"5px 12px",color:T.amber,fontSize:10,fontFamily:T.sans,cursor:"pointer",flexShrink:0}}>Retry</button>
         </div>
       )}
 
       {/* Persona + summary bar */}
-      <div style={{background:T.surface,border:"1px solid "+T.border,borderRadius:12,padding:"14px 20px",marginBottom:16,display:"flex",alignItems:"center",gap:24,flexWrap:"wrap"}}>
+      <div style={{background:T.surface,border:"1px solid "+(T.border),borderRadius:12,padding:"14px 20px",marginBottom:16,display:"flex",alignItems:"center",gap:24,flexWrap:"wrap"}}>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <div style={{width:34,height:34,borderRadius:"50%",background:"linear-gradient(135deg,"+T.violet+","+T.cyan+")",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,fontWeight:800,color:T.bg,flexShrink:0}}>
+          <div style={{width:34,height:34,borderRadius:"50%",background:"linear-gradient(135deg,"+(T.violet)+","+(T.cyan)+")",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,fontWeight:800,color:T.bg,flexShrink:0}}>
             {r?.persona?.name?.[0]||"C"}
           </div>
           <div>
@@ -3216,8 +3216,8 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
         </div>
         <div style={{display:"flex",gap:20,marginLeft:"auto",flexWrap:"wrap"}}>
           {[
-            {label:"Overall Score",  value:r?.scorecard?.overall+"/10", color: r?.scorecard?.overall>=7?T.emerald:r?.scorecard?.overall>=5?T.amber:T.rose},
-            {label:"Trust Score",    value:r?.productTrust?.trustScore+"/10", color:T.violet},
+            {label:"Overall Score",  value:(r?.scorecard?.overall)+"/10", color: r?.scorecard?.overall>=7?T.emerald:r?.scorecard?.overall>=5?T.amber:T.rose},
+            {label:"Trust Score",    value:(r?.productTrust?.trustScore)+"/10", color:T.violet},
             {label:"Decision",       value:r?.finalDecision?.choice, color:decMeta?.color},
           ].map(({label,value,color})=>(
             <div key={label}>
@@ -3226,15 +3226,15 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
             </div>
           ))}
         </div>
-        <button onClick={()=>{setSimStatus("idle");setResult(null);setSimError("");}} style={{background:"transparent",border:"1px solid "+T.border,borderRadius:8,padding:"6px 14px",color:T.textDim,fontSize:10,fontFamily:T.sans,cursor:"pointer",flexShrink:0}}>↺ Re-run</button>
+        <button onClick={()=>{setSimStatus("idle");setResult(null);setSimError("");}} style={{background:"transparent",border:"1px solid "+(T.border),borderRadius:8,padding:"6px 14px",color:T.textDim,fontSize:10,fontFamily:T.sans,cursor:"pointer",flexShrink:0}}>↺ Re-run</button>
       </div>
 
       {/* Internal section nav */}
-      <div style={{display:"flex",gap:2,marginBottom:20,background:T.surface,borderRadius:10,padding:4,border:"1px solid "+T.border,overflowX:"auto"}}>
+      <div style={{display:"flex",gap:2,marginBottom:20,background:T.surface,borderRadius:10,padding:4,border:"1px solid "+(T.border),overflowX:"auto"}}>
         {SIM_SECTION_TABS.map(({id,label})=>(
           <button key={id} onClick={()=>setSection(id)} style={{
             background:section===id?T.cyanDim:"transparent",
-            border:"1px solid "+section===id?T.cyan+"40":"transparent",
+            border:"1px solid "+(section===id?T.cyan+"40":"transparent"),
             borderRadius:7, padding:"6px 13px", cursor:"pointer", whiteSpace:"nowrap",
             color:section===id?T.cyan:T.textDim, fontSize:10, fontFamily:T.mono, fontWeight:700,
             transition:"all 0.15s",
@@ -3246,10 +3246,10 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
       {section==="overview" && (
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
-            <SimCard style={{background:"linear-gradient(135deg,"+decMeta?.color+"08,"+T.card+")",borderColor:decMeta?.color+"30"}}>
+            <SimCard style={{background:"linear-gradient(135deg,"+(decMeta?.color)+"08,"+(T.card)+")",borderColor:(decMeta?.color)+"30"}}>
               <SimSectionLabel text="Final Verdict" color={decMeta?.color}/>
               <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12}}>
-                <div style={{width:40,height:40,borderRadius:10,background:decMeta?.color+"20",border:"1px solid "+decMeta?.color+"40",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,color:decMeta?.color,fontWeight:800,fontFamily:T.mono,flexShrink:0}}>{decMeta?.icon}</div>
+                <div style={{width:40,height:40,borderRadius:10,background:(decMeta?.color)+"20",border:"1px solid "+(decMeta?.color)+"40",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,color:decMeta?.color,fontWeight:800,fontFamily:T.mono,flexShrink:0}}>{decMeta?.icon}</div>
                 <div style={{fontSize:16,fontWeight:800,color:decMeta?.color,fontFamily:T.display}}>{r?.finalDecision?.choice}</div>
               </div>
               <div style={{fontSize:12,color:T.textMid,fontFamily:T.sans,lineHeight:1.65,marginBottom:14}}>{r?.finalDecision?.reasoning}</div>
@@ -3275,7 +3275,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
                         <span style={{fontSize:10,color:c,fontFamily:T.mono,fontWeight:700}}>{ph.rating}/10</span>
                       </div>
                       <div style={{height:3,background:T.border,borderRadius:99,overflow:"hidden"}}>
-                        <div style={{height:"100%",width:ph.rating*10+"%",background:c,borderRadius:99}}/>
+                        <div style={{height:"100%",width:(ph.rating*10)+"%",background:c,borderRadius:99}}/>
                       </div>
                     </div>
                   </div>
@@ -3298,14 +3298,14 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
             const sc = ph.rating>=7?T.emerald:ph.rating>=5?T.amber:T.rose;
             const open = expandedPhase===i;
             return (
-              <SimCard key={i} style={{borderColor:open?color+"40":T.border,boxShadow:open?"0 0 20px "+color+"10":"none",transition:"all 0.2s"}}>
+              <SimCard key={i} style={{borderColor:open?(color)+"40":T.border,boxShadow:open?"0 0 20px "+(color)+"10":"none",transition:"all 0.2s"}}>
                 <div style={{cursor:"pointer"}} onClick={()=>setExpandedPhase(open?null:i)}>
                   <div style={{display:"flex",alignItems:"center",gap:12}}>
-                    <div style={{width:38,height:38,borderRadius:9,background:color+"15",border:"1px solid "+color+"30",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>{PHASE_ICONS[i]}</div>
+                    <div style={{width:38,height:38,borderRadius:9,background:(color)+"15",border:"1px solid "+(color)+"30",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>{PHASE_ICONS[i]}</div>
                     <div style={{flex:1}}>
                       <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:3}}>
                         <span style={{fontSize:9,color:T.textDim,fontFamily:T.mono}}>DAYS {ph.days}</span>
-                        <span style={{fontSize:9,color:sc,background:sc+"15",border:"1px solid "+sc+"30",borderRadius:99,padding:"1px 7px",fontFamily:T.mono,fontWeight:700}}>{ph.rating}/10</span>
+                        <span style={{fontSize:9,color:sc,background:(sc)+"15",border:"1px solid "+(sc)+"30",borderRadius:99,padding:"1px 7px",fontFamily:T.mono,fontWeight:700}}>{ph.rating}/10</span>
                       </div>
                       <div style={{fontSize:14,fontWeight:700,color:T.text,fontFamily:T.display}}>{ph.title}</div>
                     </div>
@@ -3314,7 +3314,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
                   <div style={{fontSize:12,color:T.textMid,fontFamily:T.sans,lineHeight:1.65,marginTop:10,paddingLeft:50}}>{ph.summary}</div>
                 </div>
                 {open && (
-                  <div style={{marginTop:16,paddingTop:16,borderTop:"1px solid "+T.border,paddingLeft:50,display:"grid",gridTemplateColumns:"1fr 1fr",gap:20}}>
+                  <div style={{marginTop:16,paddingTop:16,borderTop:"1px solid "+(T.border),paddingLeft:50,display:"grid",gridTemplateColumns:"1fr 1fr",gap:20}}>
                     <div>
                       <div style={{fontSize:9,color:T.emerald,fontFamily:T.mono,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",marginBottom:10}}>What Works</div>
                       <SimBullet items={ph.findings} icon="✓" color={T.emerald}/>
@@ -3338,12 +3338,12 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
             <SimSectionLabel text="AI Capability Review" color={T.violet}/>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
               {r?.aiCapability?.isCosmetic
-                ? <span style={{fontSize:10,color:T.amber,background:T.amberDim,border:"1px solid "+T.amber+"30",borderRadius:99,padding:"2px 9px",fontFamily:T.mono,fontWeight:700}}>⚠️ Largely Cosmetic</span>
-                : <span style={{fontSize:10,color:T.emerald,background:T.emeraldDim,border:"1px solid "+T.emerald+"30",borderRadius:99,padding:"2px 9px",fontFamily:T.mono,fontWeight:700}}>✓ Adds Genuine Value</span>
+                ? <span style={{fontSize:10,color:T.amber,background:T.amberDim,border:"1px solid "+(T.amber)+"30",borderRadius:99,padding:"2px 9px",fontFamily:T.mono,fontWeight:700}}>⚠️ Largely Cosmetic</span>
+                : <span style={{fontSize:10,color:T.emerald,background:T.emeraldDim,border:"1px solid "+(T.emerald)+"30",borderRadius:99,padding:"2px 9px",fontFamily:T.mono,fontWeight:700}}>✓ Adds Genuine Value</span>
               }
             </div>
             <div style={{fontSize:12,color:T.textMid,fontFamily:T.sans,lineHeight:1.65,marginBottom:16}}>{r?.aiCapability?.summary}</div>
-            <div style={{background:T.violet+"10",border:"1px solid "+T.violet+"20",borderRadius:10,padding:"12px 14px"}}>
+            <div style={{background:(T.violet)+"10",border:"1px solid "+(T.violet)+"20",borderRadius:10,padding:"12px 14px"}}>
               <div style={{fontSize:9,color:T.violet,fontFamily:T.mono,fontWeight:700,letterSpacing:1.5,marginBottom:8}}>CFO VERDICT</div>
               <div style={{fontSize:12,color:T.textMid,fontFamily:T.sans,lineHeight:1.6,fontStyle:"italic"}}>"{r?.aiCapability?.verdict}"</div>
             </div>
@@ -3372,16 +3372,16 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
             {r?.competitorComparison?.competitors?.map(comp=>{
               const color = COMP_COLORS[comp.name] || T.cyan;
               return (
-                <SimCard key={comp.name} style={{borderColor:color+"25"}}>
+                <SimCard key={comp.name} style={{borderColor:(color)+"25"}}>
                   <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14}}>
-                    <div style={{width:30,height:30,borderRadius:8,background:color+"20",border:"1px solid "+color+"40",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:800,color,fontFamily:T.mono,flexShrink:0}}>{comp.name[0]}</div>
+                    <div style={{width:30,height:30,borderRadius:8,background:(color)+"20",border:"1px solid "+(color)+"40",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:800,color,fontFamily:T.mono,flexShrink:0}}>{comp.name[0]}</div>
                     <span style={{fontSize:14,fontWeight:700,color:T.text,fontFamily:T.display}}>{comp.name}</span>
                   </div>
                   <div style={{marginBottom:12}}>
                     <div style={{fontSize:9,color:T.emerald,fontFamily:T.mono,fontWeight:700,letterSpacing:1.5,marginBottom:8}}>FINANCEIOS STRONGER AT</div>
                     <SimBullet items={comp.stronger||[]} icon="▲" color={T.emerald}/>
                   </div>
-                  <div style={{borderTop:"1px solid "+T.border,paddingTop:12}}>
+                  <div style={{borderTop:"1px solid "+(T.border),paddingTop:12}}>
                     <div style={{fontSize:9,color:T.rose,fontFamily:T.mono,fontWeight:700,letterSpacing:1.5,marginBottom:8}}>{comp.name.toUpperCase()} STRONGER AT</div>
                     <SimBullet items={comp.weaker||[]} icon="▼" color={T.rose}/>
                   </div>
@@ -3402,9 +3402,9 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
             ))}
           </SimCard>
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
-            <SimCard style={{background:"linear-gradient(135deg,"+T.cyanDim+","+T.violetDim+")",border:"1px solid "+T.cyan+"30",textAlign:"center",padding:"32px 20px"}}>
+            <SimCard style={{background:"linear-gradient(135deg,"+(T.cyanDim)+","+(T.violetDim)+")",border:"1px solid "+(T.cyan)+"30",textAlign:"center",padding:"32px 20px"}}>
               <div style={{fontSize:9,color:T.textDim,fontFamily:T.mono,textTransform:"uppercase",letterSpacing:2,marginBottom:10}}>Overall Score</div>
-              <div style={{fontSize:62,fontWeight:800,fontFamily:T.mono,background:"linear-gradient(135deg,"+T.cyan+","+T.violet+")",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",lineHeight:1}}>{r?.scorecard?.overall}</div>
+              <div style={{fontSize:62,fontWeight:800,fontFamily:T.mono,background:"linear-gradient(135deg,"+(T.cyan)+","+(T.violet)+")",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",lineHeight:1}}>{r?.scorecard?.overall}</div>
               <div style={{fontSize:11,color:T.textDim,fontFamily:T.mono,marginTop:4}}>/ 10</div>
             </SimCard>
             <SimCard>
@@ -3425,10 +3425,10 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
       {/* ── Verdict ──────────────────────────────────────── */}
       {section==="verdict" && (
         <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:16}}>
-          <SimCard style={{background:"linear-gradient(135deg,"+decMeta?.color+"08,"+T.card+")",borderColor:decMeta?.color+"35"}}>
+          <SimCard style={{background:"linear-gradient(135deg,"+(decMeta?.color)+"08,"+(T.card)+")",borderColor:(decMeta?.color)+"35"}}>
             <SimSectionLabel text="Final CFO Decision" color={decMeta?.color}/>
             <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:18}}>
-              <div style={{width:50,height:50,borderRadius:13,background:decMeta?.color+"20",border:"1.5px solid "+decMeta?.color+"40",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,color:decMeta?.color,fontWeight:800,fontFamily:T.mono,flexShrink:0}}>{decMeta?.icon}</div>
+              <div style={{width:50,height:50,borderRadius:13,background:(decMeta?.color)+"20",border:"1.5px solid "+(decMeta?.color)+"40",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,color:decMeta?.color,fontWeight:800,fontFamily:T.mono,flexShrink:0}}>{decMeta?.icon}</div>
               <div style={{fontSize:20,fontWeight:800,color:decMeta?.color,fontFamily:T.display,lineHeight:1.2}}>{r?.finalDecision?.choice}</div>
             </div>
             <div style={{fontSize:13,color:T.textMid,fontFamily:T.sans,lineHeight:1.7,marginBottom:18}}>{r?.finalDecision?.reasoning}</div>
@@ -3460,11 +3460,11 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
             const rankC   = item.rank<=3?T.cyan:item.rank<=6?T.violet:T.textMid;
             return (
               <SimCard key={item.rank} style={{display:"flex",alignItems:"flex-start",gap:14,padding:"16px 20px"}}>
-                <div style={{width:32,height:32,borderRadius:8,background:rankC+"15",border:"1px solid "+rankC+"30",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:800,color:rankC,fontFamily:T.mono,flexShrink:0}}>#{item.rank}</div>
+                <div style={{width:32,height:32,borderRadius:8,background:(rankC)+"15",border:"1px solid "+(rankC)+"30",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:800,color:rankC,fontFamily:T.mono,flexShrink:0}}>#{item.rank}</div>
                 <div style={{flex:1}}>
                   <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
                     <span style={{fontSize:13,fontWeight:700,color:T.text,fontFamily:T.display}}>{item.title}</span>
-                    <span style={{fontSize:9,color:effortC,background:effortC+"15",border:"1px solid "+effortC+"30",borderRadius:99,padding:"1px 7px",fontFamily:T.mono,fontWeight:700,textTransform:"uppercase",letterSpacing:0.8}}>{item.effort} effort</span>
+                    <span style={{fontSize:9,color:effortC,background:(effortC)+"15",border:"1px solid "+(effortC)+"30",borderRadius:99,padding:"1px 7px",fontFamily:T.mono,fontWeight:700,textTransform:"uppercase",letterSpacing:0.8}}>{item.effort} effort</span>
                   </div>
                   <div style={{fontSize:12,color:T.textMid,fontFamily:T.sans,lineHeight:1.6}}>{item.impact}</div>
                 </div>
@@ -3517,7 +3517,7 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
         setQbStep("connected"); setQb(q=>({...q,connected:true,lastSync:"Just now"}));
         window.history.replaceState({},"",[window.location.pathname,window.location.hash].join(""));
       } else if(qboParam === "error") {
-        setQbError("QuickBooks auth error: "+params.get("reason")||"unknown");
+        setQbError("QuickBooks auth error: "+(params.get("reason")||"unknown"));
         setQbStep("idle");
         window.history.replaceState({},"",[window.location.pathname,window.location.hash].join(""));
       }
@@ -3534,10 +3534,10 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
     addLog("Syncing QuickBooks data…","info");
     try {
       const r = await api.qbo.sync(new Date().getFullYear());
-      addLog("Sync complete — "+r.recordsSynced||0+" records updated.","success");
+      addLog("Sync complete — "+(r.recordsSynced||0)+" records updated.","success");
       setQb(q=>({...q,syncing:false,lastSync:new Date().toLocaleTimeString()}));
     } catch(err) {
-      addLog("Sync failed: "+err.message,"error");
+      addLog("Sync failed: "+(err.message),"error");
       setQb(q=>({...q,syncing:false}));
     }
   };
@@ -3571,7 +3571,7 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
             const status = await api.plaid.status();
             setPlaidStep("connected");
             setPlaid(p=>({...p,connected:true,lastSync:"Just now",accounts:[]}));
-            addLog(meta.institution?.name||"Bank"+" connected successfully.","success");
+            addLog((meta.institution?.name||"Bank")+" connected successfully.","success");
           } catch(err) { setPlaidError(err.message); setPlaidStep("idle"); }
         },
         onExit: (err)=>{ if(err) setPlaidError(err.error_message||"Connection cancelled."); setPlaidStep("idle"); },
@@ -3590,7 +3590,7 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
       addLog("Plaid sync complete.","success");
       setPlaid(p=>({...p,syncing:false,lastSync:new Date().toLocaleTimeString()}));
     } catch(err) {
-      addLog("Sync failed: "+err.message,"error");
+      addLog("Sync failed: "+(err.message),"error");
       setPlaid(p=>({...p,syncing:false}));
     }
   };
@@ -3608,7 +3608,7 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
         <div style={{color:T.textDim,fontFamily:T.sans,fontSize:13,marginTop:4}}>Connect your accounting software and bank accounts to automatically sync financial data into your dashboard.</div>
         {/* Starter read-only banner */}
         {!hasFeature(plan,FEATURES.INTEGRATIONS_SYNC)&&(
-          <div style={{marginTop:14,background:T.amberDim,border:"1px solid "+T.amber+"30",borderRadius:10,padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
+          <div style={{marginTop:14,background:T.amberDim,border:"1px solid "+(T.amber)+"30",borderRadius:10,padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
             <div style={{display:"flex",alignItems:"center",gap:8}}>
               <span style={{fontSize:14}}>👁</span>
               <div>
@@ -3616,14 +3616,14 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
                 <div style={{color:T.textDim,fontFamily:T.sans,fontSize:11,marginTop:1}}>You can view integration settings but connecting and syncing requires a Professional plan.</div>
               </div>
             </div>
-            <button onClick={onUpgrade} style={{background:"linear-gradient(135deg,"+T.cyan+","+T.violet+")",border:"none",borderRadius:8,padding:"8px 18px",color:T.bg,fontSize:11,fontFamily:T.sans,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>🚀 Upgrade to Pro</button>
+            <button onClick={onUpgrade} style={{background:"linear-gradient(135deg,"+(T.cyan)+","+(T.violet)+")",border:"none",borderRadius:8,padding:"8px 18px",color:T.bg,fontSize:11,fontFamily:T.sans,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>🚀 Upgrade to Pro</button>
           </div>
         )}
       </div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20,marginBottom:24}}>
         {/* QuickBooks */}
-        <div style={{background:T.card,border:"1px solid "+qb.connected?T.emerald+"50":T.border,borderRadius:16,overflow:"hidden",boxShadow:qb.connected?"0 0 24px "+T.emerald+"10":"none"}}>
-          <div style={{padding:"20px 24px",borderBottom:"1px solid "+T.border,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div style={{background:T.card,border:"1px solid "+(qb.connected?T.emerald+"50":T.border),borderRadius:16,overflow:"hidden",boxShadow:qb.connected?"0 0 24px "+(T.emerald)+"10":"none"}}>
+          <div style={{padding:"20px 24px",borderBottom:"1px solid "+(T.border),display:"flex",justifyContent:"space-between",alignItems:"center"}}>
             <div style={{display:"flex",alignItems:"center",gap:12}}>
               <div style={{width:44,height:44,borderRadius:12,background:"linear-gradient(135deg,#2CA01C,#1A6B10)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,boxShadow:"0 4px 12px #2CA01C40"}}>📒</div>
               <div>
@@ -3635,17 +3635,17 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
           </div>
           <div style={{padding:"20px 24px"}}>
             {!qb.connected&&<>
-              <div style={{background:T.surface,borderRadius:10,padding:"12px 14px",marginBottom:16,border:"1px solid "+T.border}}>
+              <div style={{background:T.surface,borderRadius:10,padding:"12px 14px",marginBottom:16,border:"1px solid "+(T.border)}}>
                 <div style={{fontSize:10,color:T.amber,fontFamily:T.sans,fontWeight:600,marginBottom:4}}>⚙️ OAuth Setup</div>
                 <div style={{fontSize:11,color:T.textMid,fontFamily:T.sans,lineHeight:1.6}}>Clicking Connect will open Intuit's authorization page. Approve access, then you'll be redirected back here. Your <span style={{color:T.cyan,fontFamily:T.mono}}>QB_CLIENT_ID</span> and <span style={{color:T.cyan,fontFamily:T.mono}}>QB_CLIENT_SECRET</span> are set in your server <span style={{color:T.cyan,fontFamily:T.mono}}>.env</span> file.</div>
               </div>
-              {qbError&&<div style={{background:T.roseDim,border:"1px solid "+T.rose+"40",borderRadius:8,padding:"8px 12px",marginBottom:12,fontSize:11,color:T.rose,fontFamily:T.sans}}>⚠️ {qbError}</div>}
+              {qbError&&<div style={{background:T.roseDim,border:"1px solid "+(T.rose)+"40",borderRadius:8,padding:"8px 12px",marginBottom:12,fontSize:11,color:T.rose,fontFamily:T.sans}}>⚠️ {qbError}</div>}
               {hasFeature(plan,FEATURES.INTEGRATIONS_SYNC)?(
                 <button onClick={connectQB} disabled={qbStep==="auth"} style={{width:"100%",background:"linear-gradient(135deg,#2CA01C,#1A6B10)",border:"none",borderRadius:10,padding:"12px",color:"#fff",fontSize:13,fontFamily:T.sans,fontWeight:700,cursor:qbStep==="auth"?"not-allowed":"pointer",opacity:qbStep==="auth"?0.6:1}}>
                   {qbStep==="auth"?"⏳ Redirecting to Intuit...":"🔐 Connect with QuickBooks"}
                 </button>
               ):(
-                <button onClick={onUpgrade} style={{width:"100%",background:T.amberDim,border:"1px solid "+T.amber+"40",borderRadius:10,padding:"12px",color:T.amber,fontSize:13,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>
+                <button onClick={onUpgrade} style={{width:"100%",background:T.amberDim,border:"1px solid "+(T.amber)+"40",borderRadius:10,padding:"12px",color:T.amber,fontSize:13,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>
                   🔒 Upgrade to Professional to Connect
                 </button>
               )}
@@ -3664,7 +3664,7 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
                   {k:"ar",l:"Accounts Receivable",d:"Customer invoices & aging"},
                   {k:"payroll",l:"Payroll Data",d:"Employee costs & benefits"}].map(it=>(
                   <div key={it.k} onClick={()=>setQb(q=>({...q,syncItems:{...q.syncItems,[it.k]:!q.syncItems[it.k]}}))}
-                    style={{display:"flex",alignItems:"center",gap:12,padding:"8px 10px",borderRadius:8,cursor:"pointer",marginBottom:4,background:qb.syncItems[it.k]?T.emeraldDim:"transparent",border:"1px solid "+qb.syncItems[it.k]?T.emerald+"30":T.border}}>
+                    style={{display:"flex",alignItems:"center",gap:12,padding:"8px 10px",borderRadius:8,cursor:"pointer",marginBottom:4,background:qb.syncItems[it.k]?T.emeraldDim:"transparent",border:"1px solid "+(qb.syncItems[it.k]?T.emerald+"30":T.border)}}>
                     <div style={{width:18,height:18,borderRadius:5,background:qb.syncItems[it.k]?"#2CA01C":T.border,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,flexShrink:0,color:"#fff"}}>{qb.syncItems[it.k]?"✓":""}</div>
                     <div style={{flex:1}}><div style={{fontSize:11,color:T.text,fontFamily:T.sans,fontWeight:600}}>{it.l}</div><div style={{fontSize:9,color:T.textDim,fontFamily:T.sans}}>{it.d}</div></div>
                   </div>
@@ -3674,17 +3674,17 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
                 {hasFeature(plan,FEATURES.INTEGRATIONS_SYNC)?(
                   <button onClick={syncQB} disabled={qb.syncing} style={{flex:2,background:"linear-gradient(135deg,#2CA01C,#1A6B10)",border:"none",borderRadius:10,padding:"11px",color:"#fff",fontSize:12,fontFamily:T.sans,fontWeight:700,cursor:qb.syncing?"not-allowed":"pointer",opacity:qb.syncing?0.6:1}}>{qb.syncing?"⏳ Syncing...":"🔄 Sync Now"}</button>
                 ):(
-                  <button onClick={onUpgrade} style={{flex:2,background:T.amberDim,border:"1px solid "+T.amber+"40",borderRadius:10,padding:"11px",color:T.amber,fontSize:12,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>🔒 Upgrade to Sync</button>
+                  <button onClick={onUpgrade} style={{flex:2,background:T.amberDim,border:"1px solid "+(T.amber)+"40",borderRadius:10,padding:"11px",color:T.amber,fontSize:12,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>🔒 Upgrade to Sync</button>
                 )}
-                <button onClick={disconnectQB} style={{flex:1,background:"transparent",border:"1px solid "+T.rose+"40",borderRadius:10,padding:"11px",color:T.rose,fontSize:12,fontFamily:T.sans,cursor:"pointer"}}>Disconnect</button>
+                <button onClick={disconnectQB} style={{flex:1,background:"transparent",border:"1px solid "+(T.rose)+"40",borderRadius:10,padding:"11px",color:T.rose,fontSize:12,fontFamily:T.sans,cursor:"pointer"}}>Disconnect</button>
               </div>
             </>}
           </div>
         </div>
 
         {/* Plaid */}
-        <div style={{background:T.card,border:"1px solid "+plaid.connected?T.cyan+"50":T.border,borderRadius:16,overflow:"hidden",boxShadow:plaid.connected?"0 0 24px "+T.cyan+"10":"none"}}>
-          <div style={{padding:"20px 24px",borderBottom:"1px solid "+T.border,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div style={{background:T.card,border:"1px solid "+(plaid.connected?T.cyan+"50":T.border),borderRadius:16,overflow:"hidden",boxShadow:plaid.connected?"0 0 24px "+(T.cyan)+"10":"none"}}>
+          <div style={{padding:"20px 24px",borderBottom:"1px solid "+(T.border),display:"flex",justifyContent:"space-between",alignItems:"center"}}>
             <div style={{display:"flex",alignItems:"center",gap:12}}>
               <div style={{width:44,height:44,borderRadius:12,background:"linear-gradient(135deg,#00B2E3,#0074B7)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,boxShadow:"0 4px 12px #00B2E340"}}>🏦</div>
               <div>
@@ -3696,17 +3696,17 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
           </div>
           <div style={{padding:"20px 24px"}}>
             {!plaid.connected&&<>
-              <div style={{background:T.surface,borderRadius:10,padding:"12px 14px",marginBottom:16,border:"1px solid "+T.border}}>
+              <div style={{background:T.surface,borderRadius:10,padding:"12px 14px",marginBottom:16,border:"1px solid "+(T.border)}}>
                 <div style={{fontSize:10,color:T.amber,fontFamily:T.sans,fontWeight:600,marginBottom:4}}>⚙️ Plaid Link</div>
                 <div style={{fontSize:11,color:T.textMid,fontFamily:T.sans,lineHeight:1.6}}>Click below to open Plaid's secure bank connection flow. Your <span style={{color:T.cyan,fontFamily:T.mono}}>PLAID_CLIENT_ID</span> and <span style={{color:T.cyan,fontFamily:T.mono}}>PLAID_SECRET</span> are configured in your server <span style={{color:T.cyan,fontFamily:T.mono}}>.env</span> file.</div>
               </div>
-              {plaidError&&<div style={{background:T.roseDim,border:"1px solid "+T.rose+"40",borderRadius:8,padding:"8px 12px",marginBottom:12,fontSize:11,color:T.rose,fontFamily:T.sans}}>⚠️ {plaidError}</div>}
+              {plaidError&&<div style={{background:T.roseDim,border:"1px solid "+(T.rose)+"40",borderRadius:8,padding:"8px 12px",marginBottom:12,fontSize:11,color:T.rose,fontFamily:T.sans}}>⚠️ {plaidError}</div>}
               {hasFeature(plan,FEATURES.INTEGRATIONS_SYNC)?(
                 <button onClick={connectPlaid} disabled={plaidStep==="linking"} style={{width:"100%",background:"linear-gradient(135deg,#00B2E3,#0074B7)",border:"none",borderRadius:10,padding:"12px",color:"#fff",fontSize:13,fontFamily:T.sans,fontWeight:700,cursor:plaidStep==="linking"?"not-allowed":"pointer",opacity:plaidStep==="linking"?0.6:1}}>
                   {plaidStep==="linking"?"⏳ Opening Plaid Link...":"🔗 Launch Plaid Link"}
                 </button>
               ):(
-                <button onClick={onUpgrade} style={{width:"100%",background:T.amberDim,border:"1px solid "+T.amber+"40",borderRadius:10,padding:"12px",color:T.amber,fontSize:13,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>
+                <button onClick={onUpgrade} style={{width:"100%",background:T.amberDim,border:"1px solid "+(T.amber)+"40",borderRadius:10,padding:"12px",color:T.amber,fontSize:13,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>
                   🔒 Upgrade to Professional to Connect Bank
                 </button>
               )}
@@ -3719,7 +3719,7 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
               </div>
               <div style={{marginBottom:16,display:"flex",flexDirection:"column",gap:8}}>
                 {plaid.accounts.map(ac=>(
-                  <div key={ac.id} style={{display:"flex",alignItems:"center",gap:12,background:T.surface,borderRadius:10,padding:"10px 14px",border:"1px solid "+T.border}}>
+                  <div key={ac.id} style={{display:"flex",alignItems:"center",gap:12,background:T.surface,borderRadius:10,padding:"10px 14px",border:"1px solid "+(T.border)}}>
                     <div style={{width:32,height:32,borderRadius:8,background:ac.type==="credit"?T.roseDim:ac.type==="investment"?T.violetDim:T.cyanDim,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0}}>
                       {ac.type==="credit"?"💳":ac.type==="investment"?"📈":"🏦"}
                     </div>
@@ -3738,9 +3738,9 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
                 {hasFeature(plan,FEATURES.INTEGRATIONS_SYNC)?(
                   <button onClick={syncPlaid} disabled={plaid.syncing} style={{flex:2,background:"linear-gradient(135deg,#00B2E3,#0074B7)",border:"none",borderRadius:10,padding:"11px",color:"#fff",fontSize:12,fontFamily:T.sans,fontWeight:700,cursor:plaid.syncing?"not-allowed":"pointer",opacity:plaid.syncing?0.6:1}}>{plaid.syncing?"⏳ Refreshing...":"🔄 Refresh Accounts"}</button>
                 ):(
-                  <button onClick={onUpgrade} style={{flex:2,background:T.amberDim,border:"1px solid "+T.amber+"40",borderRadius:10,padding:"11px",color:T.amber,fontSize:12,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>🔒 Upgrade to Sync</button>
+                  <button onClick={onUpgrade} style={{flex:2,background:T.amberDim,border:"1px solid "+(T.amber)+"40",borderRadius:10,padding:"11px",color:T.amber,fontSize:12,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>🔒 Upgrade to Sync</button>
                 )}
-                <button onClick={disconnectPlaid} style={{flex:1,background:"transparent",border:"1px solid "+T.rose+"40",borderRadius:10,padding:"11px",color:T.rose,fontSize:12,fontFamily:T.sans,cursor:"pointer"}}>Disconnect</button>
+                <button onClick={disconnectPlaid} style={{flex:1,background:"transparent",border:"1px solid "+(T.rose)+"40",borderRadius:10,padding:"11px",color:T.rose,fontSize:12,fontFamily:T.sans,cursor:"pointer"}}>Disconnect</button>
               </div>
             </>}
           </div>
@@ -3748,15 +3748,15 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
       </div>
 
       {/* Activity Log */}
-      <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:16,padding:"20px 24px",marginBottom:20}}>
+      <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:16,padding:"20px 24px",marginBottom:20}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
           <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14}}>📡 Activity Log</div>
-          {log.length>0&&<button onClick={()=>setLog([])} style={{background:"transparent",border:"1px solid "+T.border,borderRadius:6,padding:"4px 10px",color:T.textDim,fontSize:10,fontFamily:T.sans,cursor:"pointer"}}>Clear</button>}
+          {log.length>0&&<button onClick={()=>setLog([])} style={{background:"transparent",border:"1px solid "+(T.border),borderRadius:6,padding:"4px 10px",color:T.textDim,fontSize:10,fontFamily:T.sans,cursor:"pointer"}}>Clear</button>}
         </div>
         {log.length===0?<div style={{textAlign:"center",padding:"28px",color:T.textDim,fontFamily:T.sans,fontSize:12}}>No activity yet. Connect an integration above to see sync events here.</div>:(
           <div style={{display:"flex",flexDirection:"column",gap:4,maxHeight:200,overflowY:"auto"}}>
             {log.map((e,i)=>(
-              <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"6px 10px",borderRadius:6,background:e.type==="success"?T.emeraldDim:e.type==="error"?T.roseDim:T.surface,border:"1px solid "+e.type==="success"?T.emerald+"20":e.type==="error"?T.rose+"20":T.border}}>
+              <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"6px 10px",borderRadius:6,background:e.type==="success"?T.emeraldDim:e.type==="error"?T.roseDim:T.surface,border:"1px solid "+(e.type==="success"?T.emerald+"20":e.type==="error"?T.rose+"20":T.border)}}>
                 <span style={{fontSize:10}}>{e.type==="success"?"✅":"ℹ️"}</span>
                 <span style={{flex:1,fontSize:11,color:T.textMid,fontFamily:T.sans}}>{e.msg}</span>
                 <span style={{fontSize:9,color:T.textDim,fontFamily:T.mono}}>{e.ts}</span>
@@ -3774,7 +3774,7 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
           {i:"📊",t:"Historical Import",d:"Pull up to 24 months of historical data on first connect"},
           {i:"🔔",t:"Anomaly Alerts",d:"Automatic alerts when transactions deviate from expected patterns"},
           {i:"🔄",t:"Two-Way Sync",d:"Changes in QuickBooks reflect in the dashboard within minutes"}].map(f=>(
-          <div key={f.t} style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,padding:"16px 18px"}}>
+          <div key={f.t} style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,padding:"16px 18px"}}>
             <div style={{fontSize:20,marginBottom:8}}>{f.i}</div>
             <div style={{color:T.text,fontFamily:T.sans,fontWeight:700,fontSize:12,marginBottom:4}}>{f.t}</div>
             <div style={{color:T.textDim,fontFamily:T.sans,fontSize:11,lineHeight:1.6}}>{f.d}</div>
@@ -3933,10 +3933,10 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
     return(
       <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"60vh",gap:20,textAlign:"center",animation:"fadeIn 0.4s ease"}}>
         <div style={{fontSize:64,lineHeight:1}}>🎉</div>
-        <div style={{background:"linear-gradient(135deg,"+T.cyan+","+T.violet+")",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",fontFamily:T.display,fontWeight:800,fontSize:28}}>You're all set!</div>
+        <div style={{background:"linear-gradient(135deg,"+(T.cyan)+","+(T.violet)+")",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",fontFamily:T.display,fontWeight:800,fontSize:28}}>You're all set!</div>
         <div style={{color:T.textMid,fontFamily:T.sans,fontSize:14,maxWidth:420,lineHeight:1.7}}>Your plan is now active. All features are immediately available across every tab of your dashboard.</div>
         <button onClick={()=>{setStep("plans");onPlanChange&&onPlanChange(currentPlan);}}
-          style={{background:"linear-gradient(135deg,"+T.cyan+","+T.violet+")",border:"none",borderRadius:12,padding:"14px 36px",color:T.bg,fontSize:14,fontFamily:T.sans,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 24px "+T.cyan+"35"}}>
+          style={{background:"linear-gradient(135deg,"+(T.cyan)+","+(T.violet)+")",border:"none",borderRadius:12,padding:"14px 36px",color:T.bg,fontSize:14,fontFamily:T.sans,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 24px "+(T.cyan)+"35"}}>
           Go to Dashboard →
         </button>
         <div style={{fontSize:11,color:T.textDim,fontFamily:T.sans}}>A receipt has been sent to your email by Stripe.</div>
@@ -3948,28 +3948,28 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
     <div style={{maxWidth:1100,margin:"0 auto"}}>
       <style>{"
         @keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
-        .pricing-pro-glow{box-shadow:0 0 0 1.5px "+T.cyan+", 0 0 60px "+T.cyan+"20, 0 20px 60px rgba(0,0,0,0.4);}
+        .pricing-pro-glow{box-shadow:0 0 0 1.5px "+(T.cyan)+", 0 0 60px "+(T.cyan)+"20, 0 20px 60px rgba(0,0,0,0.4);}
         .pricing-cta:hover{transform:translateY(-2px);}
         .pricing-cta{transition:transform 0.15s ease,box-shadow 0.15s ease;}
       "}</style>
 
       {/* Header */}
       <div style={{textAlign:"center",marginBottom:36}}>
-        <div style={{display:"inline-flex",alignItems:"center",gap:6,background:T.cyanDim,border:"1px solid "+T.cyan+"40",borderRadius:20,padding:"4px 14px",marginBottom:14}}>
+        <div style={{display:"inline-flex",alignItems:"center",gap:6,background:T.cyanDim,border:"1px solid "+(T.cyan)+"40",borderRadius:20,padding:"4px 14px",marginBottom:14}}>
           <span style={{fontSize:9,color:T.cyan,fontFamily:T.mono,fontWeight:800,textTransform:"uppercase",letterSpacing:1.5}}>💳 Simple Pricing</span>
         </div>
-        <div style={{background:"linear-gradient(135deg,"+T.text+","+T.textMid+")",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",fontFamily:T.display,fontWeight:800,fontSize:32,marginBottom:10,lineHeight:1.15}}>
+        <div style={{background:"linear-gradient(135deg,"+(T.text)+","+(T.textMid)+")",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",fontFamily:T.display,fontWeight:800,fontSize:32,marginBottom:10,lineHeight:1.15}}>
           Plans that grow with your business
         </div>
         <div style={{color:T.textDim,fontFamily:T.sans,fontSize:14,marginBottom:24,maxWidth:440,margin:"0 auto 24px"}}>
           Start free, no credit card needed. Upgrade when you're ready to plan, forecast, and grow with confidence.
         </div>
         {/* Billing toggle */}
-        <div style={{display:"inline-flex",alignItems:"center",gap:4,background:T.card,border:"1px solid "+T.border,borderRadius:50,padding:"5px 6px"}}>
+        <div style={{display:"inline-flex",alignItems:"center",gap:4,background:T.card,border:"1px solid "+(T.border),borderRadius:50,padding:"5px 6px"}}>
           <button onClick={()=>setBilling("monthly")} style={{borderRadius:40,padding:"8px 20px",border:"none",cursor:"pointer",background:billing==="monthly"?T.surface:"transparent",color:billing==="monthly"?T.text:T.textDim,fontFamily:T.sans,fontSize:12,fontWeight:600,transition:"all 0.2s",boxShadow:billing==="monthly"?"0 1px 4px rgba(0,0,0,0.3)":"none"}}>Monthly</button>
           <button onClick={()=>setBilling("annual")} style={{borderRadius:40,padding:"8px 18px",border:"none",cursor:"pointer",background:billing==="annual"?T.surface:"transparent",color:billing==="annual"?T.text:T.textDim,fontFamily:T.sans,fontSize:12,fontWeight:600,transition:"all 0.2s",display:"flex",alignItems:"center",gap:8,boxShadow:billing==="annual"?"0 1px 4px rgba(0,0,0,0.3)":"none"}}>
             Annual
-            <span style={{background:T.emeraldDim,border:"1px solid "+T.emerald+"50",borderRadius:20,padding:"2px 8px",fontSize:9,color:T.emerald,fontWeight:800,letterSpacing:0.5}}>SAVE 20%</span>
+            <span style={{background:T.emeraldDim,border:"1px solid "+(T.emerald)+"50",borderRadius:20,padding:"2px 8px",fontSize:9,color:T.emerald,fontWeight:800,letterSpacing:0.5}}>SAVE 20%</span>
           </button>
         </div>
       </div>
@@ -3983,15 +3983,15 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
           const isCenter=plan.popular;
           return(
             <div key={plan.id} className={isCenter?"pricing-pro-glow":""}
-              style={{background:isCenter?"linear-gradient(160deg,"+T.card+",#131820 60%,"+T.cyan+"08)":T.card, border:"1.5px solid "+isCenter?T.cyan:T.border,borderRadius:18,overflow:"hidden",position:"relative",transition:"all 0.2s",marginTop:isCenter?-8:0}}>
+              style={{background:isCenter?"linear-gradient(160deg,"+(T.card)+",#131820 60%,"+(T.cyan)+"08)":T.card, border:"1.5px solid "+(isCenter?T.cyan:T.border),borderRadius:18,overflow:"hidden",position:"relative",transition:"all 0.2s",marginTop:isCenter?-8:0}}>
               {/* Most popular badge */}
               {isCenter&&(
-                <div style={{background:"linear-gradient(90deg,"+T.cyan+","+T.violet+")",padding:"6px 0",textAlign:"center"}}>
+                <div style={{background:"linear-gradient(90deg,"+(T.cyan)+","+(T.violet)+")",padding:"6px 0",textAlign:"center"}}>
                   <span style={{color:T.bg,fontSize:10,fontFamily:T.mono,fontWeight:800,letterSpacing:1.5,textTransform:"uppercase"}}>⭐ Most Popular · Best for Small Business</span>
                 </div>
               )}
               {isCurrent&&(
-                <div style={{background:plan.color+"18",borderBottom:"1px solid "+plan.color+"30",padding:"5px 0",textAlign:"center"}}>
+                <div style={{background:(plan.color)+"18",borderBottom:"1px solid "+(plan.color)+"30",padding:"5px 0",textAlign:"center"}}>
                   <span style={{color:plan.color,fontSize:9,fontFamily:T.mono,fontWeight:800,letterSpacing:1,textTransform:"uppercase"}}>✓ Your Current Plan</span>
                 </div>
               )}
@@ -4008,7 +4008,7 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
                 {/* Price */}
                 <div style={{marginBottom:20}}>
                   <div style={{display:"flex",alignItems:"flex-end",gap:4}}>
-                    <span style={{color:plan.color,fontFamily:T.mono,fontWeight:800,fontSize:plan.id==="enterprise"?26:38,lineHeight:1}}>{plan.id==="enterprise"?"Custom":"$"+price}</span>
+                    <span style={{color:plan.color,fontFamily:T.mono,fontWeight:800,fontSize:plan.id==="enterprise"?26:38,lineHeight:1}}>{plan.id==="enterprise"?"Custom":"$"+(price)}</span>
                     {plan.id!=="enterprise"&&<span style={{color:T.textDim,fontFamily:T.sans,fontSize:13,marginBottom:4}}>/mo</span>}
                   </div>
                   {billing==="annual"&&plan.id!=="enterprise"&&(
@@ -4018,16 +4018,16 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
                 </div>
                 {/* CTA */}
                 {isCurrent?(
-                  <button disabled style={{width:"100%",background:T.surface,border:"1px solid "+T.border,borderRadius:11,padding:"12px",color:T.textDim,fontSize:12,fontFamily:T.sans,fontWeight:700,cursor:"not-allowed",marginBottom:20}}>✓ Current Plan</button>
+                  <button disabled style={{width:"100%",background:T.surface,border:"1px solid "+(T.border),borderRadius:11,padding:"12px",color:T.textDim,fontSize:12,fontFamily:T.sans,fontWeight:700,cursor:"not-allowed",marginBottom:20}}>✓ Current Plan</button>
                 ):(
                   <button onClick={()=>handleCTA(plan)} disabled={!!isProc} className="pricing-cta"
-                    style={{width:"100%",background:isCenter?"linear-gradient(135deg,"+T.cyan+","+T.violet+")":plan.color+"18",border:"1.5px solid "+plan.color+isCenter?"":"60",borderRadius:11,padding:"12px",color:isCenter?T.bg:plan.color,fontSize:12,fontFamily:T.sans,fontWeight:800,cursor:isProc?"wait":"pointer",marginBottom:8,letterSpacing:0.2,opacity:isProc?0.7:1,boxShadow:isCenter?"0 4px 20px "+T.cyan+"30":"none"}}>
+                    style={{width:"100%",background:isCenter?"linear-gradient(135deg,"+(T.cyan)+","+(T.violet)+")":(plan.color)+"18",border:"1.5px solid "+(plan.color)+(isCenter?"":"60"),borderRadius:11,padding:"12px",color:isCenter?T.bg:plan.color,fontSize:12,fontFamily:T.sans,fontWeight:800,cursor:isProc?"wait":"pointer",marginBottom:8,letterSpacing:0.2,opacity:isProc?0.7:1,boxShadow:isCenter?"0 4px 20px "+(T.cyan)+"30":"none"}}>
                     {isProc?"⏳ Redirecting…":plan.cta}
                   </button>
                 )}
                 <div style={{textAlign:"center",fontSize:10,color:T.textDim,fontFamily:T.sans,marginBottom:20}}>{plan.ctaNote}</div>
                 {/* Feature list */}
-                <div style={{borderTop:"1px solid "+T.border,paddingTop:16,display:"flex",flexDirection:"column",gap:7}}>
+                <div style={{borderTop:"1px solid "+(T.border),paddingTop:16,display:"flex",flexDirection:"column",gap:7}}>
                   {plan.features.map((f,i)=>(
                     <div key={i} style={{display:"flex",alignItems:"flex-start",gap:8}}>
                       <span style={{color:plan.color,fontSize:11,flexShrink:0,marginTop:1,fontWeight:700}}>✓</span>
@@ -4042,7 +4042,7 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
       </div>
 
       {/* Trust bar */}
-      <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:14,padding:"16px 28px",marginBottom:40,display:"flex",alignItems:"center",justifyContent:"center",gap:32,flexWrap:"wrap"}}>
+      <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:14,padding:"16px 28px",marginBottom:40,display:"flex",alignItems:"center",justifyContent:"center",gap:32,flexWrap:"wrap"}}>
         {[["🔒","Bank-grade encryption"],["✓","Cancel anytime, no questions"],["⚡","No setup fees ever"],["🏆","Used by 500+ small businesses"],["💳","Powered by Stripe"]].map(([i,t])=>(
           <div key={t} style={{display:"flex",alignItems:"center",gap:7}}>
             <span style={{fontSize:13}}>{i}</span>
@@ -4052,8 +4052,8 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
       </div>
 
       {/* Feature comparison table */}
-      <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:16,overflow:"hidden",marginBottom:40}}>
-        <div style={{padding:"20px 28px",borderBottom:"1px solid "+T.border,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+      <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:16,overflow:"hidden",marginBottom:40}}>
+        <div style={{padding:"20px 28px",borderBottom:"1px solid "+(T.border),display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:16}}>Full Feature Comparison</div>
           <div style={{display:"flex",gap:24}}>
             {PLANS.map(p=>(
@@ -4066,12 +4066,12 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
         </div>
         {MATRIX_ROWS.map((row,ri)=>{
           if(row.section) return(
-            <div key={ri} style={{background:T.surface,padding:"8px 28px",borderBottom:"1px solid "+T.border}}>
+            <div key={ri} style={{background:T.surface,padding:"8px 28px",borderBottom:"1px solid "+(T.border)}}>
               <span style={{fontSize:9,color:T.textDim,fontFamily:T.mono,textTransform:"uppercase",letterSpacing:1.5,fontWeight:700}}>{row.section}</span>
             </div>
           );
           return(
-            <div key={ri} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"11px 28px",borderBottom:"1px solid "+T.border+"30",background:ri%2===0?"transparent":T.surface+"40"}}>
+            <div key={ri} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"11px 28px",borderBottom:"1px solid "+(T.border)+"30",background:ri%2===0?"transparent":T.surface+"40"}}>
               <div style={{fontSize:12,color:T.textMid,fontFamily:T.sans,flex:1}}>{row.label}</div>
               <div style={{display:"flex",gap:0,minWidth:300}}>
                 {[{v:row.starter,c:T.teal},{v:row.pro,c:T.cyan},{v:row.ent,c:T.violet}].map((cell,ci)=>(
@@ -4084,7 +4084,7 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
           );
         })}
         {/* Bottom CTA row */}
-        <div style={{display:"flex",justifyContent:"flex-end",padding:"20px 28px",borderTop:"1px solid "+T.border,background:T.surface,gap:0}}>
+        <div style={{display:"flex",justifyContent:"flex-end",padding:"20px 28px",borderTop:"1px solid "+(T.border),background:T.surface,gap:0}}>
           <div style={{minWidth:300,display:"flex",gap:0}}>
             {PLANS.map(plan=>{
               const isCurrent=plan.id===currentPlan;
@@ -4093,7 +4093,7 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
                 <div key={plan.id} style={{minWidth:100,padding:"0 4px",textAlign:"center"}}>
                   {!isCurrent&&(
                     <button onClick={()=>handleCTA(plan)} disabled={!!isProc} className="pricing-cta"
-                      style={{background:plan.popular?"linear-gradient(135deg,"+T.cyan+","+T.violet+")":plan.color+"18",border:"1px solid "+plan.color+"50",borderRadius:8,padding:"8px 10px",color:plan.popular?T.bg:plan.color,fontSize:10,fontFamily:T.sans,fontWeight:700,cursor:isProc?"wait":"pointer",width:"100%",whiteSpace:"nowrap",boxShadow:plan.popular?"0 2px 12px "+T.cyan+"30":"none"}}>
+                      style={{background:plan.popular?"linear-gradient(135deg,"+(T.cyan)+","+(T.violet)+")":(plan.color)+"18",border:"1px solid "+(plan.color)+"50",borderRadius:8,padding:"8px 10px",color:plan.popular?T.bg:plan.color,fontSize:10,fontFamily:T.sans,fontWeight:700,cursor:isProc?"wait":"pointer",width:"100%",whiteSpace:"nowrap",boxShadow:plan.popular?"0 2px 12px "+(T.cyan)+"30":"none"}}>
                       {isProc?"…":plan.id==="enterprise"?"Contact":"Get Started"}
                     </button>
                   )}
@@ -4112,7 +4112,7 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
           {i:"📊",h:"Understand your profit",d:"AI-powered analysis tells you what's driving margins — in plain language."},
           {i:"🗂️",h:"Plan without spreadsheets",d:"Scenarios, headcount, and SaaS metrics all in one place. No VLOOKUP required."},
         ].map(b=>(
-          <div key={b.h} style={{background:T.card,border:"1px solid "+T.border,borderRadius:13,padding:"18px 20px"}}>
+          <div key={b.h} style={{background:T.card,border:"1px solid "+(T.border),borderRadius:13,padding:"18px 20px"}}>
             <div style={{fontSize:22,marginBottom:10}}>{b.i}</div>
             <div style={{color:T.text,fontFamily:T.sans,fontWeight:700,fontSize:12,marginBottom:5}}>{b.h}</div>
             <div style={{color:T.textDim,fontFamily:T.sans,fontSize:11,lineHeight:1.65}}>{b.d}</div>
@@ -4129,7 +4129,7 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
           {q:"What's the AI assistant?",a:"The AI FP&A assistant analyzes your actual financial data and provides actionable insights, forecasts, and plain-English explanations on every tab."},
           {q:"Discounts for accounting firms?",a:"Firms with multiple clients qualify for our Partner Program. Contact us for volume pricing and white-label options."},
         ].map(f=>(
-          <div key={f.q} style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,padding:"16px 18px"}}>
+          <div key={f.q} style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,padding:"16px 18px"}}>
             <div style={{color:T.text,fontFamily:T.sans,fontWeight:700,fontSize:12,marginBottom:6}}>{f.q}</div>
             <div style={{color:T.textDim,fontFamily:T.sans,fontSize:11,lineHeight:1.65}}>{f.a}</div>
           </div>
@@ -4139,7 +4139,7 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
       {/* Enterprise contact modal */}
       {contactOpen&&(
         <div style={{position:"fixed",inset:0,background:"rgba(8,11,18,0.85)",backdropFilter:"blur(8px)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000,padding:24}} onClick={()=>setContactOpen(false)}>
-          <div style={{background:T.card,border:"1.5px solid "+T.violet+"50",borderRadius:20,padding:"36px",maxWidth:460,width:"100%",boxShadow:"0 0 80px "+T.violet+"20"}} onClick={e=>e.stopPropagation()}>
+          <div style={{background:T.card,border:"1.5px solid "+(T.violet)+"50",borderRadius:20,padding:"36px",maxWidth:460,width:"100%",boxShadow:"0 0 80px "+(T.violet)+"20"}} onClick={e=>e.stopPropagation()}>
             {!contactSent?(
               <>
                 <div style={{color:T.text,fontFamily:T.display,fontWeight:800,fontSize:20,marginBottom:6}}>🏢 Let's talk Enterprise</div>
@@ -4147,13 +4147,13 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
                 {[{l:"Work email",p:"you@company.com",t:"email"},{l:"Company name",p:"Acme Corp",t:"text"},{l:"Number of entities",p:"2, 5, 10+",t:"text"}].map(f=>(
                   <div key={f.l} style={{marginBottom:14}}>
                     <label style={{display:"block",fontSize:10,color:T.textDim,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:5}}>{f.l}</label>
-                    <input type={f.t} placeholder={f.p} style={{width:"100%",background:T.surface,border:"1px solid "+T.border,borderRadius:8,padding:"10px 12px",color:T.text,fontSize:12,fontFamily:T.sans,outline:"none",boxSizing:"border-box"}}
+                    <input type={f.t} placeholder={f.p} style={{width:"100%",background:T.surface,border:"1px solid "+(T.border),borderRadius:8,padding:"10px 12px",color:T.text,fontSize:12,fontFamily:T.sans,outline:"none",boxSizing:"border-box"}}
                       onFocus={e=>e.target.style.borderColor=T.violet} onBlur={e=>e.target.style.borderColor=T.border}/>
                   </div>
                 ))}
                 <div style={{display:"flex",gap:10,marginTop:20}}>
-                  <button onClick={()=>setContactSent(true)} style={{flex:2,background:"linear-gradient(135deg,"+T.violet+","+T.cyan+")",border:"none",borderRadius:10,padding:"12px",color:T.bg,fontSize:13,fontFamily:T.sans,fontWeight:800,cursor:"pointer"}}>Send Message →</button>
-                  <button onClick={()=>setContactOpen(false)} style={{flex:1,background:"transparent",border:"1px solid "+T.border,borderRadius:10,padding:"12px",color:T.textDim,fontSize:12,fontFamily:T.sans,cursor:"pointer"}}>Cancel</button>
+                  <button onClick={()=>setContactSent(true)} style={{flex:2,background:"linear-gradient(135deg,"+(T.violet)+","+(T.cyan)+")",border:"none",borderRadius:10,padding:"12px",color:T.bg,fontSize:13,fontFamily:T.sans,fontWeight:800,cursor:"pointer"}}>Send Message →</button>
+                  <button onClick={()=>setContactOpen(false)} style={{flex:1,background:"transparent",border:"1px solid "+(T.border),borderRadius:10,padding:"12px",color:T.textDim,fontSize:12,fontFamily:T.sans,cursor:"pointer"}}>Cancel</button>
                 </div>
               </>
             ):(
@@ -4161,7 +4161,7 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
                 <div style={{fontSize:48,marginBottom:16}}>✅</div>
                 <div style={{color:T.text,fontFamily:T.display,fontWeight:800,fontSize:18,marginBottom:10}}>Message sent!</div>
                 <div style={{color:T.textDim,fontFamily:T.sans,fontSize:12,lineHeight:1.7,marginBottom:24}}>Our team will be in touch within one business day.</div>
-                <button onClick={()=>{setContactOpen(false);setContactSent(false);}} style={{background:"linear-gradient(135deg,"+T.violet+","+T.cyan+")",border:"none",borderRadius:10,padding:"12px 28px",color:T.bg,fontSize:13,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>Back to Dashboard</button>
+                <button onClick={()=>{setContactOpen(false);setContactSent(false);}} style={{background:"linear-gradient(135deg,"+(T.violet)+","+(T.cyan)+")",border:"none",borderRadius:10,padding:"12px 28px",color:T.bg,fontSize:13,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>Back to Dashboard</button>
               </div>
             )}
           </div>
@@ -4212,7 +4212,7 @@ function BudgetVsActuals({aiContext}) {
           const good=k.isRatio?(k.v>=1):(k.fav==="pos"?k.v>=0:k.v<=0);
           const c=good?T.emerald:T.rose;
           return (
-            <div key={k.l} style={{background:T.card,border:"1px solid "+good?c+"40":T.border,borderRadius:12,padding:"14px 16px",boxShadow:good?"none":"0 0 16px "+T.rose+"10"}}>
+            <div key={k.l} style={{background:T.card,border:"1px solid "+(good?c+"40":T.border),borderRadius:12,padding:"14px 16px",boxShadow:good?"none":"0 0 16px "+(T.rose)+"10"}}>
               <div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>{k.l}</div>
               <div style={{fontSize:20,fontWeight:800,fontFamily:T.mono,color:c}}>{k.isRatio?pct(k.v)+" of budget":fmt(Math.abs(k.v),true)}</div>
               {!k.isRatio&&<div style={{fontSize:10,color:c,fontFamily:T.sans,marginTop:4}}>{good?"▲ Favorable":"▼ Unfavorable"} · {pct(Math.abs(k.pct||0))} vs budget</div>}
@@ -4223,14 +4223,14 @@ function BudgetVsActuals({aiContext}) {
 
       <div style={{display:"flex",gap:6,marginBottom:14}}>
         {[["summary","📊 Summary BvA"],["depts","🏢 Dept Breakdown"],["rolling","🔄 Rolling Forecast"]].map(([v,l])=>(
-          <button key={v} onClick={()=>setView(v)} style={{background:view===v?T.cyanDim:"transparent",border:"1px solid "+view===v?T.cyanMid:T.border,borderRadius:8,padding:"6px 14px",color:view===v?T.cyan:T.textMid,fontSize:11,fontFamily:T.sans,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>{l}</button>
+          <button key={v} onClick={()=>setView(v)} style={{background:view===v?T.cyanDim:"transparent",border:"1px solid "+(view===v?T.cyanMid:T.border),borderRadius:8,padding:"6px 14px",color:view===v?T.cyan:T.textMid,fontSize:11,fontFamily:T.sans,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>{l}</button>
         ))}
       </div>
 
       {view==="summary"&&(
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
-          <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,overflow:"hidden"}}>
-            <div style={{padding:"12px 16px",borderBottom:"1px solid "+T.border,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,overflow:"hidden"}}>
+            <div style={{padding:"12px 16px",borderBottom:"1px solid "+(T.border),display:"flex",justifyContent:"space-between",alignItems:"center"}}>
               <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:13}}>📐 Budget vs. Actuals — FY 2024</div>
               <div style={{display:"flex",gap:12,fontSize:9,color:T.textDim,fontFamily:T.mono}}>
                 <span style={{color:T.cyan}}>■ Actual</span>
@@ -4243,11 +4243,11 @@ function BudgetVsActuals({aiContext}) {
               <table style={{width:"100%",borderCollapse:"collapse",fontSize:10}}>
                 <thead>
                   <tr style={{background:T.surface}}>
-                    <th style={{padding:"8px 12px",textAlign:"left",color:T.textDim,fontFamily:T.sans,fontSize:9,textTransform:"uppercase",fontWeight:700,borderBottom:"1px solid "+T.border,minWidth:160}}>Line Item</th>
-                    {MONTHS.map(m=><th key={m} style={{padding:"8px 6px",textAlign:"right",color:T.textDim,fontFamily:T.mono,fontSize:9,borderBottom:"1px solid "+T.border,minWidth:64}}>{m}</th>)}
-                    <th style={{padding:"8px 8px",textAlign:"right",color:T.textDim,fontFamily:T.mono,fontSize:9,borderBottom:"1px solid "+T.border,minWidth:70}}>FY Total</th>
-                    <th style={{padding:"8px 8px",textAlign:"right",color:T.textDim,fontFamily:T.mono,fontSize:9,borderBottom:"1px solid "+T.border,minWidth:70}}>$ Var</th>
-                    <th style={{padding:"8px 8px",textAlign:"right",color:T.textDim,fontFamily:T.mono,fontSize:9,borderBottom:"1px solid "+T.border,minWidth:60}}>% Var</th>
+                    <th style={{padding:"8px 12px",textAlign:"left",color:T.textDim,fontFamily:T.sans,fontSize:9,textTransform:"uppercase",fontWeight:700,borderBottom:"1px solid "+(T.border),minWidth:160}}>Line Item</th>
+                    {MONTHS.map(m=><th key={m} style={{padding:"8px 6px",textAlign:"right",color:T.textDim,fontFamily:T.mono,fontSize:9,borderBottom:"1px solid "+(T.border),minWidth:64}}>{m}</th>)}
+                    <th style={{padding:"8px 8px",textAlign:"right",color:T.textDim,fontFamily:T.mono,fontSize:9,borderBottom:"1px solid "+(T.border),minWidth:70}}>FY Total</th>
+                    <th style={{padding:"8px 8px",textAlign:"right",color:T.textDim,fontFamily:T.mono,fontSize:9,borderBottom:"1px solid "+(T.border),minWidth:70}}>$ Var</th>
+                    <th style={{padding:"8px 8px",textAlign:"right",color:T.textDim,fontFamily:T.mono,fontSize:9,borderBottom:"1px solid "+(T.border),minWidth:60}}>% Var</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -4255,14 +4255,14 @@ function BudgetVsActuals({aiContext}) {
                     const totA=sum(row.act), totB=sum(row.bud), totV=totA-totB;
                     const good=row.fav==="pos"?totV>=0:totV<=0;
                     return [
-                      <tr key={row.label+"-a"} style={{background:"transparent",borderBottom:"1px solid "+T.border+"40"}}>
+                      <tr key={row.label+"-a"} style={{background:"transparent",borderBottom:"1px solid "+(T.border)+"40"}}>
                         <td style={{padding:"7px 12px",color:T.text,fontFamily:T.sans,fontWeight:600,fontSize:10}}>{row.label}</td>
                         {row.act.map((v,i)=><td key={i} style={{padding:"7px 6px",textAlign:"right",fontFamily:T.mono,fontSize:10,color:T.textMid}}>{fmt(v,true)}</td>)}
                         <td style={{padding:"7px 8px",textAlign:"right",fontFamily:T.mono,fontSize:10,fontWeight:700,color:T.cyan}}>{fmt(totA,true)}</td>
                         <td style={{padding:"7px 8px",textAlign:"right",fontFamily:T.mono,fontSize:10,fontWeight:700,color:good?T.emerald:T.rose}}>{good?"▲":"▼"}{fmt(Math.abs(totV),true)}</td>
                         <td style={{padding:"7px 8px",textAlign:"right",fontFamily:T.mono,fontSize:10,color:good?T.emerald:T.rose}}>{pct(Math.abs(safeDiv(totV,totB)))}</td>
                       </tr>,
-                      <tr key={row.label+"-b"} style={{background:T.surface+"80",borderBottom:"1px solid "+T.border}}>
+                      <tr key={row.label+"-b"} style={{background:T.surface+"80",borderBottom:"1px solid "+(T.border)}}>
                         <td style={{padding:"4px 12px",color:T.textDim,fontFamily:T.sans,fontSize:9,paddingLeft:24}}>└ Budget</td>
                         {row.bud.map((v,i)=><td key={i} style={{padding:"4px 6px",textAlign:"right",fontFamily:T.mono,fontSize:9,color:T.textDim}}>{fmt(v,true)}</td>)}
                         <td style={{padding:"4px 8px",textAlign:"right",fontFamily:T.mono,fontSize:9,color:T.textDim}}>{fmt(totB,true)}</td>
@@ -4275,7 +4275,7 @@ function BudgetVsActuals({aiContext}) {
             </div>
           </div>
 
-          <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,padding:"16px 18px"}}>
+          <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,padding:"16px 18px"}}>
             <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:13,marginBottom:14}}>📅 Monthly Variance Heatmap</div>
             <div style={{display:"grid",gridTemplateColumns:"160px repeat(12,1fr)",gap:2}}>
               {[""].concat(MONTHS).map((m,i)=><div key={i} style={{padding:"4px 0",textAlign:"center",fontSize:8,color:T.textDim,fontFamily:T.mono}}>{m}</div>)}
@@ -4284,8 +4284,8 @@ function BudgetVsActuals({aiContext}) {
                 ...row.var.map((v,i)=>{
                   const good=row.fav==="pos"?v>=0:v<=0;
                   const intensity=Math.min(Math.abs(v)/15000,1);
-                  return <div key={i} title={MONTHS[i]+": "+good?"▲":"▼"+fmt(Math.abs(v),true)}
-                    style={{height:22,borderRadius:3,background:good?"rgba(0,229,160,"+0.15+intensity*0.5+")":"rgba(255,77,106,"+0.15+intensity*0.5+")",display:"flex",alignItems:"center",justifyContent:"center",fontSize:7,color:good?T.emerald:T.rose,fontFamily:T.mono,fontWeight:700,cursor:"default"}}>
+                  return <div key={i} title={(MONTHS[i])+": "+(good?"▲":"▼")+(fmt(Math.abs(v),true))}
+                    style={{height:22,borderRadius:3,background:good?"rgba(0,229,160,"+(0.15+intensity*0.5)+")":"rgba(255,77,106,"+(0.15+intensity*0.5)+")",display:"flex",alignItems:"center",justifyContent:"center",fontSize:7,color:good?T.emerald:T.rose,fontFamily:T.mono,fontWeight:700,cursor:"default"}}>
                     {fmt(v,true)}
                   </div>;
                 })
@@ -4301,13 +4301,13 @@ function BudgetVsActuals({aiContext}) {
             const totA=sum(dept.act), totB=sum(dept.bud), v=totA-totB;
             const good=v<=0;
             return (
-              <div key={dept.name} style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,padding:"16px 18px"}}>
+              <div key={dept.name} style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,padding:"16px 18px"}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
                   <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:13}}>{dept.name}</div>
                   <div style={{display:"flex",gap:16,alignItems:"center"}}>
                     <div style={{textAlign:"right"}}><div style={{fontSize:8,color:T.textDim,fontFamily:T.sans}}>ACTUAL</div><div style={{fontSize:14,color:T.cyan,fontFamily:T.mono,fontWeight:700}}>{fmt(totA,true)}</div></div>
                     <div style={{textAlign:"right"}}><div style={{fontSize:8,color:T.textDim,fontFamily:T.sans}}>BUDGET</div><div style={{fontSize:14,color:T.violet,fontFamily:T.mono,fontWeight:700}}>{fmt(totB,true)}</div></div>
-                    <div style={{background:good?T.emeraldDim:T.roseDim,border:"1px solid "+good?T.emerald+"40":T.rose+"40",borderRadius:8,padding:"6px 12px",textAlign:"center"}}>
+                    <div style={{background:good?T.emeraldDim:T.roseDim,border:"1px solid "+(good?T.emerald+"40":T.rose+"40"),borderRadius:8,padding:"6px 12px",textAlign:"center"}}>
                       <div style={{fontSize:8,color:T.textDim,fontFamily:T.sans}}>{good?"UNDER":"OVER"} BUDGET</div>
                       <div style={{fontSize:14,color:good?T.emerald:T.rose,fontFamily:T.mono,fontWeight:700}}>{fmt(Math.abs(v),true)}</div>
                     </div>
@@ -4317,9 +4317,9 @@ function BudgetVsActuals({aiContext}) {
                   {MONTHS.map((m,i)=>{
                     const va=dept.act[i]-dept.bud[i]; const g=va<=0;
                     const h=Math.min(Math.abs(va)/3000*100,100);
-                    return <div key={m} title={m+": "+g?"▲":"▼"+fmt(Math.abs(va),true)}
+                    return <div key={m} title={(m)+": "+(g?"▲":"▼")+(fmt(Math.abs(va),true))}
                       style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"flex-end",alignItems:"center"}}>
-                      <div style={{width:"100%",height:h+"%",minHeight:2,background:g?T.emerald+"60":T.rose+"60",borderRadius:"2px 2px 0 0"}}/>
+                      <div style={{width:"100%",height:(h)+"%",minHeight:2,background:g?T.emerald+"60":T.rose+"60",borderRadius:"2px 2px 0 0"}}/>
                     </div>;
                   })}
                 </div>
@@ -4334,12 +4334,12 @@ function BudgetVsActuals({aiContext}) {
 
       {view==="rolling"&&(
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
-          <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,padding:"16px 18px"}}>
+          <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,padding:"16px 18px"}}>
             <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:13,marginBottom:4}}>🔄 Rolling Forecast — Updated Monthly</div>
             <div style={{color:T.textDim,fontSize:10,fontFamily:T.sans,marginBottom:16}}>Forward-looking view combining YTD actuals with updated quarterly projections</div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:18}}>
               {RF_MONTHS.map((q,i)=>(
-                <div key={q} style={{background:T.surface,border:"1px solid "+T.border,borderRadius:10,padding:"12px 14px"}}>
+                <div key={q} style={{background:T.surface,border:"1px solid "+(T.border),borderRadius:10,padding:"12px 14px"}}>
                   <div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>{q}</div>
                   <div style={{fontSize:16,fontWeight:700,fontFamily:T.mono,color:T.cyan}}>{fmt(rfRev[i],true)}</div>
                   <div style={{fontSize:10,color:T.emerald,fontFamily:T.sans,marginTop:4}}>Net: {fmt(rfNet[i],true)}</div>
@@ -4352,7 +4352,7 @@ function BudgetVsActuals({aiContext}) {
                 const variance=item.v-item.bv;
                 const good=variance>=0;
                 return (
-                  <div key={item.l} style={{background:T.surface,borderRadius:10,padding:"14px 16px",border:"1px solid "+T.border}}>
+                  <div key={item.l} style={{background:T.surface,borderRadius:10,padding:"14px 16px",border:"1px solid "+(T.border)}}>
                     <div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>{item.l}</div>
                     <div style={{fontSize:22,fontWeight:800,fontFamily:T.mono,color:item.c}}>{fmt(item.v,true)}</div>
                     <div style={{display:"flex",gap:16,marginTop:8}}>
@@ -4374,7 +4374,7 @@ function BudgetVsActuals({aiContext}) {
 /** BSRow — balance sheet line row. Hoisted to module scope. */
 function BSRow({label, value, indent, isTotal, color, bold}) {
   return (
-    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:isTotal?"8px 0":"5px 0",borderBottom:isTotal?"1px solid "+T.border+"40":"none",background:isTotal?T.cyanDim+"30":"transparent",borderRadius:isTotal?4:0}}>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:isTotal?"8px 0":"5px 0",borderBottom:isTotal?"1px solid "+(T.border)+"40":"none",background:isTotal?T.cyanDim+"30":"transparent",borderRadius:isTotal?4:0}}>
       <span style={{fontSize:isTotal?11:10,color:isTotal?T.text:T.textMid,fontFamily:isTotal?T.display:T.sans,fontWeight:isTotal||bold?700:400,paddingLeft:indent?20:0}}>{indent&&<span style={{color:T.textDim,marginRight:4}}>└</span>}{label}</span>
       <span style={{fontSize:isTotal?12:10,color:color||(isTotal?T.cyan:T.textMid),fontFamily:T.mono,fontWeight:isTotal?700:400}}>{fmt(value)}</span>
     </div>
@@ -4404,7 +4404,7 @@ function BalanceSheet({aiContext}) {
         <span style={{fontSize:10,color:T.textDim,fontFamily:T.sans}}>View month:</span>
         <div style={{display:"flex",gap:2,flexWrap:"wrap"}}>
           {MONTHS.map((m,i)=>(
-            <button key={m} onClick={()=>setMo(i)} style={{background:mo===i?T.cyanDim:"transparent",border:"1px solid "+mo===i?T.cyanMid:T.border,borderRadius:6,padding:"3px 9px",color:mo===i?T.cyan:T.textDim,fontSize:10,fontFamily:T.mono,cursor:"pointer"}}>{m}</button>
+            <button key={m} onClick={()=>setMo(i)} style={{background:mo===i?T.cyanDim:"transparent",border:"1px solid "+(mo===i?T.cyanMid:T.border),borderRadius:6,padding:"3px 9px",color:mo===i?T.cyan:T.textDim,fontSize:10,fontFamily:T.mono,cursor:"pointer"}}>{m}</button>
           ))}
         </div>
       </div>
@@ -4414,9 +4414,9 @@ function BalanceSheet({aiContext}) {
           {l:"Current Ratio",   v:currRatio.toFixed(2)+"x", sub:currRatio>=2?"Strong":currRatio>=1.5?"Healthy":"Watch", c:currRatio>=1.5?T.emerald:currRatio>=1?T.amber:T.rose},
           {l:"Quick Ratio",     v:quickRatio.toFixed(2)+"x", sub:quickRatio>=1?"Healthy":"Below 1x — risk", c:quickRatio>=1?T.emerald:T.rose},
           {l:"Debt-to-Equity",  v:debtToEquity.toFixed(2)+"x", sub:debtToEquity<=1.5?"Manageable":"High leverage", c:debtToEquity<=1.5?T.emerald:T.amber},
-          {l:"Working Capital", v:fmt(workingCapital,true), sub:pct(workingCapital/totalAssets)+" of assets", c:workingCapital>0?T.emerald:T.rose},
+          {l:"Working Capital", v:fmt(workingCapital,true), sub:(pct(workingCapital/totalAssets))+" of assets", c:workingCapital>0?T.emerald:T.rose},
         ].map(k=>(
-          <div key={k.l} style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,padding:"14px 16px"}}>
+          <div key={k.l} style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,padding:"14px 16px"}}>
             <div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>{k.l}</div>
             <div style={{fontSize:20,fontWeight:800,fontFamily:T.mono,color:k.c}}>{k.v}</div>
             <div style={{fontSize:10,color:T.textDim,fontFamily:T.sans,marginTop:4}}>{k.sub}</div>
@@ -4425,50 +4425,50 @@ function BalanceSheet({aiContext}) {
       </div>
 
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
-        <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,padding:"16px 18px"}}>
+        <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,padding:"16px 18px"}}>
           <div style={{color:T.cyan,fontFamily:T.display,fontWeight:700,fontSize:13,marginBottom:12}}>ASSETS — {MONTHS[mo]} 2024</div>
-          <div style={{color:T.textDim,fontSize:9,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:8,paddingBottom:4,borderBottom:"1px solid "+T.border}}>Current Assets</div>
+          <div style={{color:T.textDim,fontSize:9,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:8,paddingBottom:4,borderBottom:"1px solid "+(T.border)}}>Current Assets</div>
           <BSRow label="Cash & Equivalents"   value={cash} indent color={T.cyan}/>
           <BSRow label="Accounts Receivable"  value={ar}   indent color={T.cyan}/>
           <BSRow label="Inventory"            value={inv}  indent color={T.cyan}/>
           <BSRow label="Prepaid Expenses"     value={prep} indent color={T.cyan}/>
           <BSRow label="Total Current Assets" value={currAssets} isTotal/>
-          <div style={{color:T.textDim,fontSize:9,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,margin:"12px 0 8px",paddingBottom:4,borderBottom:"1px solid "+T.border}}>Non-Current Assets</div>
+          <div style={{color:T.textDim,fontSize:9,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,margin:"12px 0 8px",paddingBottom:4,borderBottom:"1px solid "+(T.border)}}>Non-Current Assets</div>
           <BSRow label="PP&E (net)"    value={ppe}   indent color={T.cyan}/>
           <BSRow label="Other Assets"  value={other} indent color={T.cyan}/>
-          <div style={{marginTop:10,paddingTop:8,borderTop:"2px solid "+T.border}}>
+          <div style={{marginTop:10,paddingTop:8,borderTop:"2px solid "+(T.border)}}>
             <BSRow label="TOTAL ASSETS" value={totalAssets} isTotal color={T.cyan} bold/>
           </div>
         </div>
 
-        <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,padding:"16px 18px"}}>
+        <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,padding:"16px 18px"}}>
           <div style={{color:T.rose,fontFamily:T.display,fontWeight:700,fontSize:13,marginBottom:12}}>LIABILITIES & EQUITY — {MONTHS[mo]} 2024</div>
-          <div style={{color:T.textDim,fontSize:9,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:8,paddingBottom:4,borderBottom:"1px solid "+T.border}}>Current Liabilities</div>
+          <div style={{color:T.textDim,fontSize:9,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:8,paddingBottom:4,borderBottom:"1px solid "+(T.border)}}>Current Liabilities</div>
           <BSRow label="Accounts Payable"        value={ap}  indent color={T.rose}/>
           <BSRow label="Accrued Expenses"        value={acc} indent color={T.rose}/>
           <BSRow label="Deferred Revenue"        value={def} indent color={T.rose}/>
           <BSRow label="Short-Term Debt"         value={std} indent color={T.amber}/>
           <BSRow label="Total Current Liabilities" value={currLiab} isTotal color={T.rose}/>
-          <div style={{color:T.textDim,fontSize:9,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,margin:"12px 0 8px",paddingBottom:4,borderBottom:"1px solid "+T.border}}>Long-Term Liabilities</div>
+          <div style={{color:T.textDim,fontSize:9,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,margin:"12px 0 8px",paddingBottom:4,borderBottom:"1px solid "+(T.border)}}>Long-Term Liabilities</div>
           <BSRow label="Long-Term Debt" value={ltd} indent color={T.amber}/>
-          <div style={{marginTop:8,paddingTop:6,borderTop:"1px solid "+T.border}}>
+          <div style={{marginTop:8,paddingTop:6,borderTop:"1px solid "+(T.border)}}>
             <BSRow label="Total Liabilities" value={totalLiab} isTotal color={T.rose}/>
           </div>
-          <div style={{color:T.textDim,fontSize:9,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,margin:"12px 0 8px",paddingBottom:4,borderBottom:"1px solid "+T.border}}>Equity</div>
+          <div style={{color:T.textDim,fontSize:9,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,margin:"12px 0 8px",paddingBottom:4,borderBottom:"1px solid "+(T.border)}}>Equity</div>
           <BSRow label="Common Stock"       value={BS.commonStock[mo]} indent color={T.violet}/>
           <BSRow label="Retained Earnings"  value={retEarnings}        indent color={T.violet}/>
-          <div style={{marginTop:10,paddingTop:8,borderTop:"2px solid "+T.border}}>
+          <div style={{marginTop:10,paddingTop:8,borderTop:"2px solid "+(T.border)}}>
             <BSRow label="TOTAL LIAB. + EQUITY" value={totalLiab+equity} isTotal color={T.violet} bold/>
           </div>
         </div>
       </div>
 
-      <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,padding:"16px 18px",marginTop:16}}>
+      <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,padding:"16px 18px",marginTop:16}}>
         <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:13,marginBottom:14}}>📈 Ratio Trends — Full Year</div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:16}}>
           {[
-            {l:"Current Ratio",data:MONTHS.map((_,i)=>{const ca=BS.cash[i]+BS.accountsReceivable[i]+BS.inventory_bs[i]+BS.prepaidExpenses[i];const cl=BS.accountsPayable[i]+BS.accruedExpenses[i]+BS.deferredRevenue[i]+BS.shortTermDebt[i];return ca/cl;}),c:T.cyan,fmt:v=>v.toFixed(2)+"x",thresh:1.5},
-            {l:"Quick Ratio",  data:MONTHS.map((_,i)=>{const qa=BS.cash[i]+BS.accountsReceivable[i];const cl=BS.accountsPayable[i]+BS.accruedExpenses[i]+BS.deferredRevenue[i]+BS.shortTermDebt[i];return qa/cl;}),c:T.emerald,fmt:v=>v.toFixed(2)+"x",thresh:1.0},
+            {l:"Current Ratio",data:MONTHS.map((_,i)=>{const ca=BS.cash[i]+BS.accountsReceivable[i]+BS.inventory_bs[i]+BS.prepaidExpenses[i];const cl=BS.accountsPayable[i]+BS.accruedExpenses[i]+BS.deferredRevenue[i]+BS.shortTermDebt[i];return ca/cl;}),c:T.cyan,fmt:v=>(v.toFixed(2))+"x",thresh:1.5},
+            {l:"Quick Ratio",  data:MONTHS.map((_,i)=>{const qa=BS.cash[i]+BS.accountsReceivable[i];const cl=BS.accountsPayable[i]+BS.accruedExpenses[i]+BS.deferredRevenue[i]+BS.shortTermDebt[i];return qa/cl;}),c:T.emerald,fmt:v=>(v.toFixed(2))+"x",thresh:1.0},
           ].map(chart=>(
             <div key={chart.l}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}>
@@ -4478,7 +4478,7 @@ function BalanceSheet({aiContext}) {
               <div style={{display:"flex",alignItems:"flex-end",gap:3,height:50}}>
                 {chart.data.map((v,i)=>(
                   <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:1}}>
-                    <div style={{width:"100%",height:Math.min(v/4,1)*46+"px",minHeight:2,background:v>=chart.thresh?chart.c+"80":T.rose+"80",borderRadius:"2px 2px 0 0",transition:"height 0.3s"}}/>
+                    <div style={{width:"100%",height:(Math.min(v/4,1)*46)+"px",minHeight:2,background:v>=chart.thresh?chart.c+"80":T.rose+"80",borderRadius:"2px 2px 0 0",transition:"height 0.3s"}}/>
                   </div>
                 ))}
               </div>
@@ -4507,12 +4507,12 @@ function HeadcountPlanning({aiContext}) {
     <div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:18}}>
         {[
-          {l:"Total Headcount",   v:active.length,    sub:open.length+" open reqs",                        c:T.cyan},
-          {l:"Total Payroll Cost",v:fmt(activeCost,true)+"/yr", sub:fmt(activeCost/12,true)+"/mo",              c:T.emerald},
-          {l:"Open Req Pipeline", v:fmt(openCost,true)+"/yr",   sub:open.length+" roles budgeted",              c:T.amber},
-          {l:"Avg Base Salary",   v:fmt(avgSalary,true),        sub:"+"+pct(avgBenefits)+" benefits avg", c:T.violet},
+          {l:"Total Headcount",   v:(active.length),    sub:(open.length)+" open reqs",                        c:T.cyan},
+          {l:"Total Payroll Cost",v:fmt(activeCost,true)+"/yr", sub:(fmt(activeCost/12,true))+"/mo",              c:T.emerald},
+          {l:"Open Req Pipeline", v:fmt(openCost,true)+"/yr",   sub:(open.length)+" roles budgeted",              c:T.amber},
+          {l:"Avg Base Salary",   v:fmt(avgSalary,true),        sub:"+"+(pct(avgBenefits))+" benefits avg", c:T.violet},
         ].map(k=>(
-          <div key={k.l} style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,padding:"14px 16px"}}>
+          <div key={k.l} style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,padding:"14px 16px"}}>
             <div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>{k.l}</div>
             <div style={{fontSize:20,fontWeight:800,fontFamily:T.mono,color:k.c}}>{k.v}</div>
             <div style={{fontSize:10,color:T.textDim,fontFamily:T.sans,marginTop:4}}>{k.sub}</div>
@@ -4522,7 +4522,7 @@ function HeadcountPlanning({aiContext}) {
 
       <div style={{display:"flex",gap:6,marginBottom:14}}>
         {[["overview","🏢 By Department"],["roster","👤 Full Roster"],["cost","💰 Cost Analysis"]].map(([v,l])=>(
-          <button key={v} onClick={()=>setView(v)} style={{background:view===v?T.cyanDim:"transparent",border:"1px solid "+view===v?T.cyanMid:T.border,borderRadius:8,padding:"6px 14px",color:view===v?T.cyan:T.textMid,fontSize:11,fontFamily:T.sans,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>{l}</button>
+          <button key={v} onClick={()=>setView(v)} style={{background:view===v?T.cyanDim:"transparent",border:"1px solid "+(view===v?T.cyanMid:T.border),borderRadius:8,padding:"6px 14px",color:view===v?T.cyan:T.textMid,fontSize:11,fontFamily:T.sans,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>{l}</button>
         ))}
       </div>
 
@@ -4535,12 +4535,12 @@ function HeadcountPlanning({aiContext}) {
             const isSelected=selDept===d.name;
             return (
               <div key={d.name}>
-                <div onClick={()=>setSelDept(isSelected?null:d.name)} style={{background:T.card,border:"1px solid "+isSelected?d.color+"60":T.border,borderRadius:12,padding:"14px 18px",cursor:"pointer",transition:"all 0.2s",boxShadow:isSelected?"0 0 20px "+d.color+"15":"none"}}>
+                <div onClick={()=>setSelDept(isSelected?null:d.name)} style={{background:T.card,border:"1px solid "+(isSelected?d.color+"60":T.border),borderRadius:12,padding:"14px 18px",cursor:"pointer",transition:"all 0.2s",boxShadow:isSelected?"0 0 20px "+(d.color)+"15":"none"}}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:isSelected?14:0}}>
                     <div style={{display:"flex",alignItems:"center",gap:10}}>
                       <div style={{width:12,height:12,borderRadius:"50%",background:d.color,flexShrink:0}}/>
                       <span style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:13}}>{d.name}</span>
-                      <span style={{fontSize:10,color:T.textDim,fontFamily:T.mono}}>{dActive.length} active{dOpen.length>0?" · "+dOpen.length+" open":""}</span>
+                      <span style={{fontSize:10,color:T.textDim,fontFamily:T.mono}}>{dActive.length} active{dOpen.length>0?" · "+(dOpen.length)+" open":""}</span>
                     </div>
                     <div style={{display:"flex",gap:20,alignItems:"center"}}>
                       <div style={{textAlign:"right"}}><div style={{fontSize:8,color:T.textDim,fontFamily:T.sans}}>ANNUAL COST</div><div style={{fontSize:14,color:d.color,fontFamily:T.mono,fontWeight:700}}>{fmt(dCost,true)}</div></div>
@@ -4552,7 +4552,7 @@ function HeadcountPlanning({aiContext}) {
                       {d.employees.map(e=>{
                         const totalComp=e.salary*(1+e.benefits);
                         return (
-                          <div key={e.id} style={{display:"grid",gridTemplateColumns:"2fr 1.5fr 1fr 1fr 1fr",alignItems:"center",background:e.status==="open"?T.amberDim:T.surface,border:"1px solid "+e.status==="open"?T.amber+"40":T.border,borderRadius:8,padding:"8px 12px",gap:8}}>
+                          <div key={e.id} style={{display:"grid",gridTemplateColumns:"2fr 1.5fr 1fr 1fr 1fr",alignItems:"center",background:e.status==="open"?T.amberDim:T.surface,border:"1px solid "+(e.status==="open"?T.amber+"40":T.border),borderRadius:8,padding:"8px 12px",gap:8}}>
                             <div>
                               <div style={{fontSize:11,color:e.status==="open"?T.amber:T.text,fontFamily:T.sans,fontWeight:600}}>{e.name}</div>
                               <div style={{fontSize:9,color:T.textDim,fontFamily:T.sans}}>{e.title}</div>
@@ -4574,22 +4574,22 @@ function HeadcountPlanning({aiContext}) {
       )}
 
       {view==="roster"&&(
-        <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,overflow:"hidden"}}>
+        <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,overflow:"hidden"}}>
           <table style={{width:"100%",borderCollapse:"collapse",fontSize:10}}>
             <thead><tr style={{background:T.surface}}>
               {["Name","Department","Title","Status","Start","Base Salary","Benefits","Total Cost"].map(h=>(
-                <th key={h} style={{padding:"9px 12px",textAlign:["Base Salary","Benefits","Total Cost"].includes(h)?"right":"left",color:T.textDim,fontFamily:T.sans,fontSize:9,textTransform:"uppercase",fontWeight:700,borderBottom:"1px solid "+T.border,whiteSpace:"nowrap"}}>{h}</th>
+                <th key={h} style={{padding:"9px 12px",textAlign:["Base Salary","Benefits","Total Cost"].includes(h)?"right":"left",color:T.textDim,fontFamily:T.sans,fontSize:9,textTransform:"uppercase",fontWeight:700,borderBottom:"1px solid "+(T.border),whiteSpace:"nowrap"}}>{h}</th>
               ))}
             </tr></thead>
             <tbody>
               {depts.flatMap(d=>d.employees.map(e=>{
                 const tc=e.salary*(1+e.benefits);
                 return (
-                  <tr key={e.id} style={{borderBottom:"1px solid "+T.border+"40"}}>
+                  <tr key={e.id} style={{borderBottom:"1px solid "+(T.border)+"40"}}>
                     <td style={{padding:"8px 12px",color:e.status==="open"?T.amber:T.text,fontFamily:T.sans,fontWeight:600,fontSize:10}}>{e.name}</td>
-                    <td style={{padding:"8px 12px"}}><span style={{background:d.color+"22",border:"1px solid "+d.color+"40",borderRadius:20,padding:"2px 8px",fontSize:9,color:d.color,fontFamily:T.sans}}>{d.name}</span></td>
+                    <td style={{padding:"8px 12px"}}><span style={{background:d.color+"22",border:"1px solid "+(d.color)+"40",borderRadius:20,padding:"2px 8px",fontSize:9,color:d.color,fontFamily:T.sans}}>{d.name}</span></td>
                     <td style={{padding:"8px 12px",color:T.textMid,fontFamily:T.sans,fontSize:10}}>{e.title}</td>
-                    <td style={{padding:"8px 12px"}}><span style={{background:e.status==="open"?T.amberDim:T.emeraldDim,border:"1px solid "+e.status==="open"?T.amber+"40":T.emerald+"40",borderRadius:20,padding:"2px 8px",fontSize:9,color:e.status==="open"?T.amber:T.emerald,fontFamily:T.sans,fontWeight:700}}>{e.status==="open"?"Open Req":"Active"}</span></td>
+                    <td style={{padding:"8px 12px"}}><span style={{background:e.status==="open"?T.amberDim:T.emeraldDim,border:"1px solid "+(e.status==="open"?T.amber+"40":T.emerald+"40"),borderRadius:20,padding:"2px 8px",fontSize:9,color:e.status==="open"?T.amber:T.emerald,fontFamily:T.sans,fontWeight:700}}>{e.status==="open"?"Open Req":"Active"}</span></td>
                     <td style={{padding:"8px 12px",color:T.textDim,fontFamily:T.mono,fontSize:10}}>{e.start}</td>
                     <td style={{padding:"8px 12px",textAlign:"right",color:T.cyan,fontFamily:T.mono,fontSize:10,fontWeight:700}}>{fmt(e.salary)}</td>
                     <td style={{padding:"8px 12px",textAlign:"right",color:T.violet,fontFamily:T.mono,fontSize:10}}>{pct(e.benefits)}</td>
@@ -4598,7 +4598,7 @@ function HeadcountPlanning({aiContext}) {
                 );
               }))}
             </tbody>
-            <tfoot><tr style={{background:T.cyanDim,borderTop:"2px solid "+T.border}}>
+            <tfoot><tr style={{background:T.cyanDim,borderTop:"2px solid "+(T.border)}}>
               <td colSpan="5" style={{padding:"9px 12px",color:T.cyan,fontFamily:T.display,fontWeight:700,fontSize:10}}>TOTAL</td>
               <td style={{padding:"9px 12px",textAlign:"right",color:T.cyan,fontFamily:T.mono,fontWeight:700}}>{fmt(sum(allEmp.map(e=>e.salary)))}</td>
               <td/>
@@ -4610,7 +4610,7 @@ function HeadcountPlanning({aiContext}) {
 
       {view==="cost"&&(
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
-          <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,padding:"16px 18px"}}>
+          <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,padding:"16px 18px"}}>
             <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:13,marginBottom:2}}>💰 Payroll Cost by Department</div>
             <div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,marginBottom:14}}>Fully loaded (salary + benefits) · Includes open req budgets</div>
             {depts.map(d=>{
@@ -4619,7 +4619,7 @@ function HeadcountPlanning({aiContext}) {
                 <div key={d.name} style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
                   <div style={{width:120,fontSize:10,color:T.textMid,fontFamily:T.sans}}>{d.name}</div>
                   <div style={{flex:1,height:10,background:T.border,borderRadius:5,overflow:"hidden"}}>
-                    <div style={{width:dc/totalCost*100+"%",height:"100%",background:d.color,borderRadius:5,transition:"width 0.4s"}}/>
+                    <div style={{width:(dc/totalCost*100)+"%",height:"100%",background:d.color,borderRadius:5,transition:"width 0.4s"}}/>
                   </div>
                   <div style={{width:70,textAlign:"right",fontFamily:T.mono,fontSize:10,color:d.color,fontWeight:700}}>{fmt(dc,true)}</div>
                   <div style={{width:36,textAlign:"right",fontFamily:T.mono,fontSize:9,color:T.textDim}}>{pct(dc/totalCost)}</div>
@@ -4633,7 +4633,7 @@ function HeadcountPlanning({aiContext}) {
               {l:"Monthly Run Rate",    v:fmt(activeCost/12,true)+"/mo",sub:"current headcount",c:T.emerald},
               {l:"Open Req Add'l Cost", v:fmt(openCost,true)+"/yr",sub:"if all reqs filled",c:T.amber},
             ].map(k=>(
-              <div key={k.l} style={{background:T.card,border:"1px solid "+T.border,borderRadius:10,padding:"14px 16px"}}>
+              <div key={k.l} style={{background:T.card,border:"1px solid "+(T.border),borderRadius:10,padding:"14px 16px"}}>
                 <div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>{k.l}</div>
                 <div style={{fontSize:18,fontWeight:700,fontFamily:T.mono,color:k.c}}>{k.v}</div>
                 <div style={{fontSize:10,color:T.textDim,fontFamily:T.sans,marginTop:4}}>{k.sub}</div>
@@ -4660,12 +4660,12 @@ function SaaSMetrics({aiContext}) {
     <div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:18}}>
         {[
-          {l:"Monthly Recurring Rev",v:fmt(latestMrr,true),sub:"ARR: "+fmt(latestArr,true),c:T.cyan,spark:SAAS.mrr},
+          {l:"Monthly Recurring Rev",v:fmt(latestMrr,true),sub:"ARR: "+(fmt(latestArr,true)),c:T.cyan,spark:SAAS.mrr},
           {l:"MoM Growth",v:pct(mrrGrowth),sub:mrrGrowth>0?"▲ Accelerating":"▼ Decelerating",c:mrrGrowth>0?T.emerald:T.rose,spark:SAAS.mrr.map((v,i)=>i===0?safeDiv(SAAS.mrr[1]-SAAS.mrr[0],SAAS.mrr[0]):safeDiv(v-SAAS.mrr[i-1],SAAS.mrr[i-1]))},
           {l:"Net Revenue Retention",v:pct(latestNrr),sub:latestNrr>=1.1?"✓ Best-in-class (≥110%)":"Target: 110%+",c:latestNrr>=1.1?T.emerald:T.amber,spark:SAAS.nrr},
-          {l:"LTV : CAC Ratio",v:ltvCacRatio.toFixed(1)+"x",sub:ltvCacRatio>=3?"Healthy ratio":"Target: 3x+",c:ltvCacRatio>=3?T.emerald:T.rose,spark:SAAS.ltv.map((v,i)=>v/SAAS.cac[i])},
+          {l:"LTV : CAC Ratio",v:(ltvCacRatio.toFixed(1))+"x",sub:ltvCacRatio>=3?"Healthy ratio":"Target: 3x+",c:ltvCacRatio>=3?T.emerald:T.rose,spark:SAAS.ltv.map((v,i)=>v/SAAS.cac[i])},
         ].map(k=>(
-          <div key={k.l} style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,padding:"14px 16px"}}>
+          <div key={k.l} style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,padding:"14px 16px"}}>
             <div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>{k.l}</div>
             <div style={{fontSize:20,fontWeight:800,fontFamily:T.mono,color:k.c}}>{k.v}</div>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:6}}>
@@ -4678,19 +4678,19 @@ function SaaSMetrics({aiContext}) {
 
       <div style={{display:"flex",gap:6,marginBottom:14}}>
         {[["overview","📈 MRR Growth"],["waterfall","🌊 MRR Waterfall"],["customers","👥 Customers"],["unit","💡 Unit Economics"]].map(([v,l])=>(
-          <button key={v} onClick={()=>setView(v)} style={{background:view===v?T.cyanDim:"transparent",border:"1px solid "+view===v?T.cyanMid:T.border,borderRadius:8,padding:"6px 14px",color:view===v?T.cyan:T.textMid,fontSize:11,fontFamily:T.sans,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>{l}</button>
+          <button key={v} onClick={()=>setView(v)} style={{background:view===v?T.cyanDim:"transparent",border:"1px solid "+(view===v?T.cyanMid:T.border),borderRadius:8,padding:"6px 14px",color:view===v?T.cyan:T.textMid,fontSize:11,fontFamily:T.sans,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>{l}</button>
         ))}
       </div>
 
       {view==="overview"&&(
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
-          <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,padding:"16px 18px"}}>
+          <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,padding:"16px 18px"}}>
             <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:13,marginBottom:14}}>📈 MRR Trend — FY 2024</div>
             <div style={{display:"flex",alignItems:"flex-end",gap:4,height:130}}>
               {SAAS.mrr.map((v,i)=>(
                 <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
                   <span style={{fontSize:8,color:T.emerald,fontFamily:T.mono,fontWeight:700}}>{fmt(v,true)}</span>
-                  <div style={{width:"100%",height:(v/mrrMax)*110+"px",background:"linear-gradient(180deg,"+T.cyan+"90,"+T.cyan+"40)",borderRadius:"3px 3px 0 0",minHeight:3}}/>
+                  <div style={{width:"100%",height:((v/mrrMax)*110)+"px",background:"linear-gradient(180deg,"+(T.cyan)+"90,"+(T.cyan)+"40)",borderRadius:"3px 3px 0 0",minHeight:3}}/>
                   <span style={{fontSize:7,color:T.textDim,fontFamily:T.mono}}>{MONTHS[i]}</span>
                 </div>
               ))}
@@ -4698,11 +4698,11 @@ function SaaSMetrics({aiContext}) {
           </div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}}>
             {[
-              {l:"Customers (EOM)",    v:latestCust,        sub:"+"+SAAS.newCust[11]+" new · -"+SAAS.churnCust[11]+" churned",c:T.cyan},
+              {l:"Customers (EOM)",    v:latestCust,        sub:"+"+(SAAS.newCust[11])+" new · -"+(SAAS.churnCust[11])+" churned",c:T.cyan},
               {l:"Monthly Churn Rate", v:pct(churnRate),    sub:churnRate<0.02?"✓ Below 2% — healthy":"⚠ Watch churn rate",     c:churnRate<0.02?T.emerald:T.rose},
               {l:"Avg Rev / Customer", v:fmt(latestMrr/latestCust,true), sub:"ARPU",                                        c:T.violet},
             ].map(k=>(
-              <div key={k.l} style={{background:T.card,border:"1px solid "+T.border,borderRadius:10,padding:"14px 16px"}}>
+              <div key={k.l} style={{background:T.card,border:"1px solid "+(T.border),borderRadius:10,padding:"14px 16px"}}>
                 <div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>{k.l}</div>
                 <div style={{fontSize:18,fontWeight:700,fontFamily:T.mono,color:k.c}}>{k.v}</div>
                 <div style={{fontSize:10,color:T.textDim,fontFamily:T.sans,marginTop:4}}>{k.sub}</div>
@@ -4713,13 +4713,13 @@ function SaaSMetrics({aiContext}) {
       )}
 
       {view==="waterfall"&&(
-        <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,padding:"16px 18px"}}>
+        <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,padding:"16px 18px"}}>
           <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:13,marginBottom:14}}>🌊 MRR Waterfall — Monthly Movement</div>
           <div style={{overflowX:"auto"}}>
             <table style={{width:"100%",borderCollapse:"collapse",fontSize:10}}>
               <thead><tr style={{background:T.surface}}>
                 {["Month","Opening MRR","New MRR","Expansion","Churn","Net New","Closing MRR","MoM %"].map(h=>(
-                  <th key={h} style={{padding:"8px 10px",textAlign:h==="Month"?"left":"right",color:T.textDim,fontFamily:T.sans,fontSize:9,textTransform:"uppercase",fontWeight:700,borderBottom:"1px solid "+T.border,whiteSpace:"nowrap"}}>{h}</th>
+                  <th key={h} style={{padding:"8px 10px",textAlign:h==="Month"?"left":"right",color:T.textDim,fontFamily:T.sans,fontSize:9,textTransform:"uppercase",fontWeight:700,borderBottom:"1px solid "+(T.border),whiteSpace:"nowrap"}}>{h}</th>
                 ))}
               </tr></thead>
               <tbody>
@@ -4728,7 +4728,7 @@ function SaaSMetrics({aiContext}) {
                   const net=SAAS.newMrr[i]+SAAS.expansionMrr[i]-SAAS.churnMrr[i];
                   const mom=i===0?0:(SAAS.mrr[i]-SAAS.mrr[i-1])/SAAS.mrr[i-1];
                   return (
-                    <tr key={m} style={{borderBottom:"1px solid "+T.border+"40"}}>
+                    <tr key={m} style={{borderBottom:"1px solid "+(T.border)+"40"}}>
                       <td style={{padding:"8px 10px",color:T.text,fontFamily:T.sans,fontWeight:600,fontSize:10}}>{m}</td>
                       <td style={{padding:"8px 10px",textAlign:"right",fontFamily:T.mono,fontSize:10,color:T.textMid}}>{fmt(opening,true)}</td>
                       <td style={{padding:"8px 10px",textAlign:"right",fontFamily:T.mono,fontSize:10,color:T.emerald}}>+{fmt(SAAS.newMrr[i],true)}</td>
@@ -4747,7 +4747,7 @@ function SaaSMetrics({aiContext}) {
       )}
 
       {view==="customers"&&(
-        <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,padding:"16px 18px"}}>
+        <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,padding:"16px 18px"}}>
           {/* Header + legend row */}
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
             <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:13}}>👥 Customer Growth — Acquired vs. Churned</div>
@@ -4775,12 +4775,12 @@ function SaaSMetrics({aiContext}) {
                       {/* Acquired bar + number */}
                       <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-end"}}>
                         <span style={{fontSize:7,fontFamily:T.mono,color:T.emerald,fontWeight:700,lineHeight:1.2,marginBottom:1}}>{SAAS.newCust[i]}</span>
-                        <div style={{width:"100%",height:(SAAS.newCust[i]/maxCust)*120+"px",background:"linear-gradient(180deg,"+T.emerald+"90,"+T.emerald+"40)",borderRadius:"2px 2px 0 0",minHeight:2}}/>
+                        <div style={{width:"100%",height:((SAAS.newCust[i]/maxCust)*120)+"px",background:"linear-gradient(180deg,"+(T.emerald)+"90,"+(T.emerald)+"40)",borderRadius:"2px 2px 0 0",minHeight:2}}/>
                       </div>
                       {/* Churned bar + number */}
                       <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-end"}}>
                         <span style={{fontSize:7,fontFamily:T.mono,color:T.rose,fontWeight:700,lineHeight:1.2,marginBottom:1}}>{SAAS.churnCust[i]}</span>
-                        <div style={{width:"100%",height:(SAAS.churnCust[i]/maxCust)*120+"px",background:"linear-gradient(180deg,"+T.rose+"90,"+T.rose+"40)",borderRadius:"2px 2px 0 0",minHeight:2}}/>
+                        <div style={{width:"100%",height:((SAAS.churnCust[i]/maxCust)*120)+"px",background:"linear-gradient(180deg,"+(T.rose)+"90,"+(T.rose)+"40)",borderRadius:"2px 2px 0 0",minHeight:2}}/>
                       </div>
                     </div>
                     <span style={{fontSize:7,color:T.textDim,fontFamily:T.mono}}>{m}</span>
@@ -4811,9 +4811,9 @@ function SaaSMetrics({aiContext}) {
             {[
               {l:"Customer Acquisition Cost",v:fmt(latestCac),sub:"Blended CAC · Dec",trend:SAAS.cac,c:T.amber,better:"lower"},
               {l:"Customer Lifetime Value",  v:fmt(latestLtv),sub:"Avg LTV · Dec",    trend:SAAS.ltv,c:T.emerald,better:"higher"},
-              {l:"LTV : CAC Ratio",          v:(ltvCacRatio||0).toFixed(1)+"x",sub:ltvCacRatio>=3?"Healthy (3x+ target)":ltvCacRatio>=2?"Improving":"Below benchmark",trend:SAAS.ltv.map((v,i)=>safeDiv(v,SAAS.cac[i])),c:ltvCacRatio>=3?T.emerald:T.amber,better:"higher"},
+              {l:"LTV : CAC Ratio",          v:((ltvCacRatio||0).toFixed(1))+"x",sub:ltvCacRatio>=3?"Healthy (3x+ target)":ltvCacRatio>=2?"Improving":"Below benchmark",trend:SAAS.ltv.map((v,i)=>safeDiv(v,SAAS.cac[i])),c:ltvCacRatio>=3?T.emerald:T.amber,better:"higher"},
             ].map(k=>(
-              <div key={k.l} style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,padding:"16px 18px"}}>
+              <div key={k.l} style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,padding:"16px 18px"}}>
                 <div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>{k.l}</div>
                 <div style={{fontSize:22,fontWeight:800,fontFamily:T.mono,color:k.c,marginBottom:4}}>{k.v}</div>
                 <div style={{fontSize:10,color:T.textDim,fontFamily:T.sans,marginBottom:12}}>{k.sub}</div>
@@ -4821,7 +4821,7 @@ function SaaSMetrics({aiContext}) {
               </div>
             ))}
           </div>
-          <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:12,padding:"16px 18px"}}>
+          <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:12,padding:"16px 18px"}}>
             <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:13,marginBottom:14}}>📊 Net Revenue Retention Trend</div>
             <div style={{display:"flex",alignItems:"flex-end",gap:4,height:100}}>
               {(()=>{
@@ -4833,7 +4833,7 @@ function SaaSMetrics({aiContext}) {
                   return (
                     <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
                       <span style={{fontSize:7,color:good?T.emerald:T.amber,fontFamily:T.mono,fontWeight:700}}>{pct(v)}</span>
-                      <div style={{width:"100%",height:Math.max(h,4)+"px",background:good?"linear-gradient(180deg,"+T.emerald+"90,"+T.emerald+"40)":"linear-gradient(180deg,"+T.amber+"90,"+T.amber+"40)",borderRadius:"3px 3px 0 0"}}/>
+                      <div style={{width:"100%",height:(Math.max(h,4))+"px",background:good?"linear-gradient(180deg,"+(T.emerald)+"90,"+(T.emerald)+"40)":"linear-gradient(180deg,"+(T.amber)+"90,"+(T.amber)+"40)",borderRadius:"3px 3px 0 0"}}/>
                       <span style={{fontSize:7,color:T.textDim,fontFamily:T.mono}}>{MONTHS[i]}</span>
                     </div>
                   );
@@ -5013,18 +5013,18 @@ function CsuiteStrategicPanel() {
   return (
     <div>
       {/* ── Role selector ── */}
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",background:T.surface,border:"1px solid "+T.border,borderRadius:12,overflow:"hidden",marginBottom:20}}>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",background:T.surface,border:"1px solid "+(T.border),borderRadius:12,overflow:"hidden",marginBottom:20}}>
         {Object.values(CSUITE_ROLES).map((r,i)=>{
           const active = roleKey===r.key;
           return (
             <button key={r.key} onClick={()=>setRoleKey(r.key)} style={{
-              border:"none", borderRight:i<2?"1px solid "+T.border:"none",
-              background:active?"linear-gradient(160deg,"+r.accent+"18,"+r.accent+"08)":"transparent",
+              border:"none", borderRight:i<2?"1px solid "+(T.border):"none",
+              background:active?"linear-gradient(160deg,"+(r.accent)+"18,"+(r.accent)+"08)":"transparent",
               cursor:"pointer", padding:"18px 20px", textAlign:"left", position:"relative", transition:"background 0.2s",
             }}>
-              {active&&<div style={{position:"absolute",top:0,left:0,right:0,height:2,background:"linear-gradient(90deg,transparent 10%,"+r.accent+" 45%,"+r.accent+" 55%,transparent 90%)"}}/>}
+              {active&&<div style={{position:"absolute",top:0,left:0,right:0,height:2,background:"linear-gradient(90deg,transparent 10%,"+(r.accent)+" 45%,"+(r.accent)+" 55%,transparent 90%)"}}/>}
               <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
-                <div style={{width:32,height:32,borderRadius:9,background:active?r.accent+"22":T.card,border:"1px solid "+active?r.accent+"50":T.border,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:T.mono,fontSize:13,color:active?r.accent:T.textDim,transition:"all 0.2s"}}>{r.icon}</div>
+                <div style={{width:32,height:32,borderRadius:9,background:active?r.accent+"22":T.card,border:"1px solid "+(active?r.accent+"50":T.border),display:"flex",alignItems:"center",justifyContent:"center",fontFamily:T.mono,fontSize:13,color:active?r.accent:T.textDim,transition:"all 0.2s"}}>{r.icon}</div>
                 <div>
                   <div style={{fontFamily:T.mono,fontSize:13,fontWeight:700,letterSpacing:1.5,color:active?r.accent:T.textMid}}>{r.key}</div>
                   <div style={{fontFamily:T.sans,fontSize:9,color:T.textDim,marginTop:1}}>{r.label}</div>
@@ -5034,8 +5034,8 @@ function CsuiteStrategicPanel() {
               <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
                 {r.watch.filter(w=>w.priority==="critical"||w.priority==="high").map((w,wi)=>{
                   const p=CPRI[w.priority];
-                  return <div key={wi} style={{display:"flex",alignItems:"center",gap:4,background:p.bg,border:"1px solid "+p.border,borderRadius:4,padding:"2px 7px"}}>
-                    <div style={{width:4,height:4,borderRadius:"50%",background:p.fg,boxShadow:"0 0 5px "+p.fg+"60"}}/>
+                  return <div key={wi} style={{display:"flex",alignItems:"center",gap:4,background:p.bg,border:"1px solid "+(p.border),borderRadius:4,padding:"2px 7px"}}>
+                    <div style={{width:4,height:4,borderRadius:"50%",background:p.fg,boxShadow:"0 0 5px "+(p.fg)+"60"}}/>
                     <span style={{fontFamily:T.mono,fontSize:7,color:p.fg,letterSpacing:1.5,fontWeight:700}}>{p.label}</span>
                   </div>;
                 })}
@@ -5046,7 +5046,7 @@ function CsuiteStrategicPanel() {
       </div>
 
       {/* ── Role lens summary ── */}
-      <div style={{background:"linear-gradient(135deg,"+ac+"10,"+ac+"04)",border:"1px solid "+ac+"28",borderLeft:"3px solid "+ac,borderRadius:"0 10px 10px 0",padding:"12px 18px",marginBottom:20}}>
+      <div style={{background:"linear-gradient(135deg,"+(ac)+"10,"+(ac)+"04)",border:"1px solid "+(ac)+"28",borderLeft:"3px solid "+(ac),borderRadius:"0 10px 10px 0",padding:"12px 18px",marginBottom:20}}>
         <div style={{display:"flex",alignItems:"flex-start",gap:12}}>
           <span style={{fontFamily:T.mono,fontSize:9,color:ac,letterSpacing:3,textTransform:"uppercase",whiteSpace:"nowrap",marginTop:2}}>{R.key} VIEW</span>
           <div style={{width:1,height:14,background:ac+"40",flexShrink:0,marginTop:2}}/>
@@ -5056,15 +5056,15 @@ function CsuiteStrategicPanel() {
 
       {/* ── Strategic wins ── */}
       <div style={{marginBottom:4}}>
-        <CSuiteRowLabel color={T.emerald} label={R.key+" · Strategic Wins"} sub="Four highest-signal positives from FY 2024"/>
+        <CSuiteRowLabel color={T.emerald} label={(R.key)+" · Strategic Wins"} sub="Four highest-signal positives from FY 2024"/>
       </div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:20}}>
         {R.wins.map((w,i)=>(
-          <div key={i} style={{background:"linear-gradient(155deg,"+T.card+","+T.surface+")",border:"1px solid "+w.color+"22",borderTop:"2px solid "+w.color+"55",borderRadius:11,padding:"16px 16px",position:"relative",overflow:"hidden"}}>
-            <div style={{position:"absolute",inset:0,pointerEvents:"none",background:"radial-gradient(ellipse at top right,"+w.color+"07,transparent 60%)"}}/>
+          <div key={i} style={{background:"linear-gradient(155deg,"+(T.card)+","+(T.surface)+")",border:"1px solid "+(w.color)+"22",borderTop:"2px solid "+(w.color)+"55",borderRadius:11,padding:"16px 16px",position:"relative",overflow:"hidden"}}>
+            <div style={{position:"absolute",inset:0,pointerEvents:"none",background:"radial-gradient(ellipse at top right,"+(w.color)+"07,transparent 60%)"}}/>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
-              <span style={{fontFamily:T.mono,fontSize:7,color:w.color,letterSpacing:1.5,textTransform:"uppercase",background:w.color+"15",border:"1px solid "+w.color+"30",borderRadius:4,padding:"2px 7px"}}>{w.tag}</span>
-              <span style={{fontFamily:T.mono,fontSize:7,color:T.emerald,background:T.emeraldDim,border:"1px solid "+T.emerald+"28",borderRadius:4,padding:"2px 7px"}}>HIGH</span>
+              <span style={{fontFamily:T.mono,fontSize:7,color:w.color,letterSpacing:1.5,textTransform:"uppercase",background:w.color+"15",border:"1px solid "+(w.color)+"30",borderRadius:4,padding:"2px 7px"}}>{w.tag}</span>
+              <span style={{fontFamily:T.mono,fontSize:7,color:T.emerald,background:T.emeraldDim,border:"1px solid "+(T.emerald)+"28",borderRadius:4,padding:"2px 7px"}}>HIGH</span>
             </div>
             <div style={{fontFamily:T.mono,fontSize:18,fontWeight:700,color:w.color,lineHeight:1,marginBottom:5}}>{w.kpi}</div>
             <div style={{fontFamily:T.sans,fontSize:9,color:T.textDim,marginBottom:8}}>{w.kpiSub}</div>
@@ -5075,29 +5075,29 @@ function CsuiteStrategicPanel() {
       </div>
 
       {/* ── Watch items ── */}
-      <CSuiteRowLabel color={T.rose} label={R.key+" · Watch Items & Required Actions"} sub="Issues ordered by priority and business impact"/>
+      <CSuiteRowLabel color={T.rose} label={(R.key)+" · Watch Items & Required Actions"} sub="Issues ordered by priority and business impact"/>
       <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:20}}>
         {R.watch.map((w,i)=>{
           const p=CPRI[w.priority], tr=CTREND[w.trend]||CTREND.stable, isOpen=expanded===i;
           return (
-            <div key={roleKey+"-"+i} onClick={()=>setExpanded(isOpen?null:i)} style={{
-              background:isOpen?"linear-gradient(135deg,"+p.fg+"0C,"+T.card+")"  :T.surface,
-              border:"1px solid "+isOpen?p.fg+"45":T.border,
-              borderLeft:"3px solid "+p.fg,
+            <div key={(roleKey)+"-"+(i)} onClick={()=>setExpanded(isOpen?null:i)} style={{
+              background:isOpen?"linear-gradient(135deg,"+(p.fg)+"0C,"+(T.card)+")"  :T.surface,
+              border:"1px solid "+(isOpen?p.fg+"45":T.border),
+              borderLeft:"3px solid "+(p.fg),
               borderRadius:"0 10px 10px 0",
               padding:isOpen?"18px 22px":"13px 22px",
               cursor:"pointer", transition:"all 0.2s",
             }}>
               {/* Header row */}
               <div style={{display:"grid",gridTemplateColumns:"auto 1fr auto auto auto auto",gap:12,alignItems:"center"}}>
-                <div style={{display:"flex",alignItems:"center",gap:5,flexShrink:0,background:p.bg,border:"1px solid "+p.border,borderRadius:5,padding:"3px 9px"}}>
-                  <div style={{width:5,height:5,borderRadius:"50%",background:p.fg,boxShadow:"0 0 5px "+p.fg+"70"}}/>
+                <div style={{display:"flex",alignItems:"center",gap:5,flexShrink:0,background:p.bg,border:"1px solid "+(p.border),borderRadius:5,padding:"3px 9px"}}>
+                  <div style={{width:5,height:5,borderRadius:"50%",background:p.fg,boxShadow:"0 0 5px "+(p.fg)+"70"}}/>
                   <span style={{fontFamily:T.mono,fontSize:7,color:p.fg,fontWeight:700,letterSpacing:1.5}}>{p.label}</span>
                 </div>
                 <div>
                   <div style={{display:"flex",alignItems:"center",gap:7}}>
                     <span style={{fontFamily:T.sans,fontSize:11,fontWeight:600,color:T.text}}>{w.title}</span>
-                    <span style={{fontFamily:T.mono,fontSize:7,color:ac,letterSpacing:1,background:ac+"14",border:"1px solid "+ac+"25",borderRadius:3,padding:"1px 5px",flexShrink:0,textTransform:"uppercase"}}>{w.tag}</span>
+                    <span style={{fontFamily:T.mono,fontSize:7,color:ac,letterSpacing:1,background:ac+"14",border:"1px solid "+(ac)+"25",borderRadius:3,padding:"1px 5px",flexShrink:0,textTransform:"uppercase"}}>{w.tag}</span>
                   </div>
                   {!isOpen&&<div style={{fontFamily:T.sans,fontSize:9,color:T.textDim,marginTop:3}}>{w.body.substring(0,115)}…</div>}
                 </div>
@@ -5132,7 +5132,7 @@ function CsuiteStrategicPanel() {
                               <div key={qi} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
                                 <div style={{fontFamily:T.mono,fontSize:8,color:qcs[qi],fontWeight:700}}>{v}</div>
                                 <div style={{width:"100%",display:"flex",flexDirection:"column",justifyContent:"flex-end",height:28}}>
-                                  <div style={{width:"100%",height:barH+"px",background:"linear-gradient(180deg,"+qcs[qi]+"90,"+qcs[qi]+"40)",border:"1px solid "+qcs[qi]+"40",borderRadius:"3px 3px 0 0"}}/>
+                                  <div style={{width:"100%",height:(barH)+"px",background:"linear-gradient(180deg,"+(qcs[qi])+"90,"+(qcs[qi])+"40)",border:"1px solid "+(qcs[qi])+"40",borderRadius:"3px 3px 0 0"}}/>
                                 </div>
                                 <div style={{fontFamily:T.mono,fontSize:7,color:T.textDim}}>Q{qi+1}</div>
                               </div>
@@ -5141,7 +5141,7 @@ function CsuiteStrategicPanel() {
                         </div>
                       </div>
                     )}
-                    <div style={{background:p.bg,border:"1px solid "+p.border,borderRadius:8,padding:"11px 14px",display:"flex",gap:10,alignItems:"flex-start"}}>
+                    <div style={{background:p.bg,border:"1px solid "+(p.border),borderRadius:8,padding:"11px 14px",display:"flex",gap:10,alignItems:"flex-start"}}>
                       <span style={{fontFamily:T.mono,color:p.fg,fontSize:12,flexShrink:0,marginTop:1}}>→</span>
                       <div>
                         <div style={{fontFamily:T.mono,fontSize:8,color:p.fg,letterSpacing:2,marginBottom:4}}>REQUIRED ACTION</div>
@@ -5149,8 +5149,8 @@ function CsuiteStrategicPanel() {
                       </div>
                     </div>
                   </div>
-                  <div style={{background:T.card,border:"1px solid "+T.border,borderRadius:10,padding:"14px",display:"flex",flexDirection:"column",gap:12}}>
-                    {[{l:"PRIORITY",v:p.label,c:p.fg},{l:"DUE DATE",v:w.due,c:T.text},{l:"OWNER",v:w.owner,c:T.textMid},{l:"EFFORT",v:w.effort,c:CEFFORT[w.effort]},{l:"CATEGORY",v:w.tag,c:ac},{l:"TREND",v:tr.g+" "+tr.label,c:tr.c}].map(m=>(
+                  <div style={{background:T.card,border:"1px solid "+(T.border),borderRadius:10,padding:"14px",display:"flex",flexDirection:"column",gap:12}}>
+                    {[{l:"PRIORITY",v:p.label,c:p.fg},{l:"DUE DATE",v:w.due,c:T.text},{l:"OWNER",v:w.owner,c:T.textMid},{l:"EFFORT",v:w.effort,c:CEFFORT[w.effort]},{l:"CATEGORY",v:w.tag,c:ac},{l:"TREND",v:(tr.g)+" "+(tr.label),c:tr.c}].map(m=>(
                       <div key={m.l}>
                         <div style={{fontFamily:T.mono,fontSize:7,color:T.textDim,letterSpacing:2,marginBottom:2}}>{m.l}</div>
                         <div style={{fontFamily:T.sans,fontSize:11,fontWeight:600,color:m.c}}>{m.v}</div>
@@ -5166,7 +5166,7 @@ function CsuiteStrategicPanel() {
 
       {/* ── Priority × Effort matrix ── */}
       <CSuiteRowLabel color={T.textDim} label="Priority × Effort Matrix" sub="Resource allocation reference for leadership team"/>
-      <div style={{background:T.surface,border:"1px solid "+T.border,borderRadius:12,padding:"18px 22px"}}>
+      <div style={{background:T.surface,border:"1px solid "+(T.border),borderRadius:12,padding:"18px 22px"}}>
         <div style={{display:"grid",gridTemplateColumns:"88px 1fr 1fr 1fr",gap:5}}>
           <div/>
           {["Low Effort","Medium Effort","High Effort"].map(e=>(
@@ -5177,7 +5177,7 @@ function CsuiteStrategicPanel() {
           {["critical","high","medium","low"].map(prio=>
             [null,"Low","Medium","High"].map((eff,ci)=>{
               if(ci===0) return (
-                <div key={"lbl-"+prio} style={{display:"flex",alignItems:"center",paddingRight:8}}>
+                <div key={"lbl-"+(prio)} style={{display:"flex",alignItems:"center",paddingRight:8}}>
                   <div style={{display:"flex",alignItems:"center",gap:5}}>
                     <div style={{width:5,height:5,borderRadius:"50%",background:CPRI[prio].fg,flexShrink:0}}/>
                     <span style={{fontFamily:T.mono,fontSize:8,color:CPRI[prio].fg,letterSpacing:1}}>{CPRI[prio].label}</span>
@@ -5190,7 +5190,7 @@ function CsuiteStrategicPanel() {
               const cellBg = cellItems.length?(isHot?T.roseDim:isQuick?T.emeraldDim:T.amberDim):T.card;
               const cellBorder = cellItems.length?(isHot?T.rose+"30":isQuick?T.emerald+"30":T.amber+"30"):T.border;
               return (
-                <div key={prio+"-"+eff} style={{background:cellBg,border:"1px solid "+cellBorder,borderRadius:7,padding:"8px 10px",minHeight:52}}>
+                <div key={(prio)+"-"+(eff)} style={{background:cellBg,border:"1px solid "+(cellBorder),borderRadius:7,padding:"8px 10px",minHeight:52}}>
                   {cellItems.length===0
                     ? <span style={{fontFamily:T.mono,fontSize:9,color:T.border,opacity:0.5}}>—</span>
                     : cellItems.map((item,ii)=>(
@@ -5204,10 +5204,10 @@ function CsuiteStrategicPanel() {
             })
           )}
         </div>
-        <div style={{display:"flex",gap:16,marginTop:12,paddingTop:10,borderTop:"1px solid "+T.border}}>
+        <div style={{display:"flex",gap:16,marginTop:12,paddingTop:10,borderTop:"1px solid "+(T.border)}}>
           {[{bg:T.roseDim,b:T.rose+"30",l:"Act Now"},{bg:T.amberDim,b:T.amber+"30",l:"Plan & Assign"},{bg:T.emeraldDim,b:T.emerald+"30",l:"Quick Win"}].map(l=>(
             <div key={l.l} style={{display:"flex",alignItems:"center",gap:6}}>
-              <div style={{width:11,height:11,borderRadius:3,background:l.bg,border:"1px solid "+l.b,flexShrink:0}}/>
+              <div style={{width:11,height:11,borderRadius:3,background:l.bg,border:"1px solid "+(l.b),flexShrink:0}}/>
               <span style={{fontFamily:T.sans,fontSize:9,color:T.textDim}}>{l.l}</span>
             </div>
           ))}
@@ -5225,7 +5225,7 @@ function CSuiteRowLabel({color,label,sub}) {
         <div style={{fontFamily:T.mono,fontSize:9,color,letterSpacing:3,textTransform:"uppercase"}}>{label}</div>
         {sub&&<div style={{fontFamily:T.sans,fontSize:9,color:T.textDim,marginTop:1}}>{sub}</div>}
       </div>
-      <div style={{height:1,flex:1,background:"linear-gradient(90deg,"+color+"30,transparent)"}}/>
+      <div style={{height:1,flex:1,background:"linear-gradient(90deg,"+(color)+"30,transparent)"}}/>
     </div>
   );
 }
@@ -5316,27 +5316,27 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
     const items = [];
     // Revenue vs budget miss
     const revMissPct = safeDiv(revVariance, sum(budPnL.map(m=>m.rev)));
-    if(revMissPct < -0.05) items.push({severity:"critical", emoji:"📉", title:"Revenue below budget", detail:"YTD revenue is "+pct(Math.abs(revMissPct))+" below budget — a "+fmt(Math.abs(revVariance),true)+" shortfall. Product Sales are the primary driver of the miss.", action:"Review pricing strategy & pipeline in Scenario Planner"});
+    if(revMissPct < -0.05) items.push({severity:"critical", emoji:"📉", title:"Revenue below budget", detail:"YTD revenue is "+(pct(Math.abs(revMissPct)))+" below budget — a "+(fmt(Math.abs(revVariance),true))+" shortfall. Product Sales are the primary driver of the miss.", action:"Review pricing strategy & pipeline in Scenario Planner"});
     // Marketing overspend
     const mktActual=sum(BASE_PNL.marketing), mktBudget=sum(BUDGET_PNL.marketing);
-    if(mktActual>mktBudget*1.08) items.push({severity:"warning", emoji:"📢", title:"Marketing over budget", detail:"Marketing spend is "+pct(safeDiv(mktActual-mktBudget,mktBudget))+" over budget ("+fmt(mktActual,true)+" actual vs "+fmt(mktBudget,true)+" budget). Check ROI on Q4 campaigns.", action:"Analyze channel ROI in Dept Breakdown"});
+    if(mktActual>mktBudget*1.08) items.push({severity:"warning", emoji:"📢", title:"Marketing over budget", detail:"Marketing spend is "+(pct(safeDiv(mktActual-mktBudget,mktBudget)))+" over budget ("+(fmt(mktActual,true))+" actual vs "+(fmt(mktBudget,true))+" budget). Check ROI on Q4 campaigns.", action:"Analyze channel ROI in Dept Breakdown"});
     // High AR overdue
     const overdue90=sum(AR_CLIENTS.map(c=>c.d90+c.d90p));
-    if(overdue90>5000) items.push({severity:"critical", emoji:"⚠️", title:"AR 90+ days overdue", detail:fmt(overdue90,true)+" is 90+ days past due. Apex Logistics ($7,900) and Cascade Financial ($900) are primary risks. Collection probability drops below 50% after 90 days.", action:"Prioritize collections call list in AR Aging"});
+    if(overdue90>5000) items.push({severity:"critical", emoji:"⚠️", title:"AR 90+ days overdue", detail:(fmt(overdue90,true))+" is 90+ days past due. Apex Logistics ($7,900) and Cascade Financial ($900) are primary risks. Collection probability drops below 50% after 90 days.", action:"Prioritize collections call list in AR Aging"});
     // Cash crunch risk
-    if(cfMin<80000) items.push({severity:"warning", emoji:"💧", title:"Cash balance dips low", detail:"Projected minimum cash balance hits "+fmt(cfMin,true)+" at Week "+cfMinWk+". This is driven by tax payments and CapEx overlap. Consider timing adjustments.", action:"Review weekly detail in Cash Flow tab"});
+    if(cfMin<80000) items.push({severity:"warning", emoji:"💧", title:"Cash balance dips low", detail:"Projected minimum cash balance hits "+(fmt(cfMin,true))+" at Week "+(cfMinWk)+". This is driven by tax payments and CapEx overlap. Consider timing adjustments.", action:"Review weekly detail in Cash Flow tab"});
     // Churn rate
-    if(churnRate>0.018) items.push({severity:"warning", emoji:"🔄", title:"Customer churn approaching target", detail:"Monthly customer churn is "+pct(churnRate)+" vs 2.0% target. "+SAAS.churnCust[11]+" customers churned in December. Review at-risk segments before churn accelerates.", action:"Deep-dive customer cohorts in SaaS Metrics"});
+    if(churnRate>0.018) items.push({severity:"warning", emoji:"🔄", title:"Customer churn approaching target", detail:"Monthly customer churn is "+(pct(churnRate))+" vs 2.0% target. "+(SAAS.churnCust[11])+" customers churned in December. Review at-risk segments before churn accelerates.", action:"Deep-dive customer cohorts in SaaS Metrics"});
     // LTV:CAC health
     const ltvCac=latestLtv/latestCac;
-    if(ltvCac<3) items.push({severity:"warning", emoji:"🎯", title:"LTV:CAC ratio below 3x", detail:"Current LTV:CAC is "+ltvCac.toFixed(1)+"x — below the 3x benchmark. CAC has been volatile. Consider reducing acquisition spend or improving onboarding retention.", action:"Analyze unit economics in SaaS Metrics"});
+    if(ltvCac<3) items.push({severity:"warning", emoji:"🎯", title:"LTV:CAC ratio below 3x", detail:"Current LTV:CAC is "+(ltvCac.toFixed(1))+"x — below the 3x benchmark. CAC has been volatile. Consider reducing acquisition spend or improving onboarding retention.", action:"Analyze unit economics in SaaS Metrics"});
     // Working capital
-    if(bsCurrRatio<1.5) items.push({severity:"info", emoji:"🏦", title:"Current ratio trending low", detail:"Current ratio is "+bsCurrRatio.toFixed(2)+"x. While above the 1.0x floor, approaching 1.5x warrants attention — especially with the short-term debt maturity.", action:"Review Balance Sheet liquidity ratios"});
+    if(bsCurrRatio<1.5) items.push({severity:"info", emoji:"🏦", title:"Current ratio trending low", detail:"Current ratio is "+(bsCurrRatio.toFixed(2))+"x. While above the 1.0x floor, approaching 1.5x warrants attention — especially with the short-term debt maturity.", action:"Review Balance Sheet liquidity ratios"});
     // Net margin compression
     const netM=aiCtx.ytdNetMargin;
-    if(netM<0.08) items.push({severity:"info", emoji:"📊", title:"Net margin compression", detail:"Net margin at "+pct(netM)+" is below the 8% healthy threshold. Payroll growth and marketing spend are outpacing revenue. Review P&L cost structure.", action:"Examine expense trends in P&L Breakdown"});
+    if(netM<0.08) items.push({severity:"info", emoji:"📊", title:"Net margin compression", detail:"Net margin at "+(pct(netM))+" is below the 8% healthy threshold. Payroll growth and marketing spend are outpacing revenue. Review P&L cost structure.", action:"Examine expense trends in P&L Breakdown"});
     // NRR below 110%
-    if(latestNrr<1.10) items.push({severity:"info", emoji:"📈", title:"NRR below 110% benchmark", detail:"Net Revenue Retention of "+pct(latestNrr-1)+" is below best-in-class SaaS benchmark of 110%+. Focus on expansion revenue and reducing contraction MRR.", action:"Review expansion MRR in SaaS Waterfall"});
+    if(latestNrr<1.10) items.push({severity:"info", emoji:"📈", title:"NRR below 110% benchmark", detail:"Net Revenue Retention of "+(pct(latestNrr-1))+" is below best-in-class SaaS benchmark of 110%+. Focus on expansion revenue and reducing contraction MRR.", action:"Review expansion MRR in SaaS Waterfall"});
     return items;
   };
   const anomalies = useMemo(()=>buildAnomalies(), [revVariance, cfMin, churnRate, latestNrr, latestLtv, latestCac, bsCurrRatio]);
@@ -5433,32 +5433,32 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
         *{box-sizing:border-box;margin:0;padding:0;}
         ::-webkit-scrollbar{width:5px;height:5px}
         ::-webkit-scrollbar-track{background:transparent}
-        ::-webkit-scrollbar-thumb{background:"+T.border+";border-radius:99px}
-        ::-webkit-scrollbar-thumb:hover{background:"+T.textDim+"}
-        input[type=range]{appearance:none;height:3px;border-radius:99px;background:"+T.border+";outline:none}
-        input[type=range]::-webkit-slider-thumb{appearance:none;width:14px;height:14px;border-radius:50%;cursor:pointer;background:"+T.cyan+";border:2px solid "+T.bg+";box-shadow:0 0 6px "+T.cyan+"60}
+        ::-webkit-scrollbar-thumb{background:"+(T.border)+";border-radius:99px}
+        ::-webkit-scrollbar-thumb:hover{background:"+(T.textDim)+"}
+        input[type=range]{appearance:none;height:3px;border-radius:99px;background:"+(T.border)+";outline:none}
+        input[type=range]::-webkit-slider-thumb{appearance:none;width:14px;height:14px;border-radius:50%;cursor:pointer;background:"+(T.cyan)+";border:2px solid "+(T.bg)+";box-shadow:0 0 6px "+(T.cyan)+"60}
         @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
         @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
         @keyframes fadeInFast{from{opacity:0}to{opacity:1}}
         @keyframes spin{to{transform:rotate(360deg)}}
         @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
         @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
-        @keyframes glow{0%,100%{box-shadow:0 0 8px "+T.cyan+"30}50%{box-shadow:0 0 20px "+T.cyan+"60}}
+        @keyframes glow{0%,100%{box-shadow:0 0 8px "+(T.cyan)+"30}50%{box-shadow:0 0 20px "+(T.cyan)+"60}}
         .fadein{animation:fadeIn 0.22s cubic-bezier(0.4,0,0.2,1) both}
         .fadein-fast{animation:fadeInFast 0.15s ease both}
         tr:hover td{filter:brightness(1.10);transition:filter 0.12s}
-        button:focus-visible{outline:2px solid "+T.cyan+";outline-offset:2px}
-        input:focus-visible{outline:2px solid "+T.cyan+"60;outline-offset:1px}
-        .skeleton{background:linear-gradient(90deg,"+T.surface+" 25%,"+T.border+" 50%,"+T.surface+" 75%);background-size:200% 100%;animation:shimmer 1.4s infinite}
+        button:focus-visible{outline:2px solid "+(T.cyan)+";outline-offset:2px}
+        input:focus-visible{outline:2px solid "+(T.cyan)+"60;outline-offset:1px}
+        .skeleton{background:linear-gradient(90deg,"+(T.surface)+" 25%,"+(T.border)+" 50%,"+(T.surface)+" 75%);background-size:200% 100%;animation:shimmer 1.4s infinite}
       "}</style>
 
       {/* ── Top Nav ── */}
-      <div style={{background:T.surface,borderBottom:"1px solid "+T.border,padding:"0 24px",display:"flex",justifyContent:"space-between",alignItems:"stretch",position:"sticky",top:0,zIndex:100,minHeight:52}}>
+      <div style={{background:T.surface,borderBottom:"1px solid "+(T.border),padding:"0 24px",display:"flex",justifyContent:"space-between",alignItems:"stretch",position:"sticky",top:0,zIndex:100,minHeight:52}}>
         {/* Left: logo + tabs */}
         <div style={{display:"flex",alignItems:"center",gap:10,flex:1,minWidth:0,overflow:"hidden"}}>
           {/* Logo */}
-          <div style={{display:"flex",alignItems:"center",gap:9,flexShrink:0,paddingRight:12,borderRight:"1px solid "+T.border,height:52,alignSelf:"stretch",alignContent:"center",flexWrap:"wrap"}}>
-            <div style={{width:32,height:32,borderRadius:9,background:"linear-gradient(135deg,"+T.cyan+","+T.violet+")",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,boxShadow:"0 0 16px "+T.cyan+"40",flexShrink:0}}>⬡</div>
+          <div style={{display:"flex",alignItems:"center",gap:9,flexShrink:0,paddingRight:12,borderRight:"1px solid "+(T.border),height:52,alignSelf:"stretch",alignContent:"center",flexWrap:"wrap"}}>
+            <div style={{width:32,height:32,borderRadius:9,background:"linear-gradient(135deg,"+(T.cyan)+","+(T.violet)+")",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,boxShadow:"0 0 16px "+(T.cyan)+"40",flexShrink:0}}>⬡</div>
             <div>
               <div style={{color:T.text,fontFamily:T.display,fontWeight:800,fontSize:15,lineHeight:1}}>FinanceOS</div>
               <div style={{color:T.textDim,fontFamily:T.mono,fontSize:7,letterSpacing:1.5,marginTop:2}}>FP&A SUITE</div>
@@ -5472,17 +5472,17 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
                 return (
                   <button key={t.id} role="tab" aria-selected={active}
                     onClick={()=>locked?setTab("pricing"):setTab(t.id)}
-                    title={locked?t.label+" — Upgrade to unlock":t.label}
+                    title={locked?(t.label)+" — Upgrade to unlock":t.label}
                     style={{
-                      background:active?T.cyanDim:locked?T.amber+"08":"transparent",
-                      border:"1px solid "+active?T.cyanMid:locked?`${T.amber+"20":"transparent"}`,
+                      background:active?T.cyanDim:locked?(T.amber)+"08":"transparent",
+                      border:"1px solid "+(active?T.cyanMid:locked?(T.amber)+"20":"transparent"),
                       borderRadius:6,padding:"3px 10px",
-                      color:active?T.cyan:locked?T.amber+"99":T.textMid,
+                      color:active?T.cyan:locked?(T.amber)+"99":T.textMid,
                       fontSize:10,fontFamily:T.sans,fontWeight:active?700:500,
                       cursor:"pointer",transition:"all 0.12s",whiteSpace:"nowrap",flexShrink:0,
                     }}
                     onMouseEnter={e=>{if(!active)e.currentTarget.style.background=active?T.cyanDim:T.border+"40"}}
-                    onMouseLeave={e=>{if(!active)e.currentTarget.style.background=active?T.cyanDim:locked?T.amber+"08":"transparent"}}
+                    onMouseLeave={e=>{if(!active)e.currentTarget.style.background=active?T.cyanDim:locked?(T.amber)+"08":"transparent"}}
                   >{locked?"🔒":t.icon} {t.label}</button>
                 );
               })}
@@ -5493,17 +5493,17 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
                 return (
                   <button key={t.id}
                     onClick={()=>locked?setTab("pricing"):setTab(t.id)}
-                    title={locked?t.label+" — Upgrade to unlock":t.label}
+                    title={locked?(t.label)+" — Upgrade to unlock":t.label}
                     style={{
-                      background:active?(isPricing?T.violet+"20":T.cyanDim):locked?T.violet+"08":"transparent",
-                      border:"1px solid "+active?(isPricing?`${T.violet+"50":T.cyanMid):locked?T.violet+"20":"transparent"}`,
+                      background:active?(isPricing?(T.violet)+"20":T.cyanDim):locked?(T.violet)+"08":"transparent",
+                      border:"1px solid "+(active?(isPricing?(T.violet)+"50":T.cyanMid):locked?(T.violet)+"20":"transparent"),
                       borderRadius:6,padding:"3px 10px",
-                      color:active?(isPricing?T.violet:T.cyan):locked?T.violet+"99":T.textDim,
+                      color:active?(isPricing?T.violet:T.cyan):locked?(T.violet)+"99":T.textDim,
                       fontSize:10,fontFamily:T.sans,fontWeight:active?700:500,
                       cursor:"pointer",transition:"all 0.12s",whiteSpace:"nowrap",flexShrink:0,
                     }}
                     onMouseEnter={e=>{if(!active)e.currentTarget.style.background=T.border+"40"}}
-                    onMouseLeave={e=>{if(!active)e.currentTarget.style.background=active?(isPricing?T.violet+"20":T.cyanDim):locked?T.violet+"08":"transparent"}}
+                    onMouseLeave={e=>{if(!active)e.currentTarget.style.background=active?(isPricing?(T.violet)+"20":T.cyanDim):locked?(T.violet)+"08":"transparent"}}
                   >{locked?"🔒":t.icon} {t.label}</button>
                 );
               })}
@@ -5512,38 +5512,38 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
         </div>
 
         {/* Right: KPIs + alerts + plan */}
-        <div style={{display:"flex",gap:4,alignItems:"center",flexShrink:0,paddingLeft:12,borderLeft:"1px solid "+T.border}}>
+        <div style={{display:"flex",gap:4,alignItems:"center",flexShrink:0,paddingLeft:12,borderLeft:"1px solid "+(T.border)}}>
           {/* KPI chips */}
           {[
-            {l:"Revenue",    v:fmt(aiCtx.ytdRevenue,true), c:T.cyan,   bg:T.cyan+"12"},
-            {l:"Net Income", v:fmt(aiCtx.ytdNet,true),     c:aiCtx.ytdNet>=0?T.emerald:T.rose, bg:aiCtx.ytdNet>=0?T.emerald+"12":T.rose+"12"},
-            {l:"Gr. Margin", v:pct(aiCtx.ytdGrossMargin),  c:T.violet, bg:T.violet+"12"},
-            {l:"MRR",        v:fmt(latestMrr,true),        c:T.amber,  bg:T.amber+"12"},
+            {l:"Revenue",    v:fmt(aiCtx.ytdRevenue,true), c:T.cyan,   bg:(T.cyan)+"12"},
+            {l:"Net Income", v:fmt(aiCtx.ytdNet,true),     c:aiCtx.ytdNet>=0?T.emerald:T.rose, bg:aiCtx.ytdNet>=0?(T.emerald)+"12":(T.rose)+"12"},
+            {l:"Gr. Margin", v:pct(aiCtx.ytdGrossMargin),  c:T.violet, bg:(T.violet)+"12"},
+            {l:"MRR",        v:fmt(latestMrr,true),        c:T.amber,  bg:(T.amber)+"12"},
           ].map(s=>(
-            <div key={s.l} style={{background:s.bg,border:"1px solid "+s.c+"25",borderRadius:7,padding:"4px 10px",textAlign:"center",cursor:"default"}} title={s.l}>
+            <div key={s.l} style={{background:s.bg,border:"1px solid "+(s.c)+"25",borderRadius:7,padding:"4px 10px",textAlign:"center",cursor:"default"}} title={s.l}>
               <div style={{color:T.textDim,fontSize:7,fontFamily:T.mono,textTransform:"uppercase",letterSpacing:1,marginBottom:1}}>{s.l}</div>
               <div style={{color:s.c,fontFamily:T.mono,fontSize:12,fontWeight:800,lineHeight:1}}>{s.v}</div>
             </div>
           ))}
           {/* Alert chip */}
           {canUseAlerts&&criticalCount>0&&(
-            <button onClick={()=>{setAiPanelOpen(true);setAiAlertTab("alerts");}} style={{display:"flex",alignItems:"center",gap:5,background:T.roseDim,border:"1px solid "+T.rose+"40",borderRadius:7,padding:"4px 10px",cursor:"pointer",animation:"pulse 2s infinite",flexShrink:0}}>
+            <button onClick={()=>{setAiPanelOpen(true);setAiAlertTab("alerts");}} style={{display:"flex",alignItems:"center",gap:5,background:T.roseDim,border:"1px solid "+(T.rose)+"40",borderRadius:7,padding:"4px 10px",cursor:"pointer",animation:"pulse 2s infinite",flexShrink:0}}>
               <span style={{fontSize:11}}>🚨</span>
               <span style={{fontSize:9,color:T.rose,fontFamily:T.sans,fontWeight:700}}>{criticalCount} Alert{criticalCount>1?"s":""}</span>
             </button>
           )}
           {/* Plan badge */}
-          <button onClick={()=>setTab("pricing")} style={{display:"flex",alignItems:"center",gap:5,background:planMeta.color+"15",border:"1px solid "+planMeta.color+"40",borderRadius:7,padding:"4px 10px",cursor:"pointer",transition:"all 0.15s",flexShrink:0}}
-            onMouseEnter={e=>e.currentTarget.style.background=planMeta.color+"25"}
-            onMouseLeave={e=>e.currentTarget.style.background=planMeta.color+"15"}>
+          <button onClick={()=>setTab("pricing")} style={{display:"flex",alignItems:"center",gap:5,background:(planMeta.color)+"15",border:"1px solid "+(planMeta.color)+"40",borderRadius:7,padding:"4px 10px",cursor:"pointer",transition:"all 0.15s",flexShrink:0}}
+            onMouseEnter={e=>e.currentTarget.style.background=(planMeta.color)+"25"}
+            onMouseLeave={e=>e.currentTarget.style.background=(planMeta.color)+"15"}>
             <span style={{fontSize:10}}>{planMeta.icon}</span>
             <span style={{fontSize:9,color:planMeta.color,fontFamily:T.mono,fontWeight:700,letterSpacing:0.5}}>{planMeta.label.toUpperCase()}</span>
           </button>
           {/* Dev plan switcher */}
-          <div style={{display:"flex",alignItems:"center",gap:1,background:T.card,border:"1px solid "+T.border,borderRadius:7,padding:"2px"}}>
+          <div style={{display:"flex",alignItems:"center",gap:1,background:T.card,border:"1px solid "+(T.border),borderRadius:7,padding:"2px"}}>
             {[["S","starter",T.teal],["P","professional",T.cyan],["E","enterprise",T.violet]].map(([abbr,p,c])=>(
               <button key={p} onClick={()=>setPlan(normalizePlan(p))} title={"Demo: "+p}
-                style={{background:plan===p?c+"20":"transparent",border:"1px solid "+plan===p?c+"40":"transparent",borderRadius:5,padding:"2px 7px",color:plan===p?c:T.textDim,fontSize:8,fontFamily:T.mono,fontWeight:700,cursor:"pointer",transition:"all 0.12s"}}>
+                style={{background:plan===p?(c)+"20":"transparent",border:"1px solid "+(plan===p?c+"40":"transparent"),borderRadius:5,padding:"2px 7px",color:plan===p?c:T.textDim,fontSize:8,fontFamily:T.mono,fontWeight:700,cursor:"pointer",transition:"all 0.12s"}}>
                 {abbr}
               </button>
             ))}
@@ -5552,7 +5552,7 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
       </div>
 
       {/* ── Page header strip (tab title + subtitle) ── */}
-      <div style={{background:T.surface,borderBottom:"1px solid "+T.border+"40",padding:"8px 28px",display:"flex",alignItems:"center",gap:10}}>
+      <div style={{background:T.surface,borderBottom:"1px solid "+(T.border)+"40",padding:"8px 28px",display:"flex",alignItems:"center",gap:10}}>
         <span style={{fontSize:16}}>{TABS.find(t=>t.id===tab)?.icon}</span>
         <div>
           <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,lineHeight:1}}>{TABS.find(t=>t.id===tab)?.label}</div>
@@ -5590,7 +5590,7 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
             />
           )}
           {tab==="integrations" && hasFeature(plan, FEATURES.CSV_IMPORT) && (
-            <button onClick={()=>setCsvImportOpen(true)} style={{display:"flex",alignItems:"center",gap:6,background:T.surface,border:"1px solid "+T.border,borderRadius:8,padding:"6px 13px",cursor:"pointer",color:T.textMid,fontSize:11,fontFamily:T.sans,fontWeight:600}}>
+            <button onClick={()=>setCsvImportOpen(true)} style={{display:"flex",alignItems:"center",gap:6,background:T.surface,border:"1px solid "+(T.border),borderRadius:8,padding:"6px 13px",cursor:"pointer",color:T.textMid,fontSize:11,fontFamily:T.sans,fontWeight:600}}>
               <span style={{fontSize:13}}>📤</span> Import CSV
             </button>
           )}
@@ -5602,7 +5602,7 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
           )).length>0&&["pnl","bva","cashflow","ar","saas"].includes(tab)&&(
             <div style={{display:"flex",gap:6}}>
               {anomalies.slice(0,2).map((a,i)=>(
-                <span key={i} style={{fontSize:9,color:a.severity==="critical"?T.rose:T.amber,background:(a.severity==="critical"?T.rose:T.amber)+"15",border:"1px solid "+(a.severity==="critical"?T.rose:T.amber)+"30",borderRadius:20,padding:"2px 8px",fontFamily:T.sans}}>
+                <span key={i} style={{fontSize:9,color:a.severity==="critical"?T.rose:T.amber,background:(a.severity==="critical"?T.rose:T.amber)+"15",border:"1px solid "+((a.severity==="critical"?T.rose:T.amber))+"30",borderRadius:20,padding:"2px 8px",fontFamily:T.sans}}>
                   {a.emoji} {a.title}
                 </span>
               ))}
@@ -5625,17 +5625,17 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
         )}
         {/* ── Starter upgrade banner — contextual per tab ── */}
         {starterBanner && (
-          <div style={{marginBottom:18,background:"linear-gradient(135deg,"+starterBanner.color+"12,"+T.violet+"08)",border:"1.5px solid "+starterBanner.color+"35",borderRadius:12,padding:"12px 18px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,position:"relative",overflow:"hidden"}}>
-            <div style={{position:"absolute",top:-20,right:80,width:120,height:60,borderRadius:"50%",background:starterBanner.color+"10",filter:"blur(20px)",pointerEvents:"none"}}/>
+          <div style={{marginBottom:18,background:"linear-gradient(135deg,"+(starterBanner.color)+"12,"+(T.violet)+"08)",border:"1.5px solid "+(starterBanner.color)+"35",borderRadius:12,padding:"12px 18px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,position:"relative",overflow:"hidden"}}>
+            <div style={{position:"absolute",top:-20,right:80,width:120,height:60,borderRadius:"50%",background:(starterBanner.color)+"10",filter:"blur(20px)",pointerEvents:"none"}}/>
             <div style={{display:"flex",alignItems:"center",gap:10,flex:1,minWidth:0}}>
-              <div style={{width:32,height:32,borderRadius:9,background:starterBanner.color+"18",border:"1px solid "+starterBanner.color+"35",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0}}>{starterBanner.icon}</div>
+              <div style={{width:32,height:32,borderRadius:9,background:(starterBanner.color)+"18",border:"1px solid "+(starterBanner.color)+"35",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0}}>{starterBanner.icon}</div>
               <div style={{minWidth:0}}>
                 <div style={{fontSize:11,color:starterBanner.color,fontFamily:T.sans,fontWeight:700,marginBottom:1}}>{starterBanner.headline}</div>
                 <div style={{fontSize:11,color:T.textDim,fontFamily:T.sans,lineHeight:1.4,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{starterBanner.text}</div>
               </div>
             </div>
             <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
-              <button onClick={()=>setTab("pricing")} style={{background:"linear-gradient(135deg,"+starterBanner.color+","+T.violet+")",border:"none",borderRadius:8,padding:"8px 18px",color:T.bg,fontSize:11,fontFamily:T.sans,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap",boxShadow:"0 2px 12px "+starterBanner.color+"35",letterSpacing:0.2}}>{starterBanner.cta}</button>
+              <button onClick={()=>setTab("pricing")} style={{background:"linear-gradient(135deg,"+(starterBanner.color)+","+(T.violet)+")",border:"none",borderRadius:8,padding:"8px 18px",color:T.bg,fontSize:11,fontFamily:T.sans,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap",boxShadow:"0 2px 12px "+(starterBanner.color)+"35",letterSpacing:0.2}}>{starterBanner.cta}</button>
               <button onClick={()=>setBannerDismissed(true)} style={{background:"transparent",border:"none",color:T.textDim,fontSize:16,cursor:"pointer",padding:"4px 6px",lineHeight:1,flexShrink:0}} title="Dismiss">×</button>
             </div>
           </div>
