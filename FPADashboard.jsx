@@ -3474,6 +3474,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
         </div>
       )}
     </div>
+    </div>
   );
 }
 
@@ -4376,7 +4377,7 @@ function BSRow({label, value, indent, isTotal, color, bold}) {
       <span style={{fontSize:isTotal?12:10,color:color||(isTotal?T.cyan:T.textMid),fontFamily:T.mono,fontWeight:isTotal?700:400}}>{fmt(value)}</span>
     </div>
   );
-}─
+}
 function BalanceSheet({aiContext}) {
   const [mo,setMo]=useState(11);
   const BS=BALANCE_SHEET;
