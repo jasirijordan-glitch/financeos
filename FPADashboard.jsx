@@ -803,7 +803,6 @@ function computeCFOScores(plan, hasQBO = false, hasPlaid = false) {
 }
 
 
-
 // ─── Export Button ────────────────────────────────────────────────
 /**
  * ExportButton — drop-down for PDF / PPTX / CSV export.
@@ -5568,58 +5567,7 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
         )}
         {/* ── CFO Scorecard — shown on pnl tab ── */}
         {tab==="pnl" && (
-          <CFOScorecard
-            plan={plan}
-            hasQBO={true}
-            hasPlaid={true}
-            hasExport={true}
-            hasCsuite={true}
-            metrics={{
-              revenue:          1100000,
-              netIncome:        86000,
-              grossMargin:      56.8,
-              mrr:              125000,
-              burnRate:         48000,
-              runwayMonths:     24.5,
-              topCustomerPct:   18,
-              nrr:              112,
-              lastUpdatedHours: 1,
-            }}
-            budget={{ revenue: 1100000 }}
-            actuals={{ revenue: 1078000 }}
-            cashFlow={{ weekly: [52000,54000,51000,55000,53000,50000,56000,54000,52000,53000,55000,54000,52000], balance: 650000 }}
-            scenarios={[
-              { name: "Base Case", revenue: 1100000 },
-              { name: "Bull Case", revenue: 1320000 },
-              { name: "Bear Case", revenue: 880000 },
-            ]}
-            historicalData={[
-              {month:"Jan 2023",revenue:682000,netIncome:47200,grossMargin:56.0,mrr:81600,burnRate:45200},
-              {month:"Feb 2023",revenue:692000,netIncome:47900,grossMargin:56.1,mrr:82700,burnRate:45400},
-              {month:"Mar 2023",revenue:703000,netIncome:48700,grossMargin:56.2,mrr:84000,burnRate:45600},
-              {month:"Apr 2023",revenue:713000,netIncome:49400,grossMargin:56.2,mrr:85300,burnRate:45800},
-              {month:"May 2023",revenue:724000,netIncome:50100,grossMargin:56.3,mrr:86600,burnRate:46000},
-              {month:"Jun 2023",revenue:735000,netIncome:50900,grossMargin:56.4,mrr:88000,burnRate:46200},
-              {month:"Jul 2023",revenue:746000,netIncome:51700,grossMargin:56.4,mrr:89400,burnRate:46400},
-              {month:"Aug 2023",revenue:757000,netIncome:52400,grossMargin:56.5,mrr:90800,burnRate:46600},
-              {month:"Sep 2023",revenue:769000,netIncome:53300,grossMargin:56.6,mrr:92200,burnRate:46800},
-              {month:"Oct 2023",revenue:780000,netIncome:54000,grossMargin:56.6,mrr:93700,burnRate:47000},
-              {month:"Nov 2023",revenue:792000,netIncome:54900,grossMargin:56.7,mrr:95200,burnRate:47200},
-              {month:"Dec 2023",revenue:804000,netIncome:55700,grossMargin:56.8,mrr:96700,burnRate:47400},
-              {month:"Jan 2024",revenue:816000,netIncome:56600,grossMargin:56.8,mrr:98200,burnRate:47600},
-              {month:"Feb 2024",revenue:829000,netIncome:57400,grossMargin:56.9,mrr:99800,burnRate:47800},
-              {month:"Mar 2024",revenue:842000,netIncome:58300,grossMargin:57.0,mrr:101500,burnRate:48000},
-              {month:"Apr 2024",revenue:855000,netIncome:59200,grossMargin:57.0,mrr:103200,burnRate:47900},
-              {month:"May 2024",revenue:868000,netIncome:60100,grossMargin:57.1,mrr:105000,burnRate:48100},
-              {month:"Jun 2024",revenue:882000,netIncome:61100,grossMargin:57.2,mrr:106800,burnRate:48000},
-              {month:"Jul 2024",revenue:896000,netIncome:62100,grossMargin:57.2,mrr:108600,burnRate:48200},
-              {month:"Aug 2024",revenue:911000,netIncome:63100,grossMargin:57.3,mrr:110500,burnRate:48100},
-              {month:"Sep 2024",revenue:925000,netIncome:64100,grossMargin:57.4,mrr:112400,burnRate:48300},
-              {month:"Oct 2024",revenue:940000,netIncome:65100,grossMargin:57.4,mrr:114400,burnRate:48200},
-              {month:"Nov 2024",revenue:955000,netIncome:66200,grossMargin:57.5,mrr:116400,burnRate:48400},
-              {month:"Dec 2024",revenue:1100000,netIncome:86000,grossMargin:56.8,mrr:125000,burnRate:48000},
-            ]}
-          />
+          <CFOScorecard plan={plan} hasQBO={false} hasPlaid={false}/>
         )}
         {/* ── Starter upgrade banner — contextual per tab ── */}
         {starterBanner && (
