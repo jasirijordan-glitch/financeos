@@ -5396,6 +5396,8 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
         tr:hover td{filter:brightness(1.10);transition:filter 0.12s}
         button:focus-visible{outline:2px solid ${T.cyan};outline-offset:2px}
         input:focus-visible{outline:2px solid ${T.cyan}60;outline-offset:1px}
+        .tab-scroll::-webkit-scrollbar{display:none}
+        .tab-scroll{-webkit-overflow-scrolling:touch}
         .skeleton{background:linear-gradient(90deg,${T.surface} 25%,${T.border} 50%,${T.surface} 75%);background-size:200% 100%;animation:shimmer 1.4s infinite}
       `}</style>
 
@@ -5412,8 +5414,8 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
             </div>
           </div>
           {/* Tab nav — two rows */}
-          <div style={{display:"flex",flexDirection:"column",gap:2,padding:"6px 0",overflow:"hidden"}}>
-            <div role="tablist" aria-label="Core financial modules" style={{display:"flex",gap:1,flexWrap:"nowrap",overflow:"hidden"}}>
+          <div className="tab-scroll" style={{display:"flex",flexDirection:"column",gap:2,padding:"6px 0",overflowX:"auto",msOverflowStyle:"none",scrollbarWidth:"none"}}>
+            <div role="tablist" aria-label="Core financial modules" style={{display:"flex",gap:1,flexWrap:"nowrap",overflow:"visible"}}>
               {TABS.filter(t=>t.group==="core").map(t=>{
                 const locked=tabLocked(t), active=tab===t.id;
                 return (
@@ -5434,7 +5436,7 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
                 );
               })}
             </div>
-            <div style={{display:"flex",gap:1,flexWrap:"nowrap",overflow:"hidden"}}>
+            <div style={{display:"flex",gap:1,flexWrap:"nowrap",overflow:"visible"}}>
               {TABS.filter(t=>t.group==="ops").map(t=>{
                 const locked=tabLocked(t), active=tab===t.id, isPricing=t.id==="pricing";
                 return (
