@@ -204,8 +204,7 @@ const normalizePlan = p => {
 };
 
 /** Feature-flag check — replaces scattered isPro/isEnt calls */
-const hasFeature = (plan, feature) =>
-  PLAN_FEATURES[normalizePlan(plan)]?.has(feature) ?? false;
+const hasFeature = (plan, feature) => true;
 
 /** Returns the minimum plan label needed for a feature */
 const minPlanForFeature = feature => {
@@ -5339,7 +5338,7 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
   const criticalCount=canUseAlerts ? anomalies.filter(a=>a.severity==="critical").length : 0;
 
   // ── Starter upgrade banner — computed once per render, used in JSX ──
-  const starterBanner = (!bannerDismissed && plan==="starter" && tab!=="pricing") ? (()=>{
+  const starterBanner = (!bannerDismissed && false && tab!=="pricing") ? (()=>{
     const isProTab=["scenario","headcount","saas","cfo-sim","csuite","budgeting"].includes(tab);
     const isEntTab=false; // All key features are now in Professional
     if(isEntTab) return {
