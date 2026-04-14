@@ -3470,10 +3470,17 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
     })();
   },[]);
 
-  const connectQB=()=>{
+  const connectQB=async()=>{
     setQbError(""); setQbStep("auth");
-    addLog("Redirecting to Intuit authorization server…","info");
-    window.location.href = api.qbo.connectUrl();
+    addLog("Checking QuickBooks configuration…","info");
+    try {
+      const r=await fetch(api.qbo.connectUrl(),{redirect:'manual'});
+      if(r.type==='opaqueredirect'||r.status===0){window.location.href=api.qbo.connectUrl();return;}
+      const d=await r.json().catch(()=>({}));
+      if(d.setup){setQbStep("idle");setQbError("Setup required: add QB_CLIENT_ID & QB_CLIENT_SECRET as Vercel environment variables, then redeploy.");addLog("QuickBooks not configured","error");return;}
+      if(d.error){setQbStep("idle");setQbError(d.error);return;}
+      window.location.href=api.qbo.connectUrl();
+    }catch(e){window.location.href=api.qbo.connectUrl();}
   };
   const syncQB=async()=>{
     setQb(q=>({...q,syncing:true}));
@@ -3518,7 +3525,7 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
             setPlaidStep("connected");
             setPlaid(p=>({...p,connected:true,lastSync:"Just now",accounts:[]}));
             addLog(`${meta.institution?.name||"Bank"} connected successfully.`,"success");
-          } catch(err) { setPlaidError(err.message); setPlaidStep("idle"); }
+          } catch(err) { const m=err.message||"Connection failed"; setPlaidError(m.includes("configured")||m.includes("setup")?"Setup required: add PLAID_CLIENT_ID & PLAID_SECRET in Vercel → Settings → Environment Variables, then redeploy.":m); setPlaidStep("idle"); }
         },
         onExit: (err)=>{ if(err) setPlaidError(err.error_message||"Connection cancelled."); setPlaidStep("idle"); },
       });
