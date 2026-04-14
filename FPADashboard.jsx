@@ -3758,7 +3758,7 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
 
   const PLANS=[
     {
-      id:"starter", name:"Starter", icon:"🌱", price:79, color:T.teal, popular:false,
+      id:"starter", name:"Growth", icon:"🌱", price:1199, annualPrice:949, color:T.teal, popular:false,
       tagline:"Basic financial visibility for early-stage businesses.",
       cta:"Start Free",
       ctaNote:"No credit card required",
@@ -3777,13 +3777,13 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
       ],
     },
     {
-      id:"professional", name:"Professional", icon:"🚀", price:199, color:T.cyan, popular:true,
+      id:"professional", name:"Pro", icon:"🚀", price:2499, annualPrice:1999, color:T.cyan, popular:true,
       tagline:"The complete FP&A system for growing companies.",
       cta:"Start 14-Day Trial",
       ctaNote:"Free for 14 days · No credit card",
       description:"Everything a CFO or finance lead needs: scenario planning, collaborative budgeting, saved scenarios, executive reporting, live integrations, and full AI analysis on every tab.",
       features:[
-        "Everything in Starter",
+        "Everything in Growth",
         "C-Suite Executive Report ✦ NEW",
         "Scenario Planner (Bear / Base / Bull)",
         "Save & Share Scenarios",
@@ -3800,13 +3800,13 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
       ],
     },
     {
-      id:"enterprise", name:"Enterprise", icon:"🏢", price:499, color:T.violet, popular:false,
+      id:"enterprise", name:"CFO Suite", icon:"🏢", price:4499, annualPrice:3599, color:T.violet, popular:false,
       tagline:"Multi-entity, compliance, and scale.",
       cta:"Contact Sales",
       ctaNote:"Custom pricing · Dedicated onboarding",
       description:"Unlimited entities, SSO/SAML, API access, white-label, advanced role permissions, audit logs, and a dedicated account manager. Built for operators managing multiple companies.",
       features:[
-        "Everything in Professional",
+        "Everything in Pro",
         "Unlimited Companies",
         "Advanced AI Board Analysis",
         "API Access + Webhooks",
@@ -3859,8 +3859,8 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
     {label:"Onboarding",                  starter:"Self-serve",pro:"Guided setup",ent:"White-glove"},
   ];
 
-  const gp=plan=>billing==="annual"?Math.round(plan.price*0.80):plan.price;
-  const gs=plan=>Math.round(plan.price*12*0.20);
+  const gp=plan=>billing==="annual"?(plan.annualPrice||Math.round(plan.price*0.80)):plan.price;
+  const gs=plan=>plan.annualPrice?Math.round((plan.price-plan.annualPrice)*12):Math.round(plan.price*12*0.20);
 
   const handleCTA = async(plan) => {
     if(plan.id===currentPlan) return;
