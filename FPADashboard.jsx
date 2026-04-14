@@ -5401,9 +5401,9 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
       `}</style>
 
       {/* ── Top Nav ── */}
-      <div style={{background:T.surface,borderBottom:`1px solid ${T.border}`,padding:"0 24px",display:"flex",justifyContent:"space-between",alignItems:"stretch",position:"sticky",top:0,zIndex:100,minHeight:52}}>
-        {/* Left: logo + tabs */}
-        <div style={{display:"flex",alignItems:"center",gap:10,flex:1,minWidth:0,overflow:"hidden"}}>
+      <div style={{background:T.surface,borderBottom:`1px solid ${T.border}`,padding:"0 24px",display:"flex",alignItems:"stretch",position:"sticky",top:0,zIndex:100,flexDirection:"column"}}>
+        {/* Logo + KPIs row */}
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           {/* Logo */}
           <div style={{display:"flex",alignItems:"center",gap:9,flexShrink:0,paddingRight:12,borderRight:`1px solid ${T.border}`,height:52,alignSelf:"stretch",alignContent:"center",flexWrap:"wrap"}}>
             <div style={{width:32,height:32,borderRadius:9,background:`linear-gradient(135deg,${T.cyan},${T.violet})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,boxShadow:`0 0 16px ${T.cyan}40`,flexShrink:0}}>⬡</div>
@@ -5412,52 +5412,6 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
               <div style={{color:T.textDim,fontFamily:T.mono,fontSize:7,letterSpacing:1.5,marginTop:2}}>FP&A SUITE</div>
             </div>
           </div>
-          {/* Tab nav — two rows */}
-          <div className="tab-scroll" style={{display:"flex",flexDirection:"column",gap:2,padding:"6px 0",overflowX:"auto",msOverflowStyle:"none",scrollbarWidth:"none"}}>
-            <div role="tablist" aria-label="Core financial modules" style={{display:"flex",gap:1,flexWrap:"nowrap",overflow:"visible"}}>
-              {TABS.filter(t=>t.group==="core").map(t=>{
-                const locked=tabLocked(t), active=tab===t.id;
-                return (
-                  <button key={t.id} role="tab" aria-selected={active}
-                    onClick={()=>locked?setTab("pricing"):setTab(t.id)}
-                    title={locked?`${t.label} — Upgrade to unlock`:t.label}
-                    style={{
-                      background:active?T.cyanDim:locked?`${T.amber}08`:"transparent",
-                      border:`1px solid ${active?T.cyanMid:locked?`${T.amber}20`:"transparent"}`,
-                      borderRadius:6,padding:"3px 10px",
-                      color:active?T.cyan:locked?`${T.amber}99`:T.textMid,
-                      fontSize:10,fontFamily:T.sans,fontWeight:active?700:500,
-                      cursor:"pointer",transition:"all 0.12s",whiteSpace:"nowrap",flexShrink:0,
-                    }}
-                    onMouseEnter={e=>{if(!active)e.currentTarget.style.background=active?T.cyanDim:T.border+"40"}}
-                    onMouseLeave={e=>{if(!active)e.currentTarget.style.background=active?T.cyanDim:locked?`${T.amber}08`:"transparent"}}
-                  >{locked?"🔒":t.icon} {t.label}</button>
-                );
-              })}
-            </div>
-            <div style={{display:"flex",gap:1,flexWrap:"nowrap",overflow:"visible"}}>
-              {TABS.filter(t=>t.group==="ops").map(t=>{
-                const locked=tabLocked(t), active=tab===t.id, isPricing=t.id==="pricing";
-                return (
-                  <button key={t.id}
-                    onClick={()=>locked?setTab("pricing"):setTab(t.id)}
-                    title={locked?`${t.label} — Upgrade to unlock`:t.label}
-                    style={{
-                      background:active?(isPricing?`${T.violet}20`:T.cyanDim):locked?`${T.violet}08`:"transparent",
-                      border:`1px solid ${active?(isPricing?`${T.violet}50`:T.cyanMid):locked?`${T.violet}20`:"transparent"}`,
-                      borderRadius:6,padding:"3px 10px",
-                      color:active?(isPricing?T.violet:T.cyan):locked?`${T.violet}99`:T.textDim,
-                      fontSize:10,fontFamily:T.sans,fontWeight:active?700:500,
-                      cursor:"pointer",transition:"all 0.12s",whiteSpace:"nowrap",flexShrink:0,
-                    }}
-                    onMouseEnter={e=>{if(!active)e.currentTarget.style.background=T.border+"40"}}
-                    onMouseLeave={e=>{if(!active)e.currentTarget.style.background=active?(isPricing?`${T.violet}20`:T.cyanDim):locked?`${T.violet}08`:"transparent"}}
-                  >{locked?"🔒":t.icon} {t.label}</button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
 
         {/* Right: KPIs + alerts + plan */}
         <div style={{display:"flex",gap:4,alignItems:"center",flexShrink:0,paddingLeft:12,borderLeft:`1px solid ${T.border}`}}>
@@ -5497,7 +5451,53 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
             ))}
           </div>
         </div>
-      </div>
+
+        </div>
+        {/* Tab nav — two rows */}
+        <div className="tab-scroll" style={{display:"flex",flexDirection:"column",gap:2,padding:"6px 0",overflowX:"auto",msOverflowStyle:"none",scrollbarWidth:"none"}}>
+          <div role="tablist" aria-label="Core financial modules" style={{display:"flex",gap:1,flexWrap:"nowrap",overflow:"visible"}}>
+            {TABS.filter(t=>t.group==="core").map(t=>{
+              const locked=tabLocked(t), active=tab===t.id;
+              return (
+                <button key={t.id} role="tab" aria-selected={active}
+                  onClick={()=>locked?setTab("pricing"):setTab(t.id)}
+                  title={locked?`${t.label} — Upgrade to unlock`:t.label}
+                  style={{
+                    background:active?T.cyanDim:locked?`${T.amber}08`:"transparent",
+                    border:`1px solid ${active?T.cyanMid:locked?`${T.amber}20`:"transparent"}`,
+                    borderRadius:6,padding:"3px 10px",
+                    color:active?T.cyan:locked?`${T.amber}99`:T.textMid,
+                    fontSize:10,fontFamily:T.sans,fontWeight:active?700:500,
+                    cursor:"pointer",transition:"all 0.12s",whiteSpace:"nowrap",flexShrink:0,
+                  }}
+                  onMouseEnter={e=>{if(!active)e.currentTarget.style.background=active?T.cyanDim:T.border+"40"}}
+                  onMouseLeave={e=>{if(!active)e.currentTarget.style.background=active?T.cyanDim:locked?`${T.amber}08`:"transparent"}}
+                >{locked?"🔒":t.icon} {t.label}</button>
+              );
+            })}
+          </div>
+          <div style={{display:"flex",gap:1,flexWrap:"nowrap",overflow:"visible"}}>
+            {TABS.filter(t=>t.group==="ops").map(t=>{
+              const locked=tabLocked(t), active=tab===t.id, isPricing=t.id==="pricing";
+              return (
+                <button key={t.id}
+                  onClick={()=>locked?setTab("pricing"):setTab(t.id)}
+                  title={locked?`${t.label} — Upgrade to unlock`:t.label}
+                  style={{
+                    background:active?(isPricing?`${T.violet}20`:T.cyanDim):locked?`${T.violet}08`:"transparent",
+                    border:`1px solid ${active?(isPricing?`${T.violet}50`:T.cyanMid):locked?`${T.violet}20`:"transparent"}`,
+                    borderRadius:6,padding:"3px 10px",
+                    color:active?(isPricing?T.violet:T.cyan):locked?`${T.violet}99`:T.textDim,
+                    fontSize:10,fontFamily:T.sans,fontWeight:active?700:500,
+                    cursor:"pointer",transition:"all 0.12s",whiteSpace:"nowrap",flexShrink:0,
+                  }}
+                  onMouseEnter={e=>{if(!active)e.currentTarget.style.background=T.border+"40"}}
+                  onMouseLeave={e=>{if(!active)e.currentTarget.style.background=active?(isPricing?`${T.violet}20`:T.cyanDim):locked?`${T.violet}08`:"transparent"}}
+                >{locked?"🔒":t.icon} {t.label}</button>
+              );
+            })}
+          </div>
+        </div>      </div>
 
       {/* ── Page header strip (tab title + subtitle) ── */}
       <div style={{background:T.surface,borderBottom:`1px solid ${T.border}40`,padding:"8px 28px",display:"flex",alignItems:"center",gap:10}}>
