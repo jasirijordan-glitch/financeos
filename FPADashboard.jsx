@@ -3639,7 +3639,7 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
         <div style={{background:T.card,border:`1px solid ${plaid.connected?T.cyan+"50":T.border}`,borderRadius:16,overflow:"hidden",boxShadow:plaid.connected?`0 0 24px ${T.cyan}10`:"none"}}>
           <div style={{padding:"20px 24px",borderBottom:`1px solid ${T.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
             <div style={{display:"flex",alignItems:"center",gap:12}}>
-              <div style={{width:44,height:44,borderRadius:12,background:"linear-gradient(135deg,#00B2E3,#0074B7)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,boxShadow:"0 4px 12px #00B2E340"}}>🏦</div>
+              <div style={{width:44,height:44,borderRadius:12,background:"linear-gradient(135deg,#22C55E,#16A34A)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,boxShadow:"0 4px 12px #00B2E340"}}>🏦</div>
               <div>
                 <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:16}}>Plaid</div>
                 <div style={{color:T.textDim,fontFamily:T.sans,fontSize:11,marginTop:2}}>Bank account linking · 12,000+ institutions</div>
@@ -3650,13 +3650,13 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
           <div style={{padding:"20px 24px"}}>
             {!plaid.connected&&<>
               <div style={{background:T.surface,borderRadius:10,padding:"12px 14px",marginBottom:16,border:`1px solid ${T.border}`}}>
-                <div style={{fontSize:10,color:T.amber,fontFamily:T.sans,fontWeight:600,marginBottom:4}}>⚙️ Plaid Link</div>
-                <div style={{fontSize:11,color:T.textMid,fontFamily:T.sans,lineHeight:1.6}}>Click below to open Plaid's secure bank connection flow. Your <span style={{color:T.cyan,fontFamily:T.mono}}>PLAID_CLIENT_ID</span> and <span style={{color:T.cyan,fontFamily:T.mono}}>PLAID_SECRET</span> are configured in your server <span style={{color:T.cyan,fontFamily:T.mono}}>.env</span> file.</div>
+                <div style={{fontSize:10,color:T.amber,fontFamily:T.sans,fontWeight:600,marginBottom:4}}>⚙️ Bank Setup</div>
+                <div style={{fontSize:11,color:T.textMid,fontFamily:T.sans,lineHeight:1.6}}>Clicking Connect will open Plaid's secure bank connection flow. Approve access and your bank data will sync automatically. Your <span style={{color:T.cyan,fontFamily:T.mono}}>PLAID_CLIENT_ID</span> and <span style={{color:T.cyan,fontFamily:T.mono}}>PLAID_SECRET</span> are set in your Vercel environment variables. <span style={{color:T.cyan,fontFamily:T.mono}}>.env</span> file.</div>
               </div>
               {plaidError&&<div style={{background:T.roseDim,border:`1px solid ${T.rose}40`,borderRadius:8,padding:"8px 12px",marginBottom:12,fontSize:11,color:T.rose,fontFamily:T.sans}}>⚠️ {plaidError}</div>}
               {hasFeature(plan,FEATURES.INTEGRATIONS_SYNC)?(
                 <button onClick={connectPlaid} disabled={plaidStep==="linking"} style={{width:"100%",background:"linear-gradient(135deg,#00B2E3,#0074B7)",border:"none",borderRadius:10,padding:"12px",color:"#fff",fontSize:13,fontFamily:T.sans,fontWeight:700,cursor:plaidStep==="linking"?"not-allowed":"pointer",opacity:plaidStep==="linking"?0.6:1}}>
-                  {plaidStep==="linking"?"⏳ Opening Plaid Link...":"🔗 Launch Plaid Link"}
+                  {plaidStep==="linking"?"⏳ Connecting to Plaid...":"🏦 Connect with Plaid"}
                 </button>
               ):(
                 <button onClick={onUpgrade} style={{width:"100%",background:T.amberDim,border:`1px solid ${T.amber}40`,borderRadius:10,padding:"12px",color:T.amber,fontSize:13,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>
