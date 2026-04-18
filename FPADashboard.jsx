@@ -724,7 +724,7 @@ function OnboardingChecklist({ onNavigate, onDismiss }) {
         <div style={{width:80,height:4,background:T.border,borderRadius:99,overflow:"hidden",flexShrink:0}}>
           <div style={{height:"100%",width:`${pct}%`,background:`linear-gradient(90deg,${T.cyan},${T.violet})`,borderRadius:99,transition:"width 0.5s ease"}}/>
         </div>
-        <button onClick={e=>{e.stopPropagation();onDismiss?.();}} style={{background:"none",border:"none",color:T.textDim,fontSize:14,cursor:"pointer",padding:"0 4px",flexShrink:0}} title="Dismiss checklist">Ã</button>
+        
         <span style={{fontSize:10,color:T.textDim,transform:collapsed?"none":"rotate(180deg)",display:"inline-block",transition:"transform 0.2s"}}>â¾</span>
       </div>
       {!collapsed && (
@@ -5580,9 +5580,9 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
 
       {/* ââ Main content ââ */}
       <div className="fadein" key={tab} style={{padding:"24px 32px", paddingBottom: showPanel ? 380 : 28, width:"100%"}}>
-        {/* ââ Onboarding checklist â shown on pnl tab until dismissed ââ */}
-        {tab==="pnl" && !checklistDismissed && (
-          <OnboardingChecklist onNavigate={id=>setTab(id)} onDismiss={()=>{setChecklistDismissed(true);try{localStorage.setItem('fo_checklist_dismissed','true')}catch{};}}/>
+        {/* ââ Onboarding checklist â always shown on pnl tab until all steps complete ââ */}
+        {tab==="pnl" && (
+          <OnboardingChecklist onNavigate={id=>setTab(id)}/>
         )}
         {/* ââ CFO Scorecard â shown on pnl tab ââ */}
         {tab==="pnl" && (
