@@ -724,7 +724,7 @@ function OnboardingChecklist({ onNavigate, onDismiss }) {
         <div style={{width:80,height:4,background:T.border,borderRadius:99,overflow:"hidden",flexShrink:0}}>
           <div style={{height:"100%",width:`${pct}%`,background:`linear-gradient(90deg,${T.cyan},${T.violet})`,borderRadius:99,transition:"width 0.5s ease"}}/>
         </div>
-        <button onClick={e=>{e.stopPropagation();onDismiss?.();}} style={{background:"none",border:"none",color:T.textDim,fontSize:14,cursor:"pointer",padding:"0 4px",flexShrink:0}} title="Dismiss checklist">Ã</button>
+        
         <span style={{fontSize:10,color:T.textDim,transform:collapsed?"none":"rotate(180deg)",display:"inline-block",transition:"transform 0.2s"}}>▾</span>
       </div>
       {!collapsed && (
