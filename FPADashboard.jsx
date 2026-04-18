@@ -2099,13 +2099,13 @@ function PnLBreakdown({aiContext}) {
             <PnLRow label="Marketing & Advertising" monthly={dc("marketing")} indent negative showSpark color={T.amber}/>
             <PnLRow label="Software & Subscriptions" monthly={dc("software")} indent negative showSpark color={T.textMid}/>
             <PnLRow label="Utilities" monthly={dc("utilities")} indent negative showSpark color={T.textDim}/>
-            <PnLRow label="Insurance" monthly={dc("insurance")} indent negative color={T.textDim}/>
+            <PnLRow label="Insurance" monthly={dc("insurance")} indent negative showSpark color={T.textDim}/>
             <PnLRow label="Professional Services" monthly={dc("professionalSvc")} indent negative showSpark color={T.textMid}/>
-            <PnLRow label="Equipment & Maintenance" monthly={dc("equipment")} indent negative color={T.textDim}/>
-            <PnLRow label="Miscellaneous" monthly={dc("miscExpenses")} indent negative color={T.textDim}/>
+            <PnLRow label="Equipment & Maintenance" monthly={dc("equipment")} indent negative showSpark color={T.textDim}/>
+            <PnLRow label="Miscellaneous" monthly={dc("miscExpenses")} indent negative showSpark color={T.textDim}/>
             <PnLRow label="â EBITDA" monthly={ebitda} isTotal color={T.violet} showSpark/>
-            <PnLRow label="Depreciation & Amortization" monthly={MONTHS.map(()=>1200)} indent negative color={T.textDim}/>
-            <PnLRow label="Interest Expense" monthly={MONTHS.map(()=>850)} indent negative color={T.textDim}/>
+            <PnLRow label="Depreciation & Amortization" monthly={MONTHS.map(()=>1200)} indent negative showSpark color={T.textDim}/>
+            <PnLRow label="Interest Expense" monthly={MONTHS.map(()=>850)} indent negative showSpark color={T.textDim}/>
             <PnLRow label="Income Taxes (21%)" monthly={col("taxes")} indent negative color={T.rose} showSpark/>
             <PnLRow label="â NET INCOME" monthly={netIncome} isTotal color={T.cyan} showSpark/>
           </div>
