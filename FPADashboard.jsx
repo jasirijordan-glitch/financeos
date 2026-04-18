@@ -230,7 +230,7 @@ const isEnt = p => hasFeature(p, FEATURES.CSUITE_REPORT);
 
 const PLAN_META = {
   starter:      { label:"Starter",      icon:"ð±", color:T.teal,   upgradeTo:"professional", upgradeLabel:"Professional" },
-  professional: { label:"Professional", icon:"ð", color:T.cyan,   upgradeTo:"enterprise",   upgradeLabel:"Enterprise"   },
+  professional: { label:"Professional", icon:"→", color:T.cyan,   upgradeTo:"enterprise",   upgradeLabel:"Enterprise"   },
   enterprise:   { label:"Enterprise",   icon:"ð¢", color:T.violet, upgradeTo:null,            upgradeLabel:null           },
 };
 const PRO_GATE_FEATURES = [
@@ -242,7 +242,7 @@ const PRO_GATE_FEATURES = [
   "Track MRR, churn, CAC, and NRR automatically",
   "Anomaly alerts before problems become crises",
   "PDF + CSV export on every report",
-  "Full AI FP&A assistant Â· Live QuickBooks & Plaid sync",
+  "Full AI FP&A assistant · Live QuickBooks & Plaid sync",
 ];
 const ENT_GATE_FEATURES = [
   "Unlimited companies (multi-entity)",
@@ -579,7 +579,7 @@ function PlanGate({ requiredPlan, featureName, features, onUpgrade, lockedCopy }
                 {isEnt?"Contact Sales â":"Start 14-Day Free Trial â"}
               </button>
               <div style={{fontSize:11,color:T.textDim,fontFamily:T.sans}}>
-                {isEnt?"Custom pricing Â· Dedicated onboarding":"Free 14 days Â· No credit card Â· Cancel anytime"}
+                {isEnt?"Custom pricing · Dedicated onboarding":"Free 14 days · No credit card · Cancel anytime"}
               </div>
             </div>
           </div>
@@ -715,16 +715,16 @@ function OnboardingChecklist({ onNavigate, onDismiss }) {
         onClick={()=>setCollapsed(c=>!c)}
         style={{display:"flex",alignItems:"center",gap:10,padding:"12px 18px",cursor:"pointer",background:`linear-gradient(135deg,${T.cyan}10,${T.violet}05)`}}
       >
-        <div style={{width:28,height:28,borderRadius:8,background:`${T.cyan}20`,border:`1px solid ${T.cyan}30`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0}}>ð</div>
+        <div style={{width:28,height:28,borderRadius:8,background:`${T.cyan}20`,border:`1px solid ${T.cyan}30`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0}}>→</div>
         <div style={{flex:1}}>
           <div style={{fontSize:14,fontWeight:700,color:T.text,fontFamily:T.display}}>Get started with FinanceOS</div>
-          <div style={{fontSize:11,color:T.textMid,fontFamily:T.sans,marginTop:2}}>{completed}/{CHECKLIST_STEPS.length} steps complete Â· {pct}%</div>
+          <div style={{fontSize:11,color:T.textMid,fontFamily:T.sans,marginTop:2}}>{completed}/{CHECKLIST_STEPS.length} steps complete · {pct}%</div>
         </div>
         {/* Progress bar */}
         <div style={{width:80,height:4,background:T.border,borderRadius:99,overflow:"hidden",flexShrink:0}}>
           <div style={{height:"100%",width:`${pct}%`,background:`linear-gradient(90deg,${T.cyan},${T.violet})`,borderRadius:99,transition:"width 0.5s ease"}}/>
         </div>
-        
+        <button onClick={e=>{e.stopPropagation();onDismiss?.();}} style={{background:"none",border:"none",color:T.textDim,fontSize:14,cursor:"pointer",padding:"0 4px",flexShrink:0}} title="Dismiss checklist">Ã</button>
         <span style={{fontSize:10,color:T.textDim,transform:collapsed?"none":"rotate(180deg)",display:"inline-block",transition:"transform 0.2s"}}>â¾</span>
       </div>
       {!collapsed && (
@@ -739,7 +739,7 @@ function OnboardingChecklist({ onNavigate, onDismiss }) {
                 >
                   {isDone?"â":""}
                 </button>
-                <span style={{fontSize:15,flexShrink:0}}>{step.icon}</span>
+                
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontSize:12,fontWeight:600,color:isDone?T.textDim:T.text,fontFamily:T.sans,textDecoration:isDone?"line-through":"none"}}>{step.label}</div>
                   <div style={{fontSize:11,color:T.textMid,fontFamily:T.sans,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{step.desc}</div>
@@ -1028,8 +1028,8 @@ function ScenarioLibrary({ onLoad, onClose }) {
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontSize:13,fontWeight:700,color:T.text,fontFamily:T.display,marginBottom:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{sc.name}</div>
                   <div style={{fontSize:10,color:T.textDim,fontFamily:T.mono}}>
-                    v{latest?.version || 1} Â· {latest?.label || "â"}
-                    {latest?.multipliers && ` Â· Rev ${((latest.multipliers.revenue||1)*100).toFixed(0)}% / OpEx ${((latest.multipliers.opex||1)*100).toFixed(0)}%`}
+                    v{latest?.version || 1} · {latest?.label || "â"}
+                    {latest?.multipliers && ` · Rev ${((latest.multipliers.revenue||1)*100).toFixed(0)}% / OpEx ${((latest.multipliers.opex||1)*100).toFixed(0)}%`}
                   </div>
                   <div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,marginTop:2}}>{new Date(sc.updated_at).toLocaleDateString()}</div>
                 </div>
@@ -1317,7 +1317,7 @@ function BudgetingPage({ plan }) {
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16,flexWrap:"wrap",gap:10}}>
             <div>
               <div style={{fontSize:16,fontWeight:700,color:T.text,fontFamily:T.display}}>{activeBudget.department}</div>
-              <div style={{fontSize:10,color:T.textDim,fontFamily:T.mono,marginTop:2}}>FY{year} Â· {STATUS_META[activeBudget.status]?.label}</div>
+              <div style={{fontSize:10,color:T.textDim,fontFamily:T.mono,marginTop:2}}>FY{year} · {STATUS_META[activeBudget.status]?.label}</div>
             </div>
             <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
               <button onClick={()=>setView(v=>v==="grid"?"comments":"grid")} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:8,padding:"6px 12px",color:T.textMid,fontSize:11,fontFamily:T.sans,cursor:"pointer"}}>
@@ -1549,7 +1549,7 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
         <div style={{width:30,height:30,borderRadius:"50%",background:`linear-gradient(135deg,${T.cyan},${T.violet})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,boxShadow:`0 0 14px ${T.cyan}60`,flexShrink:0}}>â¦</div>
         <div style={{display:"flex",alignItems:"baseline",gap:8}}>
           <span style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14}}>FP&A Intelligence</span>
-          <span style={{color:T.cyan,fontFamily:T.mono,fontSize:9,textTransform:"capitalize",background:T.cyanDim,border:`1px solid ${T.cyanMid}`,borderRadius:20,padding:"1px 7px"}}>{activeTab} Â· Live</span>
+          <span style={{color:T.cyan,fontFamily:T.mono,fontSize:9,textTransform:"capitalize",background:T.cyanDim,border:`1px solid ${T.cyanMid}`,borderRadius:20,padding:"1px 7px"}}>{activeTab} · Live</span>
         </div>
         {!open && anomalies.length>0 && (
           <div style={{display:"flex",gap:4,marginLeft:8}}>
@@ -1643,10 +1643,10 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
                 {!hasFeature(plan,FEATURES.FULL_AI)&&(
                   <div style={{padding:"0 12px 8px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
                     <span style={{fontSize:9,color:T.amber,fontFamily:T.sans}}>Use the 2 quick questions above, or upgrade for full access.</span>
-                    <span style={{fontSize:9,color:T.cyan,fontFamily:T.sans,fontWeight:700,cursor:"pointer",textDecoration:"underline"}} onClick={()=>onUpgrade&&onUpgrade()}>ð Upgrade</span>
+                    <span style={{fontSize:9,color:T.cyan,fontFamily:T.sans,fontWeight:700,cursor:"pointer",textDecoration:"underline"}} onClick={()=>onUpgrade&&onUpgrade()}>→ Upgrade</span>
                   </div>
                 )}
-                {hasFeature(plan,FEATURES.FULL_AI)&&<div style={{padding:"0 12px 8px",fontSize:9,color:T.textDim,fontFamily:T.sans}}>Powered by Claude Â· {hasFeature(plan,FEATURES.FULL_AI)?"Context-aware of all on-screen data":"Basic mode â upgrade for full financial context"}</div>}
+                {hasFeature(plan,FEATURES.FULL_AI)&&<div style={{padding:"0 12px 8px",fontSize:9,color:T.textDim,fontFamily:T.sans}}>Powered by Claude · {hasFeature(plan,FEATURES.FULL_AI)?"Context-aware of all on-screen data":"Basic mode â upgrade for full financial context"}</div>}
               </>
             )}
 
@@ -1658,7 +1658,7 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
                     <span style={{fontSize:28}}>ð</span>
                     <div style={{color:T.cyan,fontFamily:T.sans,fontWeight:700,fontSize:12}}>Anomaly Alerts</div>
                     <div style={{color:T.textDim,fontFamily:T.sans,fontSize:11,lineHeight:1.6}}>Proactive anomaly detection is a Professional feature. Upgrade to get real-time alerts on revenue misses, cash risks, AR aging, and more.</div>
-                    <div style={{background:T.cyanDim,border:`1px solid ${T.cyanMid}`,borderRadius:8,padding:"5px 14px",color:T.cyan,fontSize:10,fontFamily:T.sans,fontWeight:700}}>ð Upgrade to Professional</div>
+                    <div style={{background:T.cyanDim,border:`1px solid ${T.cyanMid}`,borderRadius:8,padding:"5px 14px",color:T.cyan,fontSize:10,fontFamily:T.sans,fontWeight:700}}>→ Upgrade to Professional</div>
                   </div>
                 )}
                 {hasFeature(plan,FEATURES.FULL_AI)&&anomalies.length===0 && (
@@ -1788,7 +1788,7 @@ function RevNetChart({ pnl }) {
             <div style={{ width:16, height:1, background:T.amber, opacity:0.5 }}/>
             <span style={{ fontFamily:T.mono, fontSize:8, color:T.textDim }}>Zero (Net Income)</span>
           </div>
-          <span style={{ fontFamily:T.mono, fontSize:8, color:T.textDim }}>Left axis = Revenue Â· Right axis = Net Income</span>
+          <span style={{ fontFamily:T.mono, fontSize:8, color:T.textDim }}>Left axis = Revenue · Right axis = Net Income</span>
         </div>
       </div>
 
@@ -2072,7 +2072,7 @@ function PnLBreakdown({aiContext}) {
         <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"16px 18px",marginBottom:20}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
             <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14}}>ð Monthly Revenue vs. Net Income</div>
-            <div style={{fontFamily:T.mono,fontSize:8,color:T.textDim,letterSpacing:1}}>FY 2024 Â· Hover month for detail</div>
+            <div style={{fontFamily:T.mono,fontSize:8,color:T.textDim,letterSpacing:1}}>FY 2024 · Hover month for detail</div>
           </div>
           <RevNetChart pnl={pnl}/>
         </div>
@@ -2595,7 +2595,7 @@ function RegionalComparison({aiContext}) {
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
                   <div>
                     <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14}}>{r.region}</div>
-                    <div style={{color:T.textDim,fontSize:10,fontFamily:T.sans,marginTop:2}}>{r.clients} clients Â· {r.cities}</div>
+                    <div style={{color:T.textDim,fontSize:10,fontFamily:T.sans,marginTop:2}}>{r.clients} clients · {r.cities}</div>
                   </div>
                   <div style={{textAlign:"right"}}>
                     <div style={{color:T.cyan,fontFamily:T.mono,fontWeight:700,fontSize:16}}>{fmt(r.revenue,true)}</div>
@@ -3107,7 +3107,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
           <button onClick={runSimulation} style={{background:`linear-gradient(135deg,${T.cyan},${T.violet})`,border:"none",borderRadius:11,padding:"13px 32px",color:T.bg,fontSize:14,fontFamily:T.display,fontWeight:800,cursor:"pointer",boxShadow:`0 4px 24px ${T.cyan}35`,letterSpacing:0.2}}>
             Run 30-Day CFO Simulation â
           </button>
-          <span style={{marginLeft:16,fontSize:10,color:T.textDim,fontFamily:T.mono}}>~30 seconds Â· Powered by Claude Sonnet</span>
+          <span style={{marginLeft:16,fontSize:10,color:T.textDim,fontFamily:T.mono}}>~30 seconds · Powered by Claude Sonnet</span>
         </div>
       </div>
 
@@ -3168,7 +3168,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
           </div>
           <div>
             <div style={{fontSize:14,fontWeight:700,color:T.text,fontFamily:T.display}}>{r?.persona?.name}</div>
-            <div style={{fontSize:10,color:T.textDim,fontFamily:T.mono}}>{r?.persona?.company} Â· {r?.persona?.arr} ARR Â· {r?.persona?.team} employees</div>
+            <div style={{fontSize:10,color:T.textDim,fontFamily:T.mono}}>{r?.persona?.company} · {r?.persona?.arr} ARR · {r?.persona?.team} employees</div>
           </div>
         </div>
         <div style={{display:"flex",gap:20,marginLeft:"auto",flexWrap:"wrap"}}>
@@ -3578,7 +3578,7 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
                 <div style={{color:T.textDim,fontFamily:T.sans,fontSize:11,marginTop:1}}>You can view integration settings but connecting and syncing requires a Professional plan.</div>
               </div>
             </div>
-            <button onClick={onUpgrade} style={{background:`linear-gradient(135deg,${T.cyan},${T.violet})`,border:"none",borderRadius:8,padding:"8px 18px",color:T.bg,fontSize:11,fontFamily:T.sans,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>ð Upgrade to Pro</button>
+            <button onClick={onUpgrade} style={{background:`linear-gradient(135deg,${T.cyan},${T.violet})`,border:"none",borderRadius:8,padding:"8px 18px",color:T.bg,fontSize:11,fontFamily:T.sans,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>→ Upgrade to Pro</button>
           </div>
         )}
       </div>
@@ -3590,7 +3590,7 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
               <div style={{width:44,height:44,borderRadius:12,background:"linear-gradient(135deg,#2CA01C,#1A6B10)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,boxShadow:"0 4px 12px #2CA01C40"}}>ð</div>
               <div>
                 <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:16}}>QuickBooks Online</div>
-                <div style={{color:T.textDim,fontFamily:T.sans,fontSize:11,marginTop:2}}>by Intuit Â· OAuth 2.0</div>
+                <div style={{color:T.textDim,fontFamily:T.sans,fontSize:11,marginTop:2}}>by Intuit · OAuth 2.0</div>
               </div>
             </div>
             <Dot connected={qb.connected} syncing={qb.syncing}/>
@@ -3616,7 +3616,7 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
               <div style={{background:"#2CA01C15",border:"1px solid #2CA01C40",borderRadius:10,padding:"12px 14px",marginBottom:16,display:"flex",alignItems:"center",gap:10}}>
                 <span style={{fontSize:16}}>â</span>
                 <div><div style={{color:T.emerald,fontFamily:T.sans,fontWeight:700,fontSize:12}}>Acme Corp â QuickBooks Online Premium</div>
-                <div style={{color:T.textDim,fontFamily:T.mono,fontSize:10}}>Realm: 9130356057836091 Â· Synced: {qb.lastSync}</div></div>
+                <div style={{color:T.textDim,fontFamily:T.mono,fontSize:10}}>Realm: 9130356057836091 · Synced: {qb.lastSync}</div></div>
               </div>
               <div style={{marginBottom:16}}>
                 <div style={{fontSize:10,color:T.textDim,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:10}}>Sync Settings</div>
@@ -3651,7 +3651,7 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
               <div style={{width:44,height:44,borderRadius:12,background:"linear-gradient(135deg,#22C55E,#16A34A)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,boxShadow:"0 4px 12px #00B2E340"}}>ð¦</div>
               <div>
                 <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:16}}>Plaid</div>
-                <div style={{color:T.textDim,fontFamily:T.sans,fontSize:11,marginTop:2}}>Bank account linking Â· 12,000+ institutions</div>
+                <div style={{color:T.textDim,fontFamily:T.sans,fontSize:11,marginTop:2}}>Bank account linking · 12,000+ institutions</div>
               </div>
             </div>
             <Dot connected={plaid.connected} syncing={plaid.syncing}/>
@@ -3687,7 +3687,7 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
                     </div>
                     <div style={{flex:1,minWidth:0}}>
                       <div style={{fontSize:11,color:T.text,fontFamily:T.sans,fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{ac.name}</div>
-                      <div style={{fontSize:9,color:T.textDim,fontFamily:T.mono}}>Â·Â·Â·Â·{ac.mask} Â· {ac.inst}</div>
+                      <div style={{fontSize:9,color:T.textDim,fontFamily:T.mono}}>····{ac.mask} · {ac.inst}</div>
                     </div>
                     <div style={{textAlign:"right",flexShrink:0}}>
                       <div style={{fontSize:12,fontWeight:700,fontFamily:T.mono,color:ac.balance<0?T.rose:T.emerald}}>{fmt(ac.balance)}</div>
@@ -3787,15 +3787,15 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
         "Client Overview",
         "CSV Data Import",
         "Basic AI Insights",
-        "1 Company Â· 90-day history",
+        "1 Company · 90-day history",
         "Email support",
       ],
     },
     {
-      id:"professional", name:"Pro", icon:"ð", price:2499, annualPrice:1999, color:T.cyan, popular:true,
+      id:"professional", name:"Pro", icon:"→", price:2499, annualPrice:1999, color:T.cyan, popular:true,
       tagline:"The complete FP&A system for growing companies.",
       cta:"Start 14-Day Trial",
-      ctaNote:"Free for 14 days Â· No credit card",
+      ctaNote:"Free for 14 days · No credit card",
       description:"Everything a CFO or finance lead needs: scenario planning, collaborative budgeting, saved scenarios, executive reporting, live integrations, and full AI analysis on every tab.",
       features:[
         "Everything in Growth",
@@ -3810,7 +3810,7 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
         "PDF + CSV Export on all reports",
         "Live QuickBooks & Plaid Sync",
         "CFO Simulation",
-        "5 Companies Â· 24-month history",
+        "5 Companies · 24-month history",
         "Priority support",
       ],
     },
@@ -3818,7 +3818,7 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
       id:"enterprise", name:"CFO Suite", icon:"ð¢", price:4499, annualPrice:3599, color:T.violet, popular:false,
       tagline:"Multi-entity, compliance, and scale.",
       cta:"Contact Sales",
-      ctaNote:"Custom pricing Â· Dedicated onboarding",
+      ctaNote:"Custom pricing · Dedicated onboarding",
       description:"Unlimited entities, SSO/SAML, API access, white-label, advanced role permissions, audit logs, and a dedicated account manager. Built for operators managing multiple companies.",
       features:[
         "Everything in Pro",
@@ -3950,7 +3950,7 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
               {/* Most popular badge */}
               {isCenter&&(
                 <div style={{background:`linear-gradient(90deg,${T.cyan},${T.violet})`,padding:"6px 0",textAlign:"center"}}>
-                  <span style={{color:T.bg,fontSize:10,fontFamily:T.mono,fontWeight:800,letterSpacing:1.5,textTransform:"uppercase"}}>â­ Most Popular Â· Best for Small Business</span>
+                  <span style={{color:T.bg,fontSize:10,fontFamily:T.mono,fontWeight:800,letterSpacing:1.5,textTransform:"uppercase"}}>â­ Most Popular · Best for Small Business</span>
                 </div>
               )}
               {isCurrent&&(
@@ -4178,7 +4178,7 @@ function BudgetVsActuals({aiContext}) {
             <div key={k.l} style={{background:T.card,border:`1px solid ${good?c+"40":T.border}`,borderRadius:12,padding:"14px 16px",boxShadow:good?"none":`0 0 16px ${T.rose}10`}}>
               <div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>{k.l}</div>
               <div style={{fontSize:20,fontWeight:800,fontFamily:T.mono,color:c}}>{k.isRatio?pct(k.v)+" of budget":fmt(Math.abs(k.v),true)}</div>
-              {!k.isRatio&&<div style={{fontSize:10,color:c,fontFamily:T.sans,marginTop:4}}>{good?"â² Favorable":"â¼ Unfavorable"} Â· {pct(Math.abs(k.pct||0))} vs budget</div>}
+              {!k.isRatio&&<div style={{fontSize:10,color:c,fontFamily:T.sans,marginTop:4}}>{good?"â² Favorable":"â¼ Unfavorable"} · {pct(Math.abs(k.pct||0))} vs budget</div>}
             </div>
           );
         })}
@@ -4503,7 +4503,7 @@ function HeadcountPlanning({aiContext}) {
                     <div style={{display:"flex",alignItems:"center",gap:10}}>
                       <div style={{width:12,height:12,borderRadius:"50%",background:d.color,flexShrink:0}}/>
                       <span style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14}}>{d.name}</span>
-                      <span style={{fontSize:10,color:T.textDim,fontFamily:T.mono}}>{dActive.length} active{dOpen.length>0?` Â· ${dOpen.length} open`:""}</span>
+                      <span style={{fontSize:10,color:T.textDim,fontFamily:T.mono}}>{dActive.length} active{dOpen.length>0?` · ${dOpen.length} open`:""}</span>
                     </div>
                     <div style={{display:"flex",gap:20,alignItems:"center"}}>
                       <div style={{textAlign:"right"}}><div style={{fontSize:8,color:T.textDim,fontFamily:T.sans}}>ANNUAL COST</div><div style={{fontSize:14,color:d.color,fontFamily:T.mono,fontWeight:700}}>{fmt(dCost,true)}</div></div>
@@ -4575,7 +4575,7 @@ function HeadcountPlanning({aiContext}) {
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
           <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"16px 18px"}}>
             <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:2}}>ð° Payroll Cost by Department</div>
-            <div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,marginBottom:14}}>Fully loaded (salary + benefits) Â· Includes open req budgets</div>
+            <div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,marginBottom:14}}>Fully loaded (salary + benefits) · Includes open req budgets</div>
             {depts.map(d=>{
               const dc=d.employees.reduce((s,e)=>s+(e.salary*(1+e.benefits)),0);
               return (
@@ -4661,7 +4661,7 @@ function SaaSMetrics({aiContext}) {
           </div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}}>
             {[
-              {l:"Customers (EOM)",    v:latestCust,        sub:`+${SAAS.newCust[11]} new Â· -${SAAS.churnCust[11]} churned`,c:T.cyan},
+              {l:"Customers (EOM)",    v:latestCust,        sub:`+${SAAS.newCust[11]} new · -${SAAS.churnCust[11]} churned`,c:T.cyan},
               {l:"Monthly Churn Rate", v:pct(churnRate),    sub:churnRate<0.02?"â Below 2% â healthy":"â  Watch churn rate",     c:churnRate<0.02?T.emerald:T.rose},
               {l:"Avg Rev / Customer", v:fmt(latestMrr/latestCust,true), sub:"ARPU",                                        c:T.violet},
             ].map(k=>(
@@ -4772,8 +4772,8 @@ function SaaSMetrics({aiContext}) {
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
           <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14}}>
             {[
-              {l:"Customer Acquisition Cost",v:fmt(latestCac),sub:"Blended CAC Â· Dec",trend:SAAS.cac,c:T.amber,better:"lower"},
-              {l:"Customer Lifetime Value",  v:fmt(latestLtv),sub:"Avg LTV Â· Dec",    trend:SAAS.ltv,c:T.emerald,better:"higher"},
+              {l:"Customer Acquisition Cost",v:fmt(latestCac),sub:"Blended CAC · Dec",trend:SAAS.cac,c:T.amber,better:"lower"},
+              {l:"Customer Lifetime Value",  v:fmt(latestLtv),sub:"Avg LTV · Dec",    trend:SAAS.ltv,c:T.emerald,better:"higher"},
               {l:"LTV : CAC Ratio",          v:`${(ltvCacRatio||0).toFixed(1)}x`,sub:ltvCacRatio>=3?"Healthy (3x+ target)":ltvCacRatio>=2?"Improving":"Below benchmark",trend:SAAS.ltv.map((v,i)=>safeDiv(v,SAAS.cac[i])),c:ltvCacRatio>=3?T.emerald:T.amber,better:"higher"},
             ].map(k=>(
               <div key={k.l} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"16px 18px"}}>
@@ -4917,7 +4917,7 @@ const CSUITE_ROLES = {
       { tag:"Integration",   color:T.emerald, kpi:"2 connectors",    kpiSub:"QuickBooks + Plaid live",
         title:"QuickBooks and Plaid integrations are operational",
         body:"OAuth 2.0 QuickBooks sync and Plaid bank feed reconciliation eliminate ~12 hrs/month of manual data entry. Bank-to-book reconciliation is now automated." },
-      { tag:"Data Coverage", color:T.violet,  kpi:"Full SaaS stack", kpiSub:"MRR Â· NRR Â· LTV:CAC Â· ARR",
+      { tag:"Data Coverage", color:T.violet,  kpi:"Full SaaS stack", kpiSub:"MRR · NRR · LTV:CAC · ARR",
         title:"Complete SaaS metric pipeline built from scratch this year",
         body:"MRR waterfall, NRR, LTV:CAC, CAC, churn cohorts, and ARR tracking did not exist as automated pipelines at the start of FY 2024. All are now tracked monthly." },
       { tag:"Cost Control",  color:T.amber,   kpi:"$26.4K total",    kpiSub:"+$400 vs prior year (+1.5%)",
@@ -5019,7 +5019,7 @@ function CsuiteStrategicPanel() {
 
       {/* ââ Strategic wins ââ */}
       <div style={{marginBottom:4}}>
-        <CSuiteRowLabel color={T.emerald} label={`${R.key} Â· Strategic Wins`} sub="Four highest-signal positives from FY 2024"/>
+        <CSuiteRowLabel color={T.emerald} label={`${R.key} · Strategic Wins`} sub="Four highest-signal positives from FY 2024"/>
       </div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:20}}>
         {R.wins.map((w,i)=>(
@@ -5038,7 +5038,7 @@ function CsuiteStrategicPanel() {
       </div>
 
       {/* ââ Watch items ââ */}
-      <CSuiteRowLabel color={T.rose} label={`${R.key} Â· Watch Items & Required Actions`} sub="Issues ordered by priority and business impact"/>
+      <CSuiteRowLabel color={T.rose} label={`${R.key} · Watch Items & Required Actions`} sub="Issues ordered by priority and business impact"/>
       <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:20}}>
         {R.watch.map((w,i)=>{
           const p=CPRI[w.priority], tr=CTREND[w.trend]||CTREND.stable, isOpen=expanded===i;
@@ -5373,7 +5373,7 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
         csuite:{headline:"C-Suite Report is now on Professional",text:"Get executive-ready CEO, CFO, and CIO summaries. Share with leadership and investors directly from FinanceOS."},
         budgeting:{headline:"Build your first budget in minutes",text:"Create department budgets, route them for approval, and track actuals vs plan â all in one place."},
       }[tab]||{headline:"Professional feature",text:"Upgrade to unlock this and 8 other planning tools."};
-      return { color: T.cyan, icon:"ð", ...cfg, cta:"Start 14-Day Free Trial" };
+      return { color: T.cyan, icon:"→", ...cfg, cta:"Start 14-Day Free Trial" };
     }
     if(tab==="integrations") return {
       color:T.amber, icon:"ð",
@@ -5580,9 +5580,9 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
 
       {/* ââ Main content ââ */}
       <div className="fadein" key={tab} style={{padding:"24px 32px", paddingBottom: showPanel ? 380 : 28, width:"100%"}}>
-        {/* ââ Onboarding checklist â always shown on pnl tab until all steps complete ââ */}
-        {tab==="pnl" && (
-          <OnboardingChecklist onNavigate={id=>setTab(id)}/>
+        {/* ââ Onboarding checklist â shown on pnl tab until dismissed ââ */}
+        {tab==="pnl" && !checklistDismissed && (
+          <OnboardingChecklist onNavigate={id=>setTab(id)} onDismiss={()=>{setChecklistDismissed(true);try{localStorage.setItem('fo_checklist_dismissed','true')}catch{};}}/>
         )}
         {/* ââ CFO Scorecard â shown on pnl tab ââ */}
         {tab==="pnl" && (
