@@ -1691,19 +1691,19 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
 function PnLRow({label,monthly,isHeader,isTotal,indent,color,showSpark,negative}) {
   const tot=sum(monthly), avg=tot/12, sc=color||(negative?T.rose:T.emerald);
   return (
-    <div style={{borderBottom:`1px solid ${isHeader||isTotal?T.border:T.border+"60"}`,background:isHeader?T.card:isTotal?T.cyanDim:"transparent"}}>
+    <div style={{borderBottom:`1px solid ${isHeader||isTotal?T.border:T.border+"60"}`,background:isHeader?T.card:isTotal?(color?color+"15":T.cyanDim):"transparent"}}>
       <div style={{display:"grid",gridTemplateColumns:"200px repeat(12, 1fr) 80px 80px 60px",alignItems:"center",padding:isHeader?"10px 0":"7px 0"}}>
         <div style={{paddingLeft:indent?24:12,paddingRight:8,fontFamily:isHeader||isTotal?T.display:T.sans,fontSize:isHeader?10:11,fontWeight:isHeader||isTotal?700:400,color:isHeader?T.textDim:isTotal?T.cyan:indent?T.textMid:T.text,textTransform:isHeader?"uppercase":"none",letterSpacing:isHeader?1:0,display:"flex",alignItems:"center",gap:4,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
           {indent&&<span style={{color:T.textDim,fontSize:9}}>â</span>}{label}
         </div>
         {monthly.map((v,i)=>(
           <div key={i} style={{fontFamily:T.mono,fontSize:10,color:isHeader?T.textDim:v<0?T.rose:isTotal?T.cyan:negative?T.rose:T.textMid,textAlign:"right",padding:"0 6px"}}>
-            {isHeader?MONTHS[i]:fmt(Math.abs(v),true)}
+            {isHeader?MONTHS[i]:negative?fmt(Math.abs(v),true):fmt(v,true)}
           </div>
         ))}
-        <div style={{fontFamily:T.mono,fontSize:10,fontWeight:700,color:isTotal?T.cyan:negative?T.rose:T.emerald,textAlign:"right",padding:"0 6px"}}>{isHeader?"ANNUAL":fmt(Math.abs(tot),true)}</div>
-        <div style={{fontFamily:T.mono,fontSize:10,color:T.textDim,textAlign:"right",padding:"0 6px"}}>{isHeader?"AVG/MO":fmt(Math.abs(avg),true)}</div>
-        <div style={{padding:"0 8px",display:"flex",justifyContent:"center"}}>{showSpark&&!isHeader&&<Spark data={monthly.map(Math.abs)} color={sc} w={48} h={20}/>}</div>
+        <div style={{fontFamily:T.mono,fontSize:10,fontWeight:700,color:isTotal?T.cyan:negative?T.rose:T.emerald,textAlign:"right",padding:"0 6px"}}>{isHeader?"ANNUAL":negative?fmt(Math.abs(tot),true):fmt(tot,true)}</div>
+        <div style={{fontFamily:T.mono,fontSize:10,color:T.textDim,textAlign:"right",padding:"0 6px"}}>{isHeader?"AVG/MO":negative?fmt(Math.abs(avg),true):fmt(avg,true)}</div>
+        <div style={{padding:"0 8px",display:"flex",justifyContent:"center"}}>{showSpark&&!isHeader&&<Spark data={monthly} color={sc} w={48} h={20}/>}</div>
       </div>
     </div>
   );
@@ -2019,7 +2019,7 @@ function RevNetChart({ pnl }) {
             boxShadow:`0 8px 32px rgba(0,0,0,0.5)`,
           }}>
             <div style={{ fontFamily:T.mono, fontSize:10, color:T.cyan, fontWeight:700, marginBottom:10, letterSpacing:1 }}>
-              {MONTHS_SHORT[i]} 2024
+              {MONTHS_SHORT[i]}
             </div>
             {[
               { label:"Revenue",     value:`$${Math.round(rev/1000)}K`,   color:T.cyan    },
