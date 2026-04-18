@@ -709,7 +709,7 @@ function OnboardingChecklist({ onNavigate, onDismiss }) {
   if (allDone) return null;
 
   return (
-    <div style={{background:T.surface,border:`1.5px solid ${T.cyan}35`,borderRadius:16,marginBottom:24,overflow:"hidden",boxShadow:`0 4px 24px ${T.bg}80`}}>
+    <div style={{background:T.surface,border:`1.5px solid ${T.cyan}55`,borderRadius:16,marginBottom:24,overflow:"hidden",boxShadow:`0 0 0 1px ${T.cyan}15,0 0 50px ${T.cyan}12,0 6px 32px ${T.bg}CC`}}>
       {/* Header */}
       <div
         onClick={()=>setCollapsed(c=>!c)}
@@ -3910,21 +3910,22 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
     <div style={{maxWidth:1100,margin:"0 auto"}}>
       <style>{`
         @keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
-        .pricing-pro-glow{box-shadow:0 0 0 1.5px ${T.cyan}, 0 0 60px ${T.cyan}20, 0 20px 60px rgba(0,0,0,0.4);}
+        .pricing-pro-glow{box-shadow:0 0 0 1.5px ${T.cyan}, 0 0 60px ${T.cyan}20, 0 20px 60px rgba(0,0,0,0.4);animation:proGlow 3.5s ease-in-out infinite;}
+        @keyframes proGlow{0%,100%{box-shadow:0 0 0 1.5px ${T.cyan},0 0 60px ${T.cyan}18,0 20px 60px rgba(0,0,0,0.4)}50%{box-shadow:0 0 0 2px ${T.cyan},0 0 90px ${T.cyan}35,0 24px 70px rgba(0,0,0,0.5)}}
         .pricing-cta:hover{transform:translateY(-2px);}
         .pricing-cta{transition:transform 0.15s ease,box-shadow 0.15s ease;}
       `}</style>
 
       {/* Header */}
-      <div style={{textAlign:"center",marginBottom:36}}>
+      <div style={{textAlign:"center",marginBottom:44}}>
         <div style={{display:"inline-flex",alignItems:"center",gap:6,background:T.cyanDim,border:`1px solid ${T.cyan}40`,borderRadius:20,padding:"4px 14px",marginBottom:14}}>
           <span style={{fontSize:9,color:T.cyan,fontFamily:T.mono,fontWeight:800,textTransform:"uppercase",letterSpacing:1.5}}>ð³ Simple Pricing</span>
         </div>
-        <div style={{background:`linear-gradient(135deg,${T.text},${T.textMid})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",fontFamily:T.display,fontWeight:800,fontSize:32,marginBottom:10,lineHeight:1.15}}>
+        <div style={{background:`linear-gradient(135deg,#FFFFFF 0%,${T.text} 35%,${T.cyan}CC 100%)`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",fontFamily:T.display,fontWeight:800,fontSize:40,marginBottom:10,lineHeight:1.1}}>
           Plans that grow with your business
         </div>
         <div style={{color:T.textDim,fontFamily:T.sans,fontSize:14,marginBottom:24,maxWidth:440,margin:"0 auto 24px"}}>
-          Start free, no credit card needed. Upgrade when you're ready to plan, forecast, and grow with confidence.
+          Trusted by 500+ growing businesses. Start free â upgrade when you're ready to plan, forecast, and scale with confidence.
         </div>
         {/* Billing toggle */}
         <div style={{display:"inline-flex",alignItems:"center",gap:4,background:T.card,border:`1px solid ${T.border}`,borderRadius:50,padding:"5px 6px"}}>
@@ -4004,7 +4005,7 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
       </div>
 
       {/* Trust bar */}
-      <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:14,padding:"16px 28px",marginBottom:40,display:"flex",alignItems:"center",justifyContent:"center",gap:32,flexWrap:"wrap"}}>
+      <div style={{background:`linear-gradient(135deg,${T.card},${T.surface})`,border:`1px solid ${T.border}`,borderRadius:14,padding:"18px 28px",marginBottom:40,display:"flex",alignItems:"center",justifyContent:"center",gap:32,flexWrap:"wrap",boxShadow:`inset 0 1px 0 ${T.borderHover}40`}}>
         {[["ð","Bank-grade encryption"],["â","Cancel anytime, no questions"],["â¡","No setup fees ever"],["ð","Used by 500+ small businesses"],["ð³","Powered by Stripe"]].map(([i,t])=>(
           <div key={t} style={{display:"flex",alignItems:"center",gap:7}}>
             <span style={{fontSize:13}}>{i}</span>
@@ -4028,7 +4029,7 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
         </div>
         {MATRIX_ROWS.map((row,ri)=>{
           if(row.section) return(
-            <div key={ri} style={{background:T.surface,padding:"8px 28px",borderBottom:`1px solid ${T.border}`}}>
+            <div key={ri} style={{background:`linear-gradient(90deg,${T.cyan}10,${T.surface})`,padding:"9px 28px",borderBottom:`1px solid ${T.border}`}}>
               <span style={{fontSize:9,color:T.textDim,fontFamily:T.mono,textTransform:"uppercase",letterSpacing:1.5,fontWeight:700}}>{row.section}</span>
             </div>
           );
@@ -4075,7 +4076,7 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
           {i:"ðï¸",h:"Plan without spreadsheets",d:"Scenarios, headcount, and SaaS metrics all in one place. No VLOOKUP required."},
         ].map(b=>(
           <div key={b.h} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:13,padding:"18px 20px"}}>
-            <div style={{fontSize:22,marginBottom:10}}>{b.i}</div>
+            <div style={{width:44,height:44,borderRadius:12,background:`${T.cyan}12`,border:`1px solid ${T.cyan}25`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,marginBottom:14}}>{b.i}</div>
             <div style={{color:T.text,fontFamily:T.sans,fontWeight:700,fontSize:12,marginBottom:5}}>{b.h}</div>
             <div style={{color:T.textDim,fontFamily:T.sans,fontSize:11,lineHeight:1.65}}>{b.d}</div>
           </div>
@@ -4091,7 +4092,7 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
           {q:"What's the AI assistant?",a:"The AI FP&A assistant analyzes your actual financial data and provides actionable insights, forecasts, and plain-English explanations on every tab."},
           {q:"Discounts for accounting firms?",a:"Firms with multiple clients qualify for our Partner Program. Contact us for volume pricing and white-label options."},
         ].map(f=>(
-          <div key={f.q} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"16px 18px"}}>
+          <div key={f.q} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"16px 18px",borderLeft:`3px solid ${T.cyan}40`}}>
             <div style={{color:T.text,fontFamily:T.sans,fontWeight:700,fontSize:12,marginBottom:6}}>{f.q}</div>
             <div style={{color:T.textDim,fontFamily:T.sans,fontSize:11,lineHeight:1.65}}>{f.a}</div>
           </div>
@@ -5389,7 +5390,7 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
   })() : null;
 
   return (
-    <div style={{minHeight:"100vh",background:`linear-gradient(180deg,${T.bg} 0%,#040711 100%)`,color:T.text}}>
+    <div style={{minHeight:"100wh",background:`radial-gradient(ellipse 90% 45% at 50% 0%,${T.cyan}09 0%,transparent 55%),linear-gradient(180deg,${T.bg} 0%,#040711 100%)`,color:T.text}}>
       <style>{`
         html,body{margin:0;padding:0;width:100%;height:100%;scroll-behavior:smooth;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
         *{box-sizing:border-box;margin:0;padding:0;}
@@ -5438,7 +5439,7 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
             {l:"Gr. Margin", v:pct(aiCtx.ytdGrossMargin),  c:T.violet, bg:`${T.violet}12`},
             {l:"MRR",        v:fmt(latestMrr,true),        c:T.amber,  bg:`${T.amber}12`},
           ].map(s=>(
-            <div key={s.l} style={{background:s.bg,border:`1px solid ${s.c}30`,borderRadius:10,padding:"6px 14px",textAlign:"center",cursor:"default",minWidth:72}} title={s.l}>
+            <div key={s.l} style={{background:s.bg,border:`1px solid ${s.c}40`,borderRadius:10,padding:"6px 14px",textAlign:"center",cursor:"default",minWidth:72,boxShadow:`0 2px 12px ${s.c}15`}} title={s.l}>
               <div style={{color:T.textMid,fontSize:9,fontFamily:T.mono,textTransform:"uppercase",letterSpacing:1.2,marginBottom:3}}>{s.l}</div>
               <div style={{color:s.c,fontFamily:T.mono,fontSize:16,fontWeight:800,lineHeight:1,letterSpacing:"-0.5px"}}>{s.v}</div>
             </div>
@@ -5470,8 +5471,8 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
 
         </div>
         {/* Tab nav â two rows */}
-        <div className="tab-scroll" style={{display:"flex",flexDirection:"column",gap:3,padding:"8px 0",overflowX:"auto",msOverflowStyle:"none",scrollbarWidth:"none"}}>
-          <div role="tablist" aria-label="Core financial modules" style={{display:"flex",gap:1,flexWrap:"nowrap",overflow:"visible"}}>
+        <div className="tab-scroll" style={{display:"flex",flexDirection:"column",gap:4,padding:"10px 0 8px",overflowX:"auto",msOverflowStyle:"none",scrollbarWidth:"none"}}>
+          <div role="tablist" aria-label="Core financial modules" style={{display:"flex",gap:2,flexWrap:"nowrap",overflow:"visible"}}>
             {TABS.filter(t=>t.group==="core").map(t=>{
               const locked=tabLocked(t), active=tab===t.id;
               return (
@@ -5492,7 +5493,7 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
               );
             })}
           </div>
-          <div style={{display:"flex",gap:1,flexWrap:"nowrap",overflow:"visible"}}>
+          <div style={{display:"flex",gap:2,flexWrap:"nowrap",overflow:"visible"}}>
             {TABS.filter(t=>t.group==="ops").map(t=>{
               const locked=tabLocked(t), active=tab===t.id, isPricing=t.id==="pricing";
               return (
