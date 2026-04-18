@@ -576,7 +576,7 @@ function PlanGate({ requiredPlan, featureName, features, onUpgrade, lockedCopy }
                 style={{background:`linear-gradient(135deg,${color},${T.violet})`,border:"none",borderRadius:11,padding:"13px 32px",color:T.bg,fontSize:13,fontFamily:T.sans,fontWeight:800,cursor:"pointer",boxShadow:`0 4px 20px ${color}40`,letterSpacing:0.3,transition:"all 0.2s"}}
                 onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow=`0 8px 28px ${color}50`;}}
                 onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow=`0 4px 20px ${color}40`;}}>
-                {isEnt?"Contact Sales â":"Start 14-Day Free Trial â"}
+                {isEnt?"Contact Sales →":"Start 14-Day Free Trial →"}
               </button>
               <div style={{fontSize:11,color:T.textDim,fontFamily:T.sans}}>
                 {isEnt?"Custom pricing · Dedicated onboarding":"Free 14 days · No credit card · Cancel anytime"}
@@ -725,7 +725,7 @@ function OnboardingChecklist({ onNavigate, onDismiss }) {
           <div style={{height:"100%",width:`${pct}%`,background:`linear-gradient(90deg,${T.cyan},${T.violet})`,borderRadius:99,transition:"width 0.5s ease"}}/>
         </div>
         <button onClick={e=>{e.stopPropagation();onDismiss?.();}} style={{background:"none",border:"none",color:T.textDim,fontSize:14,cursor:"pointer",padding:"0 4px",flexShrink:0}} title="Dismiss checklist">Ã</button>
-        <span style={{fontSize:10,color:T.textDim,transform:collapsed?"none":"rotate(180deg)",display:"inline-block",transition:"transform 0.2s"}}>â¾</span>
+        <span style={{fontSize:10,color:T.textDim,transform:collapsed?"none":"rotate(180deg)",display:"inline-block",transition:"transform 0.2s"}}>▾</span>
       </div>
       {!collapsed && (
         <div style={{padding:"8px 18px 16px",display:"flex",flexDirection:"column",gap:6}}>
@@ -746,7 +746,7 @@ function OnboardingChecklist({ onNavigate, onDismiss }) {
                 </div>
                 {!isDone && (
                   <button onClick={()=>{onNavigate(step.tab);markDone(step.id);}} style={{background:`${T.cyan}18`,border:`1px solid ${T.cyan}35`,borderRadius:8,padding:"5px 12px",color:T.cyan,fontSize:11,fontFamily:T.sans,fontWeight:700,cursor:"pointer",flexShrink:0}}>
-                    Go â
+                    Go →
                   </button>
                 )}
               </div>
@@ -972,7 +972,7 @@ function ScenarioSaveModal({ multipliers, onSave, onClose }) {
           <div style={{display:"flex",gap:8,marginTop:4}}>
             <button onClick={onClose} style={{flex:1,background:"transparent",border:`1px solid ${T.border}`,borderRadius:9,padding:"10px",color:T.textDim,fontSize:12,fontFamily:T.sans,cursor:"pointer"}}>Cancel</button>
             <button onClick={save} disabled={saving} style={{flex:2,background:`linear-gradient(135deg,${T.cyan},${T.violet})`,border:"none",borderRadius:9,padding:"10px",color:T.bg,fontSize:12,fontFamily:T.display,fontWeight:800,cursor:saving?"not-allowed":"pointer"}}>
-              {saving ? "Savingâ¦" : "Save Scenario â"}
+              {saving ? "Savingâ¦" : "Save Scenario →"}
             </button>
           </div>
         </div>
@@ -1140,7 +1140,7 @@ function CSVImportModal({ onClose, onSuccess }) {
             <div style={{display:"flex",gap:8,marginTop:14}}>
               <button onClick={onClose} style={{flex:1,background:"transparent",border:`1px solid ${T.border}`,borderRadius:9,padding:"10px",color:T.textDim,fontSize:12,fontFamily:T.sans,cursor:"pointer"}}>Cancel</button>
               <button onClick={upload} disabled={status==="uploading"} style={{flex:2,background:`linear-gradient(135deg,${T.cyan},${T.violet})`,border:"none",borderRadius:9,padding:"10px",color:T.bg,fontSize:12,fontFamily:T.display,fontWeight:800,cursor:status==="uploading"?"not-allowed":"pointer"}}>
-                {status==="uploading" ? "Importingâ¦" : "Import Data â"}
+                {status==="uploading" ? "Importingâ¦" : "Import Data →"}
               </button>
             </div>
           </>
@@ -1466,7 +1466,7 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
   const welcome = {
     pnl:      () => `ð P&L loaded. YTD revenue: **${fmt(context.ytdRevenue)}** | Net: **${fmt(context.ytdNet)}** | Margin: **${pct(context.ytdNetMargin)}**\n\nAsk me anything about your financials.`,
     scenario: () => `ð® Scenarios ready. **Bear:** ${fmt(context.bearAnnualNet,true)} | **Base:** ${fmt(context.baseAnnualNet,true)} | **Bull:** ${fmt(context.bullAnnualNet,true)}\n\nRisk spread: **${fmt((context.bullAnnualNet||0)-(context.bearAnnualNet||0),true)}**. What would you like to model?`,
-    cashflow: () => `ð§ Cash Flow loaded. Balance: **${fmt(context.openingBalance)}** â projected **${fmt(context.endBalance)}**. Min: **${fmt(context.minBalance)}** at Week ${context.minWeek}. Ask about timing risks.`,
+    cashflow: () => `ð§ Cash Flow loaded. Balance: **${fmt(context.openingBalance)}** → projected **${fmt(context.endBalance)}**. Min: **${fmt(context.minBalance)}** at Week ${context.minWeek}. Ask about timing risks.`,
     ar:       () => `ð¬ AR Aging loaded. Outstanding: **${fmt(context.totalAR)}** | DSO: **${context.dso} days** | At-risk: **${fmt((context.d60||0)+(context.d90plus||0),true)}**. Who do you want to prioritize?`,
     regional: () => `ðºï¸ Client Comparison â **${context.clientCount} clients** | Portfolio: **${fmt(context.totalRevenue,true)}** | Avg margin: **${pct(context.avgMargin||0)}**. Ask about regional performance.`,
     bva:      () => `ð Budget vs. Actuals loaded. Revenue variance: **${fmt(context.revVariance,true)}** | OpEx variance: **${fmt(context.opexVariance,true)}**. Ask about any line item.`,
@@ -1675,7 +1675,7 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
                       <span style={{marginLeft:"auto",fontSize:9,color:SEVER[a.severity]||T.amber,background:(SEVER[a.severity]||T.amber)+"20",borderRadius:20,padding:"1px 7px",fontFamily:T.mono,textTransform:"uppercase",fontWeight:700}}>{a.severity}</span>
                     </div>
                     <div style={{color:T.textMid,fontFamily:T.sans,fontSize:11,lineHeight:1.5}}>{a.detail}</div>
-                    {a.action && <div style={{marginTop:5,color:T.cyan,fontFamily:T.sans,fontSize:10,fontWeight:600}}>â {a.action}</div>}
+                    {a.action && <div style={{marginTop:5,color:T.cyan,fontFamily:T.sans,fontSize:10,fontWeight:600}}>→ {a.action}</div>}
                   </div>
                 ))}
               </div>
@@ -1731,7 +1731,7 @@ function RevNetChart({ pnl }) {
   const revY  = v => PAD.top + (1 - Math.max(0, v) / REV_MAX) * cH;
   const revH  = v => Math.max(0, v) / REV_MAX * cH;
 
-  // ââ Right Y-axis: Net Income  (â5K â +25K) âââââââââââââââââââââââ
+  // ââ Right Y-axis: Net Income  (â5K → +25K) âââââââââââââââââââââââ
   const NET_MIN = -5000, NET_MAX = 25000, NET_RANGE = 30000;
   const netY  = v => PAD.top + (NET_MAX - v) / NET_RANGE * cH;
   const ZERO_Y = netY(0); // pixel-y of zero for net income
@@ -2663,8 +2663,8 @@ function RegionalComparison({aiContext}) {
               <div style={{position:"relative",height:220,background:T.surface,borderRadius:8,overflow:"hidden"}}>
                 {[0.25,0.5,0.75].map(f=><div key={f} style={{position:"absolute",left:`${f*100}%`,top:0,bottom:0,width:1,background:T.border}}/>)}
                 {[0.25,0.5,0.75].map(f=><div key={f} style={{position:"absolute",top:`${f*100}%`,left:0,right:0,height:1,background:T.border}}/>)}
-                <div style={{position:"absolute",bottom:6,right:10,fontSize:8,color:T.textDim,fontFamily:T.sans}}>Revenue â</div>
-                <div style={{position:"absolute",top:"50%",left:4,fontSize:8,color:T.textDim,fontFamily:T.sans,transform:"translateY(-50%) rotate(-90deg)",transformOrigin:"center"}}>Margin â</div>
+                <div style={{position:"absolute",bottom:6,right:10,fontSize:8,color:T.textDim,fontFamily:T.sans}}>Revenue →</div>
+                <div style={{position:"absolute",top:"50%",left:4,fontSize:8,color:T.textDim,fontFamily:T.sans,transform:"translateY(-50%) rotate(-90deg)",transformOrigin:"center"}}>Margin →</div>
                 {(()=>{
                   const maxRv=Math.max(...REGIONAL_CLIENTS.map(c=>c.revenue)),minRv=Math.min(...REGIONAL_CLIENTS.map(c=>c.revenue));
                   return REGIONAL_CLIENTS.map((c,i)=>{
@@ -2807,7 +2807,7 @@ const MOCK_RESULT = {
     { rank:4, title:"Salesforce / HubSpot Pipeline Integration", impact:"ARR forecast is the most critical forward-looking metric. Connecting pipeline data makes the forecast accurate instead of manual.", effort:"High" },
     { rank:5, title:"Configurable Anomaly Thresholds", impact:"Currently fires too broadly. Letting the CFO set per-metric thresholds (e.g. flag only >10% MoM variance on COGS) dramatically improves signal quality.", effort:"Low" },
     { rank:6, title:"Drill-Through from Charts to Transactions", impact:"Every chart click should show the underlying transactions. Without this, the CFO has to leave FinanceOS and open QBO to answer follow-up questions.", effort:"Medium" },
-    { rank:7, title:"Data Lineage / Audit Trail Panel", impact:"CFOs need to know where every number comes from. A lightweight lineage panel (source â transformation â display) closes the biggest trust gap.", effort:"Medium" },
+    { rank:7, title:"Data Lineage / Audit Trail Panel", impact:"CFOs need to know where every number comes from. A lightweight lineage panel (source → transformation → display) closes the biggest trust gap.", effort:"Medium" },
     { rank:8, title:"Cohort Revenue Retention Analysis", impact:"NRR alone is not enough for investors. Cohort-level retention shows whether the business is improving or degrading at the customer level.", effort:"Medium" },
     { rank:9, title:"C-Suite Report on Professional Plan", impact:"Moving the board summary to the $99/mo tier makes it accessible to the typical buyer and removes a key objection in the sales process.", effort:"Low" },
     { rank:10, title:"Mobile-Responsive Layout", impact:"CFOs review numbers between meetings on their phone. A responsive layout increases daily active usage and reduces churn on the Professional tier.", effort:"High" },
@@ -3001,7 +3001,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
           <div style={{fontSize:9,color:T.textDim,fontFamily:T.mono,marginTop:2,letterSpacing:1}}>CFO SIMULATION ADVISOR</div>
         </div>
         {!canUseAI && <span style={{fontSize:9,color:T.amber,background:T.amberDim,border:`1px solid ${T.amber}30`,borderRadius:99,padding:"2px 8px",fontFamily:T.mono,fontWeight:700}}>PROFESSIONAL</span>}
-        <span style={{fontSize:11,color:T.textDim,transform:aiOpen?"rotate(180deg)":"none",transition:"transform 0.2s",display:"inline-block"}}>â¾</span>
+        <span style={{fontSize:11,color:T.textDim,transform:aiOpen?"rotate(180deg)":"none",transition:"transform 0.2s",display:"inline-block"}}>▾</span>
       </div>
 
       {aiOpen && (
@@ -3105,7 +3105,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
             ))}
           </div>
           <button onClick={runSimulation} style={{background:`linear-gradient(135deg,${T.cyan},${T.violet})`,border:"none",borderRadius:11,padding:"13px 32px",color:T.bg,fontSize:14,fontFamily:T.display,fontWeight:800,cursor:"pointer",boxShadow:`0 4px 24px ${T.cyan}35`,letterSpacing:0.2}}>
-            Run 30-Day CFO Simulation â
+            Run 30-Day CFO Simulation →
           </button>
           <span style={{marginLeft:16,fontSize:10,color:T.textDim,fontFamily:T.mono}}>~30 seconds · Powered by Claude Sonnet</span>
         </div>
@@ -3211,7 +3211,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
               </div>
               <div style={{fontSize:12,color:T.textMid,fontFamily:T.sans,lineHeight:1.65,marginBottom:14}}>{r?.finalDecision?.reasoning}</div>
               <SimSectionLabel text="Key Conditions" color={T.cyan}/>
-              <SimBullet items={r?.finalDecision?.keyConditions} icon="â" color={T.cyan}/>
+              <SimBullet items={r?.finalDecision?.keyConditions} icon="→" color={T.cyan}/>
             </SimCard>
             <SimCard>
               <SimSectionLabel text="Biggest Weaknesses" color={T.rose}/>
@@ -3266,7 +3266,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
                       </div>
                       <div style={{fontSize:14,fontWeight:700,color:T.text,fontFamily:T.display}}>{ph.title}</div>
                     </div>
-                    <span style={{color:T.textDim,fontSize:11,transform:open?"rotate(180deg)":"none",transition:"transform 0.2s",flexShrink:0}}>â¾</span>
+                    <span style={{color:T.textDim,fontSize:11,transform:open?"rotate(180deg)":"none",transition:"transform 0.2s",flexShrink:0}}>▾</span>
                   </div>
                   <div style={{fontSize:12,color:T.textMid,fontFamily:T.sans,lineHeight:1.65,marginTop:10,paddingLeft:50}}>{ph.summary}</div>
                 </div>
@@ -3390,7 +3390,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
             </div>
             <div style={{fontSize:13,color:T.textMid,fontFamily:T.sans,lineHeight:1.7,marginBottom:18}}>{r?.finalDecision?.reasoning}</div>
             <SimSectionLabel text="Key Conditions for Yes" color={T.cyan}/>
-            <SimBullet items={r?.finalDecision?.keyConditions} icon="â" color={T.cyan}/>
+            <SimBullet items={r?.finalDecision?.keyConditions} icon="→" color={T.cyan}/>
           </SimCard>
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
             <SimCard>
@@ -3534,7 +3534,7 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
             setPlaidStep("connected");
             setPlaid(p=>({...p,connected:true,lastSync:"Just now",accounts:[]}));
             addLog(`${meta.institution?.name||"Bank"} connected successfully.`,"success");
-          } catch(err) { const m=err.message||"Connection failed"; setPlaidError(m.includes("configured")||m.includes("setup")?"Setup required: add PLAID_CLIENT_ID & PLAID_SECRET in Vercel â Settings â Environment Variables, then redeploy.":m); setPlaidStep("idle"); }
+          } catch(err) { const m=err.message||"Connection failed"; setPlaidError(m.includes("configured")||m.includes("setup")?"Setup required: add PLAID_CLIENT_ID & PLAID_SECRET in Vercel → Settings → Environment Variables, then redeploy.":m); setPlaidStep("idle"); }
         },
         onExit: (err)=>{ if(err) setPlaidError(err.error_message||"Connection cancelled."); setPlaidStep("idle"); },
       });
@@ -3899,7 +3899,7 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
         <div style={{color:T.textMid,fontFamily:T.sans,fontSize:14,maxWidth:420,lineHeight:1.7}}>Your plan is now active. All features are immediately available across every tab of your dashboard.</div>
         <button onClick={()=>{setStep("plans");onPlanChange&&onPlanChange(currentPlan);}}
           style={{background:`linear-gradient(135deg,${T.cyan},${T.violet})`,border:"none",borderRadius:12,padding:"14px 36px",color:T.bg,fontSize:14,fontFamily:T.sans,fontWeight:800,cursor:"pointer",boxShadow:`0 4px 24px ${T.cyan}35`}}>
-          Go to Dashboard â
+          Go to Dashboard →
         </button>
         <div style={{fontSize:11,color:T.textDim,fontFamily:T.sans}}>A receipt has been sent to your email by Stripe.</div>
       </div>
@@ -4115,7 +4115,7 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
                   </div>
                 ))}
                 <div style={{display:"flex",gap:10,marginTop:20}}>
-                  <button onClick={()=>setContactSent(true)} style={{flex:2,background:`linear-gradient(135deg,${T.violet},${T.cyan})`,border:"none",borderRadius:10,padding:"12px",color:T.bg,fontSize:13,fontFamily:T.sans,fontWeight:800,cursor:"pointer"}}>Send Message â</button>
+                  <button onClick={()=>setContactSent(true)} style={{flex:2,background:`linear-gradient(135deg,${T.violet},${T.cyan})`,border:"none",borderRadius:10,padding:"12px",color:T.bg,fontSize:13,fontFamily:T.sans,fontWeight:800,cursor:"pointer"}}>Send Message →</button>
                   <button onClick={()=>setContactOpen(false)} style={{flex:1,background:"transparent",border:`1px solid ${T.border}`,borderRadius:10,padding:"12px",color:T.textDim,fontSize:12,fontFamily:T.sans,cursor:"pointer"}}>Cancel</button>
                 </div>
               </>
@@ -4868,15 +4868,15 @@ const CSUITE_ROLES = {
       { tag:"Margin Control",     color:T.emerald, kpi:"56.9% GM",     kpiSub:"Held Â±0.4pp all four quarters",
         title:"Gross margin held stable despite 81% revenue growth",
         body:"COGS scaled linearly with revenue â no adverse leverage on inventory, direct labor, or shipping. Holding ~57% gross margin through rapid growth confirms disciplined procurement." },
-      { tag:"Liquidity",          color:T.cyan,    kpi:"+$86K Cash FY",kpiSub:"$142K â $228K, self-funded",
+      { tag:"Liquidity",          color:T.cyan,    kpi:"+$86K Cash FY",kpiSub:"$142K → $228K, self-funded",
         title:"The business funded its own growth â no equity raise needed",
         body:"Opening cash of $142K grew to $228K through organic operations. Long-term debt reduced by $24.2K on schedule. Current ratio 3.74x and quick ratio 2.92x are both comfortably in the safe zone." },
-      { tag:"Operating Leverage", color:T.amber,   kpi:"16.2pp EBITDA",kpiSub:"1.8% Q1 â 18.0% Q4",
+      { tag:"Operating Leverage", color:T.amber,   kpi:"16.2pp EBITDA",kpiSub:"1.8% Q1 → 18.0% Q4",
         title:"EBITDA margin expanded 16 percentage points across the year",
         body:"EBITDA grew from $3.8K in Q1 to $68.3K in Q4 â 1,697% increase on 81% revenue growth. Fixed cost absorption is accelerating with each incremental revenue dollar." },
       { tag:"Debt Management",    color:T.violet,  kpi:"â$24.2K LTD",  kpiSub:"All covenants current",
         title:"Debt service is on schedule with no covenant risk",
-        body:"Long-term debt tracking to plan ($185K â $160.8K). Short-term debt retired mid-year. No refinancing or emergency credit events occurred." },
+        body:"Long-term debt tracking to plan ($185K → $160.8K). Short-term debt retired mid-year. No refinancing or emergency credit events occurred." },
     ],
     watch:[
       { priority:"critical", effort:"Low",    trend:"worsening", tag:"Receivables",   owner:"CFO / Controller",  due:"Mar 21",
@@ -4961,7 +4961,7 @@ const CPRI = {
 };
 const CTREND = {
   worsening:{ g:"â", label:"Worsening", c:T.rose    },
-  stable:   { g:"â", label:"Stable",    c:T.amber   },
+  stable:   { g:"→", label:"Stable",    c:T.amber   },
   improving:{ g:"â", label:"Improving", c:T.emerald },
 };
 const CEFFORT = { High:T.rose, Medium:T.amber, Low:T.emerald };
@@ -5086,7 +5086,7 @@ function CsuiteStrategicPanel() {
                     <p style={{fontFamily:T.sans,fontSize:11,color:T.textMid,lineHeight:1.8,marginBottom:14}}>{w.body}</p>
                     {w.data&&(
                       <div style={{marginBottom:14}}>
-                        <div style={{fontFamily:T.mono,fontSize:8,color:T.textDim,letterSpacing:2,marginBottom:8}}>{w.data.label} â Q1 â Q4</div>
+                        <div style={{fontFamily:T.mono,fontSize:8,color:T.textDim,letterSpacing:2,marginBottom:8}}>{w.data.label} â Q1 → Q4</div>
                         <div style={{display:"flex",gap:8,alignItems:"flex-end",height:44}}>
                           {w.data.vals.map((v,qi)=>{
                             const qcs=[T.amber,T.cyan,T.emerald,T.violet];
@@ -5105,7 +5105,7 @@ function CsuiteStrategicPanel() {
                       </div>
                     )}
                     <div style={{background:p.bg,border:`1px solid ${p.border}`,borderRadius:8,padding:"11px 14px",display:"flex",gap:10,alignItems:"flex-start"}}>
-                      <span style={{fontFamily:T.mono,color:p.fg,fontSize:12,flexShrink:0,marginTop:1}}>â</span>
+                      <span style={{fontFamily:T.mono,color:p.fg,fontSize:12,flexShrink:0,marginTop:1}}>→</span>
                       <div>
                         <div style={{fontFamily:T.mono,fontSize:8,color:p.fg,letterSpacing:2,marginBottom:4}}>REQUIRED ACTION</div>
                         <div style={{fontFamily:T.sans,fontSize:11,color:T.text,fontWeight:600,lineHeight:1.6}}>{w.action}</div>
@@ -5385,7 +5385,7 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
       color: T.teal, icon:"ð±",
       headline:"You're on Starter",
       text:"Unlock Scenario Planning, SaaS Metrics, Headcount Planning, anomaly alerts, and full AI FP&A â all for less than a bookkeeper.",
-      cta:"See what's included â",
+      cta:"See what's included →",
     };
   })() : null;
 
