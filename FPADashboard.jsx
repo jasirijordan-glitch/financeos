@@ -1,11 +1,11 @@
 /**
- * FinanceOS Ã¢ÂÂ FP&A Suite for Small Business
+ * FinanceOS â FP&A Suite for Small Business
  * Production-hardened dashboard component.
  *
  * Architecture notes:
  * - AI calls go to /api/ai (proxied through Express server, never direct to Anthropic)
  * - All financial math guarded against NaN/division-by-zero via safeDiv()
- * - Error boundary wraps entire app Ã¢ÂÂ no blank screens on component crash
+ * - Error boundary wraps entire app â no blank screens on component crash
  * - Memoized heavy computations to prevent re-computation on unrelated renders
  * - ARIA roles on navigation for keyboard accessibility
  * - Rate limiting enforced both client-side (debounce) and server-side (express-rate-limit)
@@ -14,7 +14,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback, Component } from "react";
 import CFOScorecard from "./src/components/CFOScorecard";
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Google Fonts Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ Google Fonts ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââÃÂ¢ÃÂÃÂ
 if (typeof document !== "undefined" && !document.getElementById("fo-fonts")) {
   const link = document.createElement("link");
   link.id = "fo-fonts";
@@ -23,7 +23,7 @@ if (typeof document !== "undefined" && !document.getElementById("fo-fonts")) {
   document.head.appendChild(link);
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Safe API client (inline Ã¢ÂÂ no import chain that can fail) Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ Safe API client (inline â no import chain that can fail) ââââââââ
 const api = (() => {
   const req = async (method, path, body) => {
     try {
@@ -104,7 +104,7 @@ const api = (() => {
   };
 })();
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Design Tokens Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ Design Tokens ââââââââââââââââââââââââââââââââââââââââââââââââ
 const T = {
   bg: "#060911", surface: "#0B0E18", card: "#101420",
   border: "#1A2035", borderHover: "#2A3255",
@@ -123,7 +123,7 @@ const T = {
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Safe Math Utilities Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ Safe Math Utilities ââââââââââââââââââââââââââââââââââââââââââ
 /** Prevents division-by-zero NaN propagation throughout all financial calculations */
 const safeDiv = (a, b, fallback = 0) => {
   if (!b || !isFinite(b)) return fallback;
@@ -152,8 +152,8 @@ const sum = (arr) => {
   return arr.reduce((a, b) => a + (isFinite(b) ? b : 0), 0);
 };
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Plan Capability System Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
-/** Feature keys Ã¢ÂÂ single source of truth for all capability checks */
+// ââÃÂ¢ÃÂÃÂ Plan Capability System ââââââââââââââââââââââââââââââââââââââÃÂ¢ÃÂÃÂ
+/** Feature keys â single source of truth for all capability checks */
 const FEATURES = {
   PNL:                "pnl",
   BUDGET_VS_ACTUAL:   "budget_vs_actual",
@@ -212,7 +212,7 @@ const normalizePlan = p => {
   return "starter";
 };
 
-/** Feature-flag check Ã¢ÂÂ replaces scattered isPro/isEnt calls */
+/** Feature-flag check â replaces scattered isPro/isEnt calls */
 const hasFeature = (plan, feature) => PLAN_FEATURES[normalizePlan(plan)]?.has(feature) ?? false;
 
 /** Returns the minimum plan label needed for a feature */
@@ -224,17 +224,17 @@ const minPlanForFeature = feature => {
   return "Included";
 };
 
-/** Backward-compat shims Ã¢ÂÂ used in a handful of legacy call sites */
+/** Backward-compat shims â used in a handful of legacy call sites */
 const isPro = p => hasFeature(p, FEATURES.FULL_AI);
 const isEnt = p => hasFeature(p, FEATURES.CSUITE_REPORT);
 
 const PLAN_META = {
-  starter:      { label:"Starter",      icon:"Ã°ÂÂÂ±", color:T.teal,   upgradeTo:"professional", upgradeLabel:"Professional" },
+  starter:      { label:"Starter",      icon:"ð±", color:T.teal,   upgradeTo:"professional", upgradeLabel:"Professional" },
   professional: { label:"Professional", icon:"â", color:T.cyan,   upgradeTo:"enterprise",   upgradeLabel:"Enterprise"   },
-  enterprise:   { label:"Enterprise",   icon:"Ã°ÂÂÂ¢", color:T.violet, upgradeTo:null,            upgradeLabel:null           },
+  enterprise:   { label:"Enterprise",   icon:"ð¢", color:T.violet, upgradeTo:null,            upgradeLabel:null           },
 };
 const PRO_GATE_FEATURES = [
-  "C-Suite Executive Report Ã¢ÂÂ included in Professional",
+  "C-Suite Executive Report â included in Professional",
   "Save, version, and share scenarios across sessions",
   "Collaborative budgeting with approval workflows",
   "Model Bear, Base, and Bull scenarios side-by-side",
@@ -242,7 +242,7 @@ const PRO_GATE_FEATURES = [
   "Track MRR, churn, CAC, and NRR automatically",
   "Anomaly alerts before problems become crises",
   "PDF + CSV export on every report",
-  "Full AI FP&A assistant Â· Live QuickBooks & Plaid sync",
+  "Full AI FP&A assistant ÃÂ· Live QuickBooks & Plaid sync",
 ];
 const ENT_GATE_FEATURES = [
   "Unlimited companies (multi-entity)",
@@ -256,7 +256,7 @@ const ENT_GATE_FEATURES = [
   "SLA 99.9% uptime guarantee",
 ];
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Financial Data Constants Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ Financial Data Constants ââââââââââââââââââââââââââââââââââââÃÂ¢ÃÂÃÂ
 const BASE_PNL = {
   productSales:    [42000,38000,45000,51000,48000,55000,62000,58000,67000,71000,79000,88000],
   serviceFees:     [18000,17000,19000,21000,22000,24000,26000,25000,28000,30000,32000,35000],
@@ -406,12 +406,12 @@ const SAAS = {
 };
 
 const SCENARIOS_DEF = {
-  bear: { label:"Bear", icon:"Ã°ÂÂÂ»", color:T.rose,    revenue:0.78, cogs:1.08, opex:0.95, desc:"Revenue down 22%, costs elevated" },
-  base: { label:"Base", icon:"Ã°ÂÂÂ", color:T.cyan,    revenue:1.00, cogs:1.00, opex:1.00, desc:"Current trajectory maintained" },
-  bull: { label:"Bull", icon:"Ã°ÂÂÂ", color:T.emerald, revenue:1.28, cogs:0.94, opex:1.05, desc:"Revenue up 28%, improved margins" },
+  bear: { label:"Bear", icon:"ð»", color:T.rose,    revenue:0.78, cogs:1.08, opex:0.95, desc:"Revenue down 22%, costs elevated" },
+  base: { label:"Base", icon:"ð", color:T.cyan,    revenue:1.00, cogs:1.00, opex:1.00, desc:"Current trajectory maintained" },
+  bull: { label:"Bull", icon:"ð", color:T.emerald, revenue:1.28, cogs:0.94, opex:1.05, desc:"Revenue up 28%, improved margins" },
 };
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Core Computation Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ Core Computation ââââââââââââââââââââââââââââââââââââââââââââÃÂ¢ÃÂÃÂ
 // Financial schedule constants (override via data.da[] / data.interest[])
 const DA_MONTHLY       = 1200; // Depreciation & Amortization per month
 const INTEREST_MONTHLY = 850;  // Interest expense per month
@@ -442,7 +442,7 @@ function computePnL(data, mults = { revenue:1, cogs:1, opex:1 }) {
   });
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Error Boundary Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ Error Boundary ââââââââââââââââââââââââââââââââââââââââââââââÃÂ¢ÃÂÃÂ
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -466,22 +466,22 @@ class ErrorBoundary extends React.Component {
     const box = { background:"#131820", border:"1px solid #1C2333", borderRadius:8, padding:"10px 14px", maxWidth:640, width:"100%", textAlign:"left", fontFamily:"monospace", fontSize:11, wordBreak:"break-all", whiteSpace:"pre-wrap", overflowY:"auto" };
     return (
       <div style={{minHeight:"100vh",background:"#080B12",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:12,padding:32,textAlign:"center"}}>
-        <div style={{fontSize:32}}>Ã¢ÂÂ Ã¯Â¸Â</div>
+        <div style={{fontSize:32}}>â ï¸</div>
         <div style={{color:"#E2E8F8",fontWeight:700,fontSize:17,fontFamily:"sans-serif"}}>Dashboard Render Error</div>
-        <div style={{color:"#8892AA",fontSize:12,maxWidth:460,lineHeight:1.6,fontFamily:"sans-serif"}}>A component crashed. The error details are below Ã¢ÂÂ copy and share to debug.</div>
+        <div style={{color:"#8892AA",fontSize:12,maxWidth:460,lineHeight:1.6,fontFamily:"sans-serif"}}>A component crashed. The error details are below â copy and share to debug.</div>
         <div style={{...box,color:"#FF4D6A",background:"#FF4D6A12",border:"1px solid #FF4D6A40"}}>{errMsg}</div>
         {errStack ? <div style={{...box,color:"#8892AA",maxHeight:120}}>{errStack}</div> : null}
         {compStack ? <div style={{...box,color:"#4A5268"}}><span style={{display:"block",fontSize:9,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Component Tree</span>{compStack}</div> : null}
         <div style={{display:"flex",gap:8,marginTop:8}}>
-          <button onClick={()=>this.setState({hasError:false,errMsg:"",errStack:"",compStack:""})} style={{background:"linear-gradient(135deg,#00D4FF,#A78BFA)",border:"none",borderRadius:8,padding:"10px 20px",color:"#080B12",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"sans-serif"}}>Ã°ÂÂÂ Retry</button>
-          <button onClick={()=>{try{navigator.clipboard.writeText(errMsg+"\n\n"+errStack+"\n\n"+compStack);}catch(e){}}} style={{background:"#131820",border:"1px solid #1C2333",borderRadius:8,padding:"10px 20px",color:"#8892AA",fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"sans-serif"}}>Ã°ÂÂÂ Copy Error</button>
+          <button onClick={()=>this.setState({hasError:false,errMsg:"",errStack:"",compStack:""})} style={{background:"linear-gradient(135deg,#00D4FF,#A78BFA)",border:"none",borderRadius:8,padding:"10px 20px",color:"#080B12",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"sans-serif"}}>ð Retry</button>
+          <button onClick={()=>{try{navigator.clipboard.writeText(errMsg+"\n\n"+errStack+"\n\n"+compStack);}catch(e){}}} style={{background:"#131820",border:"1px solid #1C2333",borderRadius:8,padding:"10px 20px",color:"#8892AA",fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"sans-serif"}}>ð Copy Error</button>
         </div>
       </div>
     );
   }
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Sparkline Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ Sparkline ââââââââââââââââââââââââââââââââââââââââââââââââââââ
 let _sparkId = 0;
 function Spark({ data, color, w = 80, h = 28 }) {
   const idRef = useRef(null);
@@ -505,28 +505,28 @@ function Spark({ data, color, w = 80, h = 28 }) {
   );
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Plan Gate Overlay Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ Plan Gate Overlay ââââââââââââââââââââââââââââââââââââââââââââ
 const GATE_CONFIG = {
   "Scenario Planner": {
-    emoji:"Ã°ÂÂÂ®", headline:"Test decisions before you make them.",
-    pitch:"Model a price increase, a new hire, or a slow quarter Ã¢ÂÂ before you're locked in. See the best-case, base-case, and worst-case outcomes of every major business decision.",
+    emoji:"ð®", headline:"Test decisions before you make them.",
+    pitch:"Model a price increase, a new hire, or a slow quarter â before you're locked in. See the best-case, base-case, and worst-case outcomes of every major business decision.",
     outcomes:["Test hiring, pricing, and revenue changes before committing","See your break-even point under any scenario","Understand your runway in a downturn","Build board-ready forecasts in minutes"],
-    social:"Teams using Scenario Planning catch cash problems 3ÃÂ earlier.",
+    social:"Teams using Scenario Planning catch cash problems 3ÃÂÃÂ earlier.",
   },
   "Headcount Planning": {
-    emoji:"Ã°ÂÂÂ¥", headline:"Plan growth without spreadsheet chaos.",
-    pitch:"Know exactly when you can afford to hire, what each role costs fully-loaded, and how payroll tracks against your budget Ã¢ÂÂ all without a single spreadsheet.",
+    emoji:"ð¥", headline:"Plan growth without spreadsheet chaos.",
+    pitch:"Know exactly when you can afford to hire, what each role costs fully-loaded, and how payroll tracks against your budget â all without a single spreadsheet.",
     outcomes:["See the full cost of every hire before you post the role","Track open reqs and offer costs against budget","Model salary increases and benefits before they hit the books","Avoid hiring too fast or too slow"],
     social:"Save 4+ hours per week vs. manual headcount tracking.",
   },
   "SaaS Metrics": {
-    emoji:"Ã°ÂÂÂ", headline:"Understand what's driving growth Ã¢ÂÂ or killing it.",
+    emoji:"ð", headline:"Understand what's driving growth â or killing it.",
     pitch:"MRR, churn, NRR, CAC, and LTV in one view. Know whether your retention is healthy, whether your acquisition cost makes sense, and when you'll hit your next ARR milestone.",
     outcomes:["Track MRR growth and churn month over month","See whether your NRR is above or below 100%","Calculate CAC payback period automatically","Forecast ARR and identify the levers that matter most"],
     social:"Investors ask for these numbers. Now you'll have them ready.",
   },
   "C-Suite Strategic Report": {
-    emoji:"Ã¢ÂÂ", headline:"Reporting that speaks to the board, not just the books.",
+    emoji:"â", headline:"Reporting that speaks to the board, not just the books.",
     pitch:"Role-differentiated strategic summaries for your CEO, CFO, and CIO. Identify risks, highlight momentum, and frame every key metric with executive context.",
     outcomes:["CEO view: trajectory, competitive positioning, and blockers","CFO view: cash efficiency, burn rate, and covenants","CIO view: technology spend, vendor risk, and roadmap gaps","One-click board pack generation"],
     social:"Enterprise teams use this to cut board prep time by 60%.",
@@ -551,7 +551,7 @@ function PlanGate({ requiredPlan, featureName, features, onUpgrade, lockedCopy }
           <div style={{position:"relative"}}>
             <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:20}}>
               <div style={{width:52,height:52,borderRadius:14,background:`${color}18`,border:`1.5px solid ${color}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24}}>
-                {config.emoji||"Ã°ÂÂÂ"}
+                {config.emoji||"ð"}
               </div>
               <div>
                 <div style={{display:"inline-flex",alignItems:"center",gap:6,background:`${color}15`,border:`1px solid ${color}40`,borderRadius:20,padding:"3px 12px",marginBottom:5}}>
@@ -565,7 +565,7 @@ function PlanGate({ requiredPlan, featureName, features, onUpgrade, lockedCopy }
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px 24px",marginBottom:28}}>
               {(config.outcomes||features.slice(0,4)).map((f,i)=>(
                 <div key={i} style={{display:"flex",alignItems:"flex-start",gap:9}}>
-                  <div style={{width:18,height:18,borderRadius:6,background:`${color}20`,border:`1px solid ${color}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,color,fontWeight:800,flexShrink:0,marginTop:1}}>Ã¢ÂÂ</div>
+                  <div style={{width:18,height:18,borderRadius:6,background:`${color}20`,border:`1px solid ${color}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,color,fontWeight:800,flexShrink:0,marginTop:1}}>â</div>
                   <span style={{fontSize:12,color:T.textMid,fontFamily:T.sans,lineHeight:1.5}}>{f}</span>
                 </div>
               ))}
@@ -573,7 +573,7 @@ function PlanGate({ requiredPlan, featureName, features, onUpgrade, lockedCopy }
             {/* Social proof */}
             {config.social&&(
               <div style={{background:`${color}08`,border:`1px solid ${color}20`,borderRadius:10,padding:"10px 14px",marginBottom:24,display:"flex",alignItems:"center",gap:8}}>
-                <span style={{fontSize:14}}>Ã°ÂÂÂ¬</span>
+                <span style={{fontSize:14}}>ð¬</span>
                 <span style={{fontSize:11,color:T.textMid,fontFamily:T.sans,fontStyle:"italic"}}>{config.social}</span>
               </div>
             )}
@@ -585,7 +585,7 @@ function PlanGate({ requiredPlan, featureName, features, onUpgrade, lockedCopy }
                 {isEnt?"Contact Sales â":"Start 14-Day Free Trial â"}
               </button>
               <div style={{fontSize:11,color:T.textDim,fontFamily:T.sans}}>
-                {isEnt?"Custom pricing Â· Dedicated onboarding":"Free 14 days Â· No credit card Â· Cancel anytime"}
+                {isEnt?"Custom pricing ÃÂ· Dedicated onboarding":"Free 14 days ÃÂ· No credit card ÃÂ· Cancel anytime"}
               </div>
             </div>
           </div>
@@ -597,7 +597,7 @@ function PlanGate({ requiredPlan, featureName, features, onUpgrade, lockedCopy }
           <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"7px 12px"}}>
             {features.map((f,i)=>(
               <div key={i} style={{display:"flex",alignItems:"flex-start",gap:6}}>
-                <span style={{color,fontSize:10,flexShrink:0,marginTop:2}}>Ã¢ÂÂ</span>
+                <span style={{color,fontSize:10,flexShrink:0,marginTop:2}}>â</span>
                 <span style={{fontSize:10,color:T.textDim,fontFamily:T.sans,lineHeight:1.4}}>{f}</span>
               </div>
             ))}
@@ -608,11 +608,11 @@ function PlanGate({ requiredPlan, featureName, features, onUpgrade, lockedCopy }
   );
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ FeatureGate Ã¢ÂÂ generic feature-flag wrapper Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ FeatureGate â generic feature-flag wrapper ââââââââââââââââââ
 /**
  * Wraps children with a feature check. Renders `fallback` (default: null)
  * when the plan lacks the feature, otherwise renders children transparently.
- * Matches the reference drop-in API: <FeatureGate plan={plan} feature={FEATURES.X} fallback={<PlanGate Ã¢ÂÂ¦/>}>
+ * Matches the reference drop-in API: <FeatureGate plan={plan} feature={FEATURES.X} fallback={<PlanGate â¦/>}>
  */
 function FeatureGate({ plan, feature, fallback=null, children }) {
   if(!feature) return children;
@@ -620,7 +620,7 @@ function FeatureGate({ plan, feature, fallback=null, children }) {
   return children;
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ LOCKED_COPY Ã¢ÂÂ tab-specific locked state messaging Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ LOCKED_COPY â tab-specific locked state messaging ââââââââââââ
 const LOCKED_COPY = {
   scenario: {
     title:"Scenario Planning",
@@ -636,7 +636,7 @@ const LOCKED_COPY = {
   },
   csuite: {
     title:"C-Suite Executive Report",
-    description:"Get board-ready CEO, CFO, and CIO executive summaries. Now included in Professional Ã¢ÂÂ upgrade to unlock.",
+    description:"Get board-ready CEO, CFO, and CIO executive summaries. Now included in Professional â upgrade to unlock.",
   },
   "cfo-sim": {
     title:"30-Day CFO Simulation",
@@ -649,18 +649,18 @@ const LOCKED_COPY = {
 };
 const getLockedCopy = tabId => LOCKED_COPY[tabId] || { title:"Upgrade Required", description:"Upgrade your plan to unlock this feature." };
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Data Source Badge Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ Data Source Badge ââââââââââââââââââââââââââââââââââââââââââÃÂ¢ÃÂÃÂ
 /**
  * Shows LIVE / DEMO / STALE / ERROR status on report headers.
  * Builds trust by making data provenance explicit.
  */
 function DataSourceBadge({ source = "demo", lastSync = null }) {
   const meta = {
-    live:  { color: T.emerald, bg: T.emeraldDim, icon: "Ã¢ÂÂ", label: "Live Data",  tip: "Synced from QuickBooks" },
-    demo:  { color: T.amber,   bg: T.amberDim,   icon: "Ã¢ÂÂ", label: "Demo Data",  tip: "Connect QuickBooks to see live numbers" },
-    stale: { color: T.orange,  bg: T.orangeDim,  icon: "Ã¢ÂÂ", label: "Stale",      tip: lastSync ? `Last synced ${new Date(lastSync).toLocaleDateString()}` : "Data may be outdated" },
-    error: { color: T.rose,    bg: T.roseDim,    icon: "Ã¢ÂÂ", label: "Sync Error", tip: "Integration disconnected Ã¢ÂÂ check Integrations tab" },
-    csv:   { color: T.violet,  bg: T.violetDim,  icon: "Ã¢ÂÂ", label: "CSV Import", tip: "Imported from CSV" },
+    live:  { color: T.emerald, bg: T.emeraldDim, icon: "â", label: "Live Data",  tip: "Synced from QuickBooks" },
+    demo:  { color: T.amber,   bg: T.amberDim,   icon: "â", label: "Demo Data",  tip: "Connect QuickBooks to see live numbers" },
+    stale: { color: T.orange,  bg: T.orangeDim,  icon: "â", label: "Stale",      tip: lastSync ? `Last synced ${new Date(lastSync).toLocaleDateString()}` : "Data may be outdated" },
+    error: { color: T.rose,    bg: T.roseDim,    icon: "â", label: "Sync Error", tip: "Integration disconnected â check Integrations tab" },
+    csv:   { color: T.violet,  bg: T.violetDim,  icon: "â", label: "CSV Import", tip: "Imported from CSV" },
   };
   const m = meta[source] || meta.demo;
   return (
@@ -679,21 +679,21 @@ function DataSourceBadge({ source = "demo", lastSync = null }) {
   );
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Onboarding Checklist Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ Onboarding Checklist ââââââââââââââââââââââââââââââââââââââââÃÂ¢ÃÂÃÂ
 /**
  * First-run checklist that guides new users to first value fast.
  * Persists completion state in localStorage.
- * Dismissible Ã¢ÂÂ never forces itself on returning users.
+ * Dismissible â never forces itself on returning users.
  */
 const CHECKLIST_STEPS = [
-  { id:"explore",   icon:"Ã°ÂÂÂ", label:"Explore your P&L",          desc:"Review revenue, margins, and expense trends",           tab:"pnl"          },
-  { id:"cashflow",  icon:"Ã°ÂÂÂ§", label:"Check your cash runway",      desc:"See your 13-week forecast and identify crunch points",  tab:"cashflow"     },
-  { id:"ar",        icon:"Ã°ÂÂÂ¬", label:"Review AR aging",             desc:"Find overdue invoices and prioritize collections",      tab:"ar"           },
-  { id:"scenario",  icon:"Ã°ÂÂÂ®", label:"Run a scenario",              desc:"Model a Bear, Base, or Bull case for your business",    tab:"scenario"     },
-  { id:"budget",    icon:"Ã°ÂÂÂ¼", label:"Create a budget",             desc:"Build your first department budget and submit for review", tab:"budgeting"  },
-  { id:"export",    icon:"Ã¢Â¬Â",  label:"Export a report",             desc:"Download a PDF or CSV of any report",                  tab:"pnl",action:"export"},
-  { id:"csuite",    icon:"Ã¢ÂÂ",  label:"Generate an executive report", desc:"Create a board-ready C-Suite summary",                tab:"csuite"       },
-  { id:"integrate", icon:"Ã°ÂÂÂ", label:"Connect QuickBooks or Plaid", desc:"Replace demo data with your live financials",          tab:"integrations" },
+  { id:"explore",   icon:"ð", label:"Explore your P&L",          desc:"Review revenue, margins, and expense trends",           tab:"pnl"          },
+  { id:"cashflow",  icon:"ð§", label:"Check your cash runway",      desc:"See your 13-week forecast and identify crunch points",  tab:"cashflow"     },
+  { id:"ar",        icon:"ð¬", label:"Review AR aging",             desc:"Find overdue invoices and prioritize collections",      tab:"ar"           },
+  { id:"scenario",  icon:"ð®", label:"Run a scenario",              desc:"Model a Bear, Base, or Bull case for your business",    tab:"scenario"     },
+  { id:"budget",    icon:"ð¼", label:"Create a budget",             desc:"Build your first department budget and submit for review", tab:"budgeting"  },
+  { id:"export",    icon:"â¬",  label:"Export a report",             desc:"Download a PDF or CSV of any report",                  tab:"pnl",action:"export"},
+  { id:"csuite",    icon:"â",  label:"Generate an executive report", desc:"Create a board-ready C-Suite summary",                tab:"csuite"       },
+  { id:"integrate", icon:"ð", label:"Connect QuickBooks or Plaid", desc:"Replace demo data with your live financials",          tab:"integrations" },
 ];
 
 function OnboardingChecklist({ onNavigate, onDismiss }) {
@@ -724,7 +724,7 @@ function OnboardingChecklist({ onNavigate, onDismiss }) {
         <div style={{width:28,height:28,borderRadius:8,background:`${T.cyan}20`,border:`1px solid ${T.cyan}30`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0}}>â</div>
         <div style={{flex:1}}>
           <div style={{fontSize:14,fontWeight:700,color:T.text,fontFamily:T.display}}>Get started with FinanceOS</div>
-          <div style={{fontSize:11,color:T.textMid,fontFamily:T.sans,marginTop:2}}>{completed}/{CHECKLIST_STEPS.length} steps complete Â· {pct}%</div>
+          <div style={{fontSize:11,color:T.textMid,fontFamily:T.sans,marginTop:2}}>{completed}/{CHECKLIST_STEPS.length} steps complete ÃÂ· {pct}%</div>
         </div>
         {/* Progress bar */}
         <div style={{width:80,height:4,background:T.border,borderRadius:99,overflow:"hidden",flexShrink:0}}>
@@ -743,7 +743,7 @@ function OnboardingChecklist({ onNavigate, onDismiss }) {
                   onClick={()=>markDone(step.id)}
                   style={{width:18,height:18,borderRadius:"50%",border:`2px solid ${isDone?T.emerald:T.border}`,background:isDone?T.emerald:"transparent",flexShrink:0,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:10,fontWeight:700}}
                 >
-                  {isDone?"Ã¢ÂÂ":""}
+                  {isDone?"â":""}
                 </button>
                 
                 <div style={{flex:1,minWidth:0}}>
@@ -764,9 +764,9 @@ function OnboardingChecklist({ onNavigate, onDismiss }) {
   );
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ CFO Scorecard Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ CFO Scorecard ââââââââââââââââââââââââââââââââââââââââââââââââ
 /**
- * Live self-scoring panel Ã¢ÂÂ evaluates FinanceOS across 15 CFO dimensions.
+ * Live self-scoring panel â evaluates FinanceOS across 15 CFO dimensions.
  * Score adjusts based on which features are enabled (plan + integrations).
  * Provides a transparent "product readiness" signal to buyers.
  */
@@ -817,9 +817,9 @@ function computeCFOScores(plan, hasQBO = false, hasPlaid = false) {
 }
 
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Export Button Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ Export Button ââââââââââââââââââââââââââââââââââââââââââââââââ
 /**
- * ExportButton Ã¢ÂÂ drop-down for PDF / PPTX / CSV export.
+ * ExportButton â drop-down for PDF / PPTX / CSV export.
  * Calls POST /api/export with current tab's data.
  */
 function ExportButton({ reportType, data, companyName="FinanceOS", fiscalYear=new Date().getFullYear(), plan }) {
@@ -876,8 +876,8 @@ function ExportButton({ reportType, data, companyName="FinanceOS", fiscalYear=ne
           transition:"border-color 0.15s",
         }}
       >
-        <span style={{fontSize:13}}>Ã¢Â¬Â</span>
-        {canExport ? "Export" : "Ã°ÂÂÂ Export"}
+        <span style={{fontSize:13}}>â¬</span>
+        {canExport ? "Export" : "ð Export"}
       </button>
       {open && canExport && (
         <div style={{
@@ -887,9 +887,9 @@ function ExportButton({ reportType, data, companyName="FinanceOS", fiscalYear=ne
           minWidth:160,overflow:"hidden",
         }}>
           {[
-            {fmt:"pdf",  icon:"Ã°ÂÂÂ", label:"PDF Report",      sub:"Board-ready document"},
-            {fmt:"xlsx", icon:"Ã°ÂÂÂ", label:"Excel Workbook",   sub:"Finance-team usable"},
-            {fmt:"csv",  icon:"Ã°ÂÂÂ", label:"CSV Data",         sub:"Raw numbers"},
+            {fmt:"pdf",  icon:"ð", label:"PDF Report",      sub:"Board-ready document"},
+            {fmt:"xlsx", icon:"ð", label:"Excel Workbook",   sub:"Finance-team usable"},
+            {fmt:"csv",  icon:"ð", label:"CSV Data",         sub:"Raw numbers"},
           ].map(({fmt,icon,label,sub})=>(
             <button key={fmt} onClick={()=>doExport(fmt)} style={{
               display:"flex",alignItems:"center",gap:10,width:"100%",
@@ -899,7 +899,7 @@ function ExportButton({ reportType, data, companyName="FinanceOS", fiscalYear=ne
               onMouseEnter={e=>e.currentTarget.style.background=T.surface}
               onMouseLeave={e=>e.currentTarget.style.background="transparent"}
             >
-              <span style={{fontSize:16,flexShrink:0}}>{loading===fmt ? "Ã¢ÂÂ³" : icon}</span>
+              <span style={{fontSize:16,flexShrink:0}}>{loading===fmt ? "â³" : icon}</span>
               <div>
                 <div style={{fontSize:12,fontWeight:600,color:T.text,fontFamily:T.sans}}>{label}</div>
                 <div style={{fontSize:10,color:T.textDim,fontFamily:T.sans}}>{sub}</div>
@@ -913,10 +913,10 @@ function ExportButton({ reportType, data, companyName="FinanceOS", fiscalYear=ne
   );
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Scenario Save / Library Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ Scenario Save / Library ââââââââââââââââââââââââââââââââââââââ
 /**
- * ScenarioSaveModal Ã¢ÂÂ save current multipliers as a named scenario.
- * ScenarioLibrary Ã¢ÂÂ list, load, and manage saved scenarios.
+ * ScenarioSaveModal â save current multipliers as a named scenario.
+ * ScenarioLibrary â list, load, and manage saved scenarios.
  */
 function ScenarioSaveModal({ multipliers, onSave, onClose }) {
   const [name, setName]         = useState("");
@@ -947,8 +947,8 @@ function ScenarioSaveModal({ multipliers, onSave, onClose }) {
     <div style={{position:"fixed",inset:0,zIndex:500,background:"rgba(0,0,0,0.7)",display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
       <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:16,padding:28,width:"100%",maxWidth:420,boxShadow:"0 24px 64px rgba(0,0,0,0.6)"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20}}>
-          <div style={{fontSize:15,fontWeight:700,color:T.text,fontFamily:T.display}}>Ã°ÂÂÂ¾ Save Scenario</div>
-          <button onClick={onClose} style={{background:"none",border:"none",color:T.textDim,fontSize:18,cursor:"pointer"}}>ÃÂ</button>
+          <div style={{fontSize:15,fontWeight:700,color:T.text,fontFamily:T.display}}>ð¾ Save Scenario</div>
+          <button onClick={onClose} style={{background:"none",border:"none",color:T.textDim,fontSize:18,cursor:"pointer"}}>ÃÂÃÂ</button>
         </div>
         <div style={{display:"flex",flexDirection:"column",gap:12}}>
           <div>
@@ -961,7 +961,7 @@ function ScenarioSaveModal({ multipliers, onSave, onClose }) {
           </div>
           <div>
             <div style={{fontSize:10,color:T.textDim,fontFamily:T.mono,textTransform:"uppercase",letterSpacing:1,marginBottom:5}}>Notes</div>
-            <textarea style={{...inp,height:68,resize:"none"}} value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Assumptions, context, or decision rationaleÃ¢ÂÂ¦"/>
+            <textarea style={{...inp,height:68,resize:"none"}} value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Assumptions, context, or decision rationaleâ¦"/>
           </div>
           <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:8,padding:"10px 14px"}}>
             <div style={{fontSize:9,color:T.textDim,fontFamily:T.mono,textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>Multipliers Being Saved</div>
@@ -978,7 +978,7 @@ function ScenarioSaveModal({ multipliers, onSave, onClose }) {
           <div style={{display:"flex",gap:8,marginTop:4}}>
             <button onClick={onClose} style={{flex:1,background:"transparent",border:`1px solid ${T.border}`,borderRadius:9,padding:"10px",color:T.textDim,fontSize:12,fontFamily:T.sans,cursor:"pointer"}}>Cancel</button>
             <button onClick={save} disabled={saving} style={{flex:2,background:`linear-gradient(135deg,${T.cyan},${T.violet})`,border:"none",borderRadius:9,padding:"10px",color:T.bg,fontSize:12,fontFamily:T.display,fontWeight:800,cursor:saving?"not-allowed":"pointer"}}>
-              {saving ? "SavingÃ¢ÂÂ¦" : "Save Scenario â"}
+              {saving ? "Savingâ¦" : "Save Scenario â"}
             </button>
           </div>
         </div>
@@ -1015,10 +1015,10 @@ function ScenarioLibrary({ onLoad, onClose }) {
     <div style={{position:"fixed",inset:0,zIndex:500,background:"rgba(0,0,0,0.7)",display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
       <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:16,padding:28,width:"100%",maxWidth:560,maxHeight:"80vh",display:"flex",flexDirection:"column",boxShadow:"0 24px 64px rgba(0,0,0,0.6)"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18}}>
-          <div style={{fontSize:15,fontWeight:700,color:T.text,fontFamily:T.display}}>Ã°ÂÂÂ Scenario Library</div>
-          <button onClick={onClose} style={{background:"none",border:"none",color:T.textDim,fontSize:18,cursor:"pointer"}}>ÃÂ</button>
+          <div style={{fontSize:15,fontWeight:700,color:T.text,fontFamily:T.display}}>ð Scenario Library</div>
+          <button onClick={onClose} style={{background:"none",border:"none",color:T.textDim,fontSize:18,cursor:"pointer"}}>ÃÂÃÂ</button>
         </div>
-        {loading && <div style={{color:T.textDim,fontFamily:T.sans,fontSize:13,textAlign:"center",padding:24}}>LoadingÃ¢ÂÂ¦</div>}
+        {loading && <div style={{color:T.textDim,fontFamily:T.sans,fontSize:13,textAlign:"center",padding:24}}>Loadingâ¦</div>}
         {err    && <div style={{color:T.rose,fontSize:11,fontFamily:T.sans,marginBottom:10}}>{err}</div>}
         {!loading && scenarios.length===0 && (
           <div style={{textAlign:"center",padding:"32px 0",color:T.textDim,fontFamily:T.sans,fontSize:13}}>
@@ -1034,8 +1034,8 @@ function ScenarioLibrary({ onLoad, onClose }) {
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontSize:13,fontWeight:700,color:T.text,fontFamily:T.display,marginBottom:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{sc.name}</div>
                   <div style={{fontSize:10,color:T.textDim,fontFamily:T.mono}}>
-                    v{latest?.version || 1} Â· {latest?.label || "Ã¢ÂÂ"}
-                    {latest?.multipliers && ` Â· Rev ${((latest.multipliers.revenue||1)*100).toFixed(0)}% / OpEx ${((latest.multipliers.opex||1)*100).toFixed(0)}%`}
+                    v{latest?.version || 1} ÃÂ· {latest?.label || "â"}
+                    {latest?.multipliers && ` ÃÂ· Rev ${((latest.multipliers.revenue||1)*100).toFixed(0)}% / OpEx ${((latest.multipliers.opex||1)*100).toFixed(0)}%`}
                   </div>
                   <div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,marginTop:2}}>{new Date(sc.updated_at).toLocaleDateString()}</div>
                 </div>
@@ -1046,7 +1046,7 @@ function ScenarioLibrary({ onLoad, onClose }) {
                     </button>
                   )}
                   <button onClick={()=>del(sc.id)} disabled={deleting===sc.id} style={{background:T.roseDim,border:`1px solid ${T.rose}30`,borderRadius:7,padding:"5px 10px",color:T.rose,fontSize:10,fontFamily:T.sans,cursor:"pointer"}}>
-                    {deleting===sc.id?"Ã¢ÂÂ¦":"Ã¢ÂÂ"}
+                    {deleting===sc.id?"â¦":"â"}
                   </button>
                 </div>
               </div>
@@ -1058,7 +1058,7 @@ function ScenarioLibrary({ onLoad, onClose }) {
   );
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ CSV Import Modal Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ CSV Import Modal ââââââââââââââââââââââââââââââââââââââââââââÃÂ¢ÃÂÃÂ
 function CSVImportModal({ onClose, onSuccess }) {
   const [dataType, setDataType] = useState("pnl");
   const [csvText, setCsvText]   = useState("");
@@ -1067,11 +1067,11 @@ function CSVImportModal({ onClose, onSuccess }) {
   const [err, setErr]           = useState("");
 
   const DATA_TYPES = [
-    {id:"pnl",       label:"P&L Actuals",   icon:"Ã°ÂÂÂ"},
-    {id:"ar",        label:"AR Aging",       icon:"Ã°ÂÂÂ¬"},
-    {id:"headcount", label:"Headcount",      icon:"Ã°ÂÂÂ¥"},
-    {id:"saas",      label:"SaaS Metrics",   icon:"Ã°ÂÂÂ"},
-    {id:"cashflow",  label:"Cash Flow",      icon:"Ã°ÂÂÂ§"},
+    {id:"pnl",       label:"P&L Actuals",   icon:"ð"},
+    {id:"ar",        label:"AR Aging",       icon:"ð¬"},
+    {id:"headcount", label:"Headcount",      icon:"ð¥"},
+    {id:"saas",      label:"SaaS Metrics",   icon:"ð"},
+    {id:"cashflow",  label:"Cash Flow",      icon:"ð§"},
   ];
 
   const upload = async () => {
@@ -1102,13 +1102,13 @@ function CSVImportModal({ onClose, onSuccess }) {
     <div style={{position:"fixed",inset:0,zIndex:500,background:"rgba(0,0,0,0.75)",display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
       <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:16,padding:28,width:"100%",maxWidth:560,boxShadow:"0 24px 64px rgba(0,0,0,0.6)"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20}}>
-          <div style={{fontSize:15,fontWeight:700,color:T.text,fontFamily:T.display}}>Ã°ÂÂÂ¤ Import CSV Data</div>
-          <button onClick={onClose} style={{background:"none",border:"none",color:T.textDim,fontSize:18,cursor:"pointer"}}>ÃÂ</button>
+          <div style={{fontSize:15,fontWeight:700,color:T.text,fontFamily:T.display}}>ð¤ Import CSV Data</div>
+          <button onClick={onClose} style={{background:"none",border:"none",color:T.textDim,fontSize:18,cursor:"pointer"}}>ÃÂÃÂ</button>
         </div>
 
         {status === "done" ? (
           <div style={{textAlign:"center",padding:"20px 0"}}>
-            <div style={{fontSize:40,marginBottom:12}}>Ã¢ÂÂ</div>
+            <div style={{fontSize:40,marginBottom:12}}>â</div>
             <div style={{fontSize:15,fontWeight:700,color:T.emerald,fontFamily:T.display,marginBottom:6}}>{result?.imported} rows imported</div>
             <div style={{fontSize:12,color:T.textMid,fontFamily:T.sans,marginBottom:20}}>Your {dataType.toUpperCase()} data has been updated successfully.</div>
             <button onClick={onClose} style={{background:`linear-gradient(135deg,${T.cyan},${T.violet})`,border:"none",borderRadius:9,padding:"10px 28px",color:T.bg,fontSize:12,fontFamily:T.display,fontWeight:800,cursor:"pointer"}}>Done</button>
@@ -1130,14 +1130,14 @@ function CSVImportModal({ onClose, onSuccess }) {
                 Paste CSV below. Column headers must match the template exactly.
               </div>
               <button onClick={downloadTemplate} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:7,padding:"5px 11px",color:T.textMid,fontSize:10,fontFamily:T.sans,cursor:"pointer",flexShrink:0,whiteSpace:"nowrap"}}>
-                Ã¢Â¬Â Template
+                â¬ Template
               </button>
             </div>
 
             <textarea
               value={csvText}
               onChange={e=>setCsvText(e.target.value)}
-              placeholder={`Paste ${dataType.toUpperCase()} CSV hereÃ¢ÂÂ¦\nFirst row must be column headers.`}
+              placeholder={`Paste ${dataType.toUpperCase()} CSV hereâ¦\nFirst row must be column headers.`}
               style={{width:"100%",height:160,background:T.surface,border:`1px solid ${T.border}`,borderRadius:9,padding:"10px 12px",color:T.text,fontSize:11,fontFamily:T.mono,outline:"none",resize:"vertical",boxSizing:"border-box"}}
             />
 
@@ -1146,7 +1146,7 @@ function CSVImportModal({ onClose, onSuccess }) {
             <div style={{display:"flex",gap:8,marginTop:14}}>
               <button onClick={onClose} style={{flex:1,background:"transparent",border:`1px solid ${T.border}`,borderRadius:9,padding:"10px",color:T.textDim,fontSize:12,fontFamily:T.sans,cursor:"pointer"}}>Cancel</button>
               <button onClick={upload} disabled={status==="uploading"} style={{flex:2,background:`linear-gradient(135deg,${T.cyan},${T.violet})`,border:"none",borderRadius:9,padding:"10px",color:T.bg,fontSize:12,fontFamily:T.display,fontWeight:800,cursor:status==="uploading"?"not-allowed":"pointer"}}>
-                {status==="uploading" ? "ImportingÃ¢ÂÂ¦" : "Import Data â"}
+                {status==="uploading" ? "Importingâ¦" : "Import Data â"}
               </button>
             </div>
           </>
@@ -1156,7 +1156,7 @@ function CSVImportModal({ onClose, onSuccess }) {
   );
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Budgeting Page Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ Budgeting Page ââââââââââââââââââââââââââââââââââââââââââââââÃÂ¢ÃÂÃÂ
 const BUDGET_CATEGORIES = ["Payroll","Marketing","Software","Rent","Equipment","Professional Services","Travel","Utilities","Insurance","Miscellaneous"];
 const MONTHS_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
@@ -1257,10 +1257,10 @@ function BudgetingPage({ plan }) {
   };
 
   const STATUS_META = {
-    draft:     { color:T.textDim,  bg:T.border+"40",    label:"Draft",     icon:"Ã¢ÂÂÃ¯Â¸Â" },
-    submitted: { color:T.amber,    bg:T.amberDim,        label:"Submitted", icon:"Ã°ÂÂÂ¤" },
-    approved:  { color:T.emerald,  bg:T.emeraldDim,      label:"Approved",  icon:"Ã¢ÂÂ" },
-    rejected:  { color:T.rose,     bg:T.roseDim,         label:"Rejected",  icon:"Ã¢ÂÂ" },
+    draft:     { color:T.textDim,  bg:T.border+"40",    label:"Draft",     icon:"âï¸" },
+    submitted: { color:T.amber,    bg:T.amberDim,        label:"Submitted", icon:"ð¤" },
+    approved:  { color:T.emerald,  bg:T.emeraldDim,      label:"Approved",  icon:"â" },
+    rejected:  { color:T.rose,     bg:T.roseDim,         label:"Rejected",  icon:"â" },
   };
 
   const monthTotal = (month) => BUDGET_CATEGORIES.reduce((s, cat) => s + (grid[cat]?.[month]?.amount || 0), 0);
@@ -1274,12 +1274,12 @@ function BudgetingPage({ plan }) {
   };
 
   if (loading && !activeBudget) return (
-    <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:300,color:T.textDim,fontFamily:T.sans,fontSize:13}}>Loading budgetsÃ¢ÂÂ¦</div>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:300,color:T.textDim,fontFamily:T.sans,fontSize:13}}>Loading budgetsâ¦</div>
   );
 
   return (
     <div style={{display:"grid",gridTemplateColumns:"220px 1fr",gap:20,minHeight:500}}>
-      {/* Ã¢ÂÂÃ¢ÂÂ Sidebar Ã¢ÂÂ department list Ã¢ÂÂÃ¢ÂÂ */}
+      {/* ââ Sidebar â department list ââ */}
       <div>
         <div style={{fontSize:10,color:T.textDim,fontFamily:T.mono,textTransform:"uppercase",letterSpacing:1.5,marginBottom:10}}>FY{year} Departments</div>
         <div style={{display:"flex",flexDirection:"column",gap:6,marginBottom:14}}>
@@ -1303,7 +1303,7 @@ function BudgetingPage({ plan }) {
           <input
             value={newDept} onChange={e=>setNewDept(e.target.value)}
             onKeyDown={e=>e.key==="Enter"&&createBudget()}
-            placeholder="New departmentÃ¢ÂÂ¦"
+            placeholder="New departmentâ¦"
             style={{flex:1,background:T.surface,border:`1px solid ${T.border}`,borderRadius:8,padding:"7px 10px",color:T.text,fontSize:11,fontFamily:T.sans,outline:"none"}}
           />
           <button onClick={createBudget} disabled={creating||!newDept.trim()} style={{background:T.cyanDim,border:`1px solid ${T.cyan}30`,borderRadius:8,padding:"7px 10px",color:T.cyan,fontSize:12,cursor:"pointer",fontWeight:700}}>+</button>
@@ -1311,10 +1311,10 @@ function BudgetingPage({ plan }) {
         {err && <div style={{fontSize:10,color:T.rose,fontFamily:T.sans,marginTop:8,lineHeight:1.4}}>{err}</div>}
       </div>
 
-      {/* Ã¢ÂÂÃ¢ÂÂ Main Ã¢ÂÂ budget grid Ã¢ÂÂÃ¢ÂÂ */}
+      {/* ââ Main â budget grid ââ */}
       {!activeBudget ? (
         <div style={{display:"flex",alignItems:"center",justifyContent:"center",color:T.textDim,fontFamily:T.sans,fontSize:13,flexDirection:"column",gap:10}}>
-          <div style={{fontSize:32}}>Ã°ÂÂÂ¼</div>
+          <div style={{fontSize:32}}>ð¼</div>
           <div>Select a department or create one to start budgeting.</div>
         </div>
       ) : (
@@ -1323,30 +1323,30 @@ function BudgetingPage({ plan }) {
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16,flexWrap:"wrap",gap:10}}>
             <div>
               <div style={{fontSize:16,fontWeight:700,color:T.text,fontFamily:T.display}}>{activeBudget.department}</div>
-              <div style={{fontSize:10,color:T.textDim,fontFamily:T.mono,marginTop:2}}>FY{year} Â· {STATUS_META[activeBudget.status]?.label}</div>
+              <div style={{fontSize:10,color:T.textDim,fontFamily:T.mono,marginTop:2}}>FY{year} ÃÂ· {STATUS_META[activeBudget.status]?.label}</div>
             </div>
             <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
               <button onClick={()=>setView(v=>v==="grid"?"comments":"grid")} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:8,padding:"6px 12px",color:T.textMid,fontSize:11,fontFamily:T.sans,cursor:"pointer"}}>
-                {view==="grid" ? `Ã°ÂÂÂ¬ Comments (${comments.length})` : "Ã°ÂÂÂ Grid"}
+                {view==="grid" ? `ð¬ Comments (${comments.length})` : "ð Grid"}
               </button>
               {activeBudget.status==="draft" && (
                 <>
                   <button onClick={saveItems} disabled={saving} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:8,padding:"6px 13px",color:T.textMid,fontSize:11,fontFamily:T.sans,cursor:"pointer"}}>
-                    {saving?"SavingÃ¢ÂÂ¦":"Ã°ÂÂÂ¾ Save"}
+                    {saving?"Savingâ¦":"ð¾ Save"}
                   </button>
                   <button onClick={()=>doAction("submit")} style={{background:`${T.cyan}18`,border:`1px solid ${T.cyan}30`,borderRadius:8,padding:"6px 13px",color:T.cyan,fontSize:11,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>
-                    Ã°ÂÂÂ¤ Submit for Review
+                    ð¤ Submit for Review
                   </button>
                 </>
               )}
               {activeBudget.status==="submitted" && canApprove && (
                 <>
-                  <button onClick={()=>doAction("approve")} style={{background:T.emeraldDim,border:`1px solid ${T.emerald}40`,borderRadius:8,padding:"6px 13px",color:T.emerald,fontSize:11,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>Ã¢ÂÂ Approve</button>
-                  <button onClick={()=>setShowReject(true)} style={{background:T.roseDim,border:`1px solid ${T.rose}40`,borderRadius:8,padding:"6px 13px",color:T.rose,fontSize:11,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>Ã¢ÂÂ Reject</button>
+                  <button onClick={()=>doAction("approve")} style={{background:T.emeraldDim,border:`1px solid ${T.emerald}40`,borderRadius:8,padding:"6px 13px",color:T.emerald,fontSize:11,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>â Approve</button>
+                  <button onClick={()=>setShowReject(true)} style={{background:T.roseDim,border:`1px solid ${T.rose}40`,borderRadius:8,padding:"6px 13px",color:T.rose,fontSize:11,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>â Reject</button>
                 </>
               )}
               {activeBudget.status==="rejected" && (
-                <button onClick={()=>setActive(b=>({...b,status:"draft"}))} style={{background:T.amberDim,border:`1px solid ${T.amber}40`,borderRadius:8,padding:"6px 13px",color:T.amber,fontSize:11,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>Ã¢ÂÂÃ¯Â¸Â Revise</button>
+                <button onClick={()=>setActive(b=>({...b,status:"draft"}))} style={{background:T.amberDim,border:`1px solid ${T.amber}40`,borderRadius:8,padding:"6px 13px",color:T.amber,fontSize:11,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>âï¸ Revise</button>
               )}
             </div>
           </div>
@@ -1362,15 +1362,15 @@ function BudgetingPage({ plan }) {
             <div style={{background:T.roseDim,border:`1px solid ${T.rose}30`,borderRadius:10,padding:"14px 16px",marginBottom:14}}>
               <div style={{fontSize:12,color:T.rose,fontFamily:T.sans,marginBottom:8}}>Reason for rejection</div>
               <div style={{display:"flex",gap:8}}>
-                <input value={rejectNote} onChange={e=>setRejectNote(e.target.value)} placeholder="e.g. Marketing budget exceeds approved capÃ¢ÂÂ¦" style={{flex:1,background:T.surface,border:`1px solid ${T.border}`,borderRadius:7,padding:"7px 10px",color:T.text,fontSize:11,fontFamily:T.sans,outline:"none"}}/>
+                <input value={rejectNote} onChange={e=>setRejectNote(e.target.value)} placeholder="e.g. Marketing budget exceeds approved capâ¦" style={{flex:1,background:T.surface,border:`1px solid ${T.border}`,borderRadius:7,padding:"7px 10px",color:T.text,fontSize:11,fontFamily:T.sans,outline:"none"}}/>
                 <button onClick={()=>doAction("reject",rejectNote)} style={{background:T.roseDim,border:`1px solid ${T.rose}40`,borderRadius:7,padding:"7px 13px",color:T.rose,fontSize:11,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>Reject</button>
-                <button onClick={()=>setShowReject(false)} style={{background:"none",border:"none",color:T.textDim,fontSize:13,cursor:"pointer"}}>ÃÂ</button>
+                <button onClick={()=>setShowReject(false)} style={{background:"none",border:"none",color:T.textDim,fontSize:13,cursor:"pointer"}}>ÃÂÃÂ</button>
               </div>
             </div>
           )}
 
           {view==="grid" ? (
-            /* Ã¢ÂÂÃ¢ÂÂ Budget grid Ã¢ÂÂÃ¢ÂÂ */
+            /* ââ Budget grid ââ */
             <div style={{overflowX:"auto"}}>
               <table style={{borderCollapse:"collapse",width:"100%",fontSize:11,fontFamily:T.mono}}>
                 <thead>
@@ -1416,10 +1416,10 @@ function BudgetingPage({ plan }) {
               </table>
             </div>
           ) : (
-            /* Ã¢ÂÂÃ¢ÂÂ Comments Ã¢ÂÂÃ¢ÂÂ */
+            /* ââ Comments ââ */
             <div>
               <div style={{display:"flex",gap:8,marginBottom:16}}>
-                <input value={comment} onChange={e=>setComment(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addComment()} placeholder="Add a comment or questionÃ¢ÂÂ¦" style={{flex:1,background:T.surface,border:`1px solid ${T.border}`,borderRadius:9,padding:"9px 12px",color:T.text,fontSize:12,fontFamily:T.sans,outline:"none"}}/>
+                <input value={comment} onChange={e=>setComment(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addComment()} placeholder="Add a comment or questionâ¦" style={{flex:1,background:T.surface,border:`1px solid ${T.border}`,borderRadius:9,padding:"9px 12px",color:T.text,fontSize:12,fontFamily:T.sans,outline:"none"}}/>
                 <button onClick={addComment} disabled={!comment.trim()} style={{background:`${T.cyan}15`,border:`1px solid ${T.cyan}30`,borderRadius:9,padding:"9px 16px",color:T.cyan,fontSize:12,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>Post</button>
               </div>
               <div style={{display:"flex",flexDirection:"column",gap:10}}>
@@ -1470,17 +1470,17 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
   };
 
   const welcome = {
-    pnl:      () => `Ã°ÂÂÂ P&L loaded. YTD revenue: **${fmt(context.ytdRevenue)}** | Net: **${fmt(context.ytdNet)}** | Margin: **${pct(context.ytdNetMargin)}**\n\nAsk me anything about your financials.`,
-    scenario: () => `Ã°ÂÂÂ® Scenarios ready. **Bear:** ${fmt(context.bearAnnualNet,true)} | **Base:** ${fmt(context.baseAnnualNet,true)} | **Bull:** ${fmt(context.bullAnnualNet,true)}\n\nRisk spread: **${fmt((context.bullAnnualNet||0)-(context.bearAnnualNet||0),true)}**. What would you like to model?`,
-    cashflow: () => `Ã°ÂÂÂ§ Cash Flow loaded. Balance: **${fmt(context.openingBalance)}** â projected **${fmt(context.endBalance)}**. Min: **${fmt(context.minBalance)}** at Week ${context.minWeek}. Ask about timing risks.`,
-    ar:       () => `Ã°ÂÂÂ¬ AR Aging loaded. Outstanding: **${fmt(context.totalAR)}** | DSO: **${context.dso} days** | At-risk: **${fmt((context.d60||0)+(context.d90plus||0),true)}**. Who do you want to prioritize?`,
-    regional: () => `Ã°ÂÂÂºÃ¯Â¸Â Client Comparison Ã¢ÂÂ **${context.clientCount} clients** | Portfolio: **${fmt(context.totalRevenue,true)}** | Avg margin: **${pct(context.avgMargin||0)}**. Ask about regional performance.`,
-    bva:      () => `Ã°ÂÂÂ Budget vs. Actuals loaded. Revenue variance: **${fmt(context.revVariance,true)}** | OpEx variance: **${fmt(context.opexVariance,true)}**. Ask about any line item.`,
-    balancesheet:()=>`Ã°ÂÂÂ¦ Balance Sheet loaded. Total assets: **${fmt(context.totalAssets,true)}** | Working capital: **${fmt(context.workingCapital,true)}**. Ask about ratios or trends.`,
-    headcount:() => `Ã°ÂÂÂ¥ Headcount: **${context.totalHC} employees** (${context.openReqs} open reqs) | Payroll cost: **${fmt(context.totalPayrollCost,true)}/yr**. Ask about team structure or costs.`,
-    saas:     () => `Ã°ÂÂÂ SaaS Metrics Ã¢ÂÂ MRR: **${fmt(context.latestMrr,true)}** | ARR: **${fmt(context.latestMrr*12,true)}** | NRR: **${pct(context.latestNrr)}**. Ask about growth or churn.`,
-    csuite:   () => `Ã¢ÂÂ C-Suite Report loaded. Revenue: **${fmt(context.ytdRevenue,true)}** (+81% YoY) | Net: **${fmt(context.ytdNet,true)}** | ARR: **${fmt(context.latestMrr*12,true)}**\n\nSwitch between CEO, CFO, and CIO views on the panel. Ask me about any executive's priorities or action items.`,
-    "cfo-sim": () => `Ã°ÂÂÂ¯ CFO Simulation ready. Run the 30-day evaluation to get a brutally honest CFO verdict Ã¢ÂÂ competitive gaps, scorecard, and top 10 improvements ranked by impact.`,
+    pnl:      () => `ð P&L loaded. YTD revenue: **${fmt(context.ytdRevenue)}** | Net: **${fmt(context.ytdNet)}** | Margin: **${pct(context.ytdNetMargin)}**\n\nAsk me anything about your financials.`,
+    scenario: () => `ð® Scenarios ready. **Bear:** ${fmt(context.bearAnnualNet,true)} | **Base:** ${fmt(context.baseAnnualNet,true)} | **Bull:** ${fmt(context.bullAnnualNet,true)}\n\nRisk spread: **${fmt((context.bullAnnualNet||0)-(context.bearAnnualNet||0),true)}**. What would you like to model?`,
+    cashflow: () => `ð§ Cash Flow loaded. Balance: **${fmt(context.openingBalance)}** â projected **${fmt(context.endBalance)}**. Min: **${fmt(context.minBalance)}** at Week ${context.minWeek}. Ask about timing risks.`,
+    ar:       () => `ð¬ AR Aging loaded. Outstanding: **${fmt(context.totalAR)}** | DSO: **${context.dso} days** | At-risk: **${fmt((context.d60||0)+(context.d90plus||0),true)}**. Who do you want to prioritize?`,
+    regional: () => `ðºï¸ Client Comparison â **${context.clientCount} clients** | Portfolio: **${fmt(context.totalRevenue,true)}** | Avg margin: **${pct(context.avgMargin||0)}**. Ask about regional performance.`,
+    bva:      () => `ð Budget vs. Actuals loaded. Revenue variance: **${fmt(context.revVariance,true)}** | OpEx variance: **${fmt(context.opexVariance,true)}**. Ask about any line item.`,
+    balancesheet:()=>`ð¦ Balance Sheet loaded. Total assets: **${fmt(context.totalAssets,true)}** | Working capital: **${fmt(context.workingCapital,true)}**. Ask about ratios or trends.`,
+    headcount:() => `ð¥ Headcount: **${context.totalHC} employees** (${context.openReqs} open reqs) | Payroll cost: **${fmt(context.totalPayrollCost,true)}/yr**. Ask about team structure or costs.`,
+    saas:     () => `ð SaaS Metrics â MRR: **${fmt(context.latestMrr,true)}** | ARR: **${fmt(context.latestMrr*12,true)}** | NRR: **${pct(context.latestNrr)}**. Ask about growth or churn.`,
+    csuite:   () => `â C-Suite Report loaded. Revenue: **${fmt(context.ytdRevenue,true)}** (+81% YoY) | Net: **${fmt(context.ytdNet,true)}** | ARR: **${fmt(context.latestMrr*12,true)}**\n\nSwitch between CEO, CFO, and CIO views on the panel. Ask me about any executive's priorities or action items.`,
+    "cfo-sim": () => `ð¯ CFO Simulation ready. Run the 30-day evaluation to get a brutally honest CFO verdict â competitive gaps, scorecard, and top 10 improvements ranked by impact.`,
   };
 
   useEffect(() => {
@@ -1522,7 +1522,7 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
           : res.status >= 500
             ? "AI service is temporarily unavailable. Please try again."
             : "Something went wrong. Please try again.");
-        setMsgs(m => [...m, { role:"assistant", content:`Ã¢ÂÂ Ã¯Â¸Â ${msg}` }]);
+        setMsgs(m => [...m, { role:"assistant", content:`â ï¸ ${msg}` }]);
       } else {
         setMsgs(m => [...m, { role:"assistant", content: d.text || "No response received." }]);
       }
@@ -1530,7 +1530,7 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
       const msg = err.name === "AbortError"
         ? "Request timed out. Please try again."
         : "Connection error. Check your internet and try again.";
-      setMsgs(m => [...m, { role:"assistant", content:`Ã¢ÂÂ Ã¯Â¸Â ${msg}` }]);
+      setMsgs(m => [...m, { role:"assistant", content:`â ï¸ ${msg}` }]);
     }
     setLoading(false);
     sendingRef.current = false;
@@ -1550,12 +1550,12 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
       display:"flex", flexDirection:"column",
       boxShadow:"0 -8px 40px rgba(0,0,0,0.6)",
     }}>
-      {/* Ã¢ÂÂÃ¢ÂÂ Header bar Ã¢ÂÂÃ¢ÂÂ */}
+      {/* ââ Header bar ââ */}
       <div style={{height:56,flexShrink:0,display:"flex",alignItems:"center",gap:12,padding:"0 20px",borderBottom:`1px solid ${T.border}`,background:`linear-gradient(90deg,${T.card},${T.surface})`,cursor:"pointer"}} onClick={()=>setOpen(o=>!o)}>
-        <div style={{width:30,height:30,borderRadius:"50%",background:`linear-gradient(135deg,${T.cyan},${T.violet})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,boxShadow:`0 0 14px ${T.cyan}60`,flexShrink:0}}>Ã¢ÂÂ¦</div>
+        <div style={{width:30,height:30,borderRadius:"50%",background:`linear-gradient(135deg,${T.cyan},${T.violet})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,boxShadow:`0 0 14px ${T.cyan}60`,flexShrink:0}}>â¦</div>
         <div style={{display:"flex",alignItems:"baseline",gap:8}}>
           <span style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14}}>FP&A Intelligence</span>
-          <span style={{color:T.cyan,fontFamily:T.mono,fontSize:9,textTransform:"capitalize",background:T.cyanDim,border:`1px solid ${T.cyanMid}`,borderRadius:20,padding:"1px 7px"}}>{activeTab} Â· Live</span>
+          <span style={{color:T.cyan,fontFamily:T.mono,fontSize:9,textTransform:"capitalize",background:T.cyanDim,border:`1px solid ${T.cyanMid}`,borderRadius:20,padding:"1px 7px"}}>{activeTab} ÃÂ· Live</span>
         </div>
         {!open && anomalies.length>0 && (
           <div style={{display:"flex",gap:4,marginLeft:8}}>
@@ -1578,11 +1578,11 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
               ))}
             </div>
           )}
-          <div style={{color:T.textDim,fontSize:14,fontWeight:700,userSelect:"none",padding:"0 4px",transition:"transform 0.25s",transform:open?"rotate(0deg)":"rotate(180deg)"}}>Ã¢ÂÂ</div>
+          <div style={{color:T.textDim,fontSize:14,fontWeight:700,userSelect:"none",padding:"0 4px",transition:"transform 0.25s",transform:open?"rotate(0deg)":"rotate(180deg)"}}>â</div>
         </div>
       </div>
 
-      {/* Ã¢ÂÂÃ¢ÂÂ Expanded body Ã¢ÂÂÃ¢ÂÂ */}
+      {/* ââ Expanded body ââ */}
       {open && (
         <div style={{flex:1,display:"grid",gridTemplateColumns:"1fr 380px",overflow:"hidden"}}>
 
@@ -1608,9 +1608,9 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
           <div style={{display:"flex",flexDirection:"column",background:T.card}}>
             {/* Tab toggle */}
             <div style={{display:"flex",borderBottom:`1px solid ${T.border}`}}>
-              <button onClick={()=>setRightTab("chat")} style={{flex:1,background:rightTab==="chat"?T.cyanDim:"transparent",border:"none",borderBottom:`2px solid ${rightTab==="chat"?T.cyan:"transparent"}`,padding:"8px 0",color:rightTab==="chat"?T.cyan:T.textDim,fontSize:10,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>Ã°ÂÂÂ¬ Chat{!hasFeature(plan,FEATURES.FULL_AI)&&<span style={{fontSize:8,color:T.amber,marginLeft:4}}>LIMITED</span>}</button>
+              <button onClick={()=>setRightTab("chat")} style={{flex:1,background:rightTab==="chat"?T.cyanDim:"transparent",border:"none",borderBottom:`2px solid ${rightTab==="chat"?T.cyan:"transparent"}`,padding:"8px 0",color:rightTab==="chat"?T.cyan:T.textDim,fontSize:10,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>ð¬ Chat{!hasFeature(plan,FEATURES.FULL_AI)&&<span style={{fontSize:8,color:T.amber,marginLeft:4}}>LIMITED</span>}</button>
               <button onClick={()=>setRightTab("alerts")} style={{flex:1,background:rightTab==="alerts"?T.cyanDim:"transparent",border:"none",borderBottom:`2px solid ${rightTab==="alerts"?T.cyan:"transparent"}`,padding:"8px 0",color:rightTab==="alerts"?T.cyan:hasFeature(plan,FEATURES.FULL_AI)?T.textDim:T.textDim+"88",fontSize:10,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>
-                {hasFeature(plan,FEATURES.FULL_AI)?`Ã°ÂÂÂ¨ Alerts${anomalies.length?` (${anomalies.length})`:""}`:"Ã°ÂÂÂ Alerts"}
+                {hasFeature(plan,FEATURES.FULL_AI)?`ð¨ Alerts${anomalies.length?` (${anomalies.length})`:""}`:"ð Alerts"}
               </button>
             </div>
 
@@ -1619,15 +1619,15 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
                 {/* Starter limited AI banner */}
                 {!hasFeature(plan,FEATURES.FULL_AI)&&(
                   <div style={{padding:"6px 12px",background:T.amberDim,borderBottom:`1px solid ${T.amber}25`,display:"flex",alignItems:"center",gap:6}}>
-                    <span style={{fontSize:10}}>Ã¢ÂÂ¡</span>
-                    <span style={{fontSize:9,color:T.amber,fontFamily:T.sans,fontWeight:600}}>Limited AI on Starter Ã¢ÂÂ upgrade for full context-aware analysis</span>
+                    <span style={{fontSize:10}}>â¡</span>
+                    <span style={{fontSize:9,color:T.amber,fontFamily:T.sans,fontWeight:600}}>Limited AI on Starter â upgrade for full context-aware analysis</span>
                   </div>
                 )}
                 {/* Enterprise strategic badge */}
                 {hasFeature(plan,FEATURES.ADVANCED_AI)&&(
                   <div style={{padding:"5px 12px",background:T.violetDim,borderBottom:`1px solid ${T.violet}25`,display:"flex",alignItems:"center",gap:6}}>
-                    <span style={{fontSize:10}}>Ã°ÂÂÂ¢</span>
-                    <span style={{fontSize:9,color:T.violet,fontFamily:T.sans,fontWeight:600}}>Enterprise Strategic Analysis Ã¢ÂÂ Full executive context enabled</span>
+                    <span style={{fontSize:10}}>ð¢</span>
+                    <span style={{fontSize:9,color:T.violet,fontFamily:T.sans,fontWeight:600}}>Enterprise Strategic Analysis â Full executive context enabled</span>
                   </div>
                 )}
                 <div style={{padding:"8px 12px",borderBottom:`1px solid ${T.border}`,display:"flex",gap:5,flexWrap:"wrap"}}>
@@ -1640,11 +1640,11 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
                 </div>
                 <div style={{flex:1,display:"flex",alignItems:"center",gap:8,padding:"10px 12px"}}>
                   <input value={input} onChange={e=>hasFeature(plan,FEATURES.FULL_AI)&&setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&hasFeature(plan,FEATURES.FULL_AI)&&send()}
-                    placeholder={hasFeature(plan,FEATURES.FULL_AI)?`Ask about your ${activeTab==="pnl"?"P&L":activeTab==="cashflow"?"cash flow":activeTab==="ar"?"AR":activeTab==="regional"?"clients":activeTab==="scenario"?"scenarios":activeTab==="bva"?"budget vs actuals":activeTab==="balancesheet"?"balance sheet":activeTab==="headcount"?"headcount":activeTab==="saas"?"SaaS metrics":"financials"}...`:"Ã°ÂÂÂ Free-form chat Ã¢ÂÂ Professional plan required"}
+                    placeholder={hasFeature(plan,FEATURES.FULL_AI)?`Ask about your ${activeTab==="pnl"?"P&L":activeTab==="cashflow"?"cash flow":activeTab==="ar"?"AR":activeTab==="regional"?"clients":activeTab==="scenario"?"scenarios":activeTab==="bva"?"budget vs actuals":activeTab==="balancesheet"?"balance sheet":activeTab==="headcount"?"headcount":activeTab==="saas"?"SaaS metrics":"financials"}...`:"ð Free-form chat â Professional plan required"}
                     disabled={!hasFeature(plan,FEATURES.FULL_AI)}
                     style={{flex:1,background:hasFeature(plan,FEATURES.FULL_AI)?T.surface:T.surface+"80",border:`1px solid ${hasFeature(plan,FEATURES.FULL_AI)?T.border:T.amber+"40"}`,borderRadius:9,padding:"9px 14px",color:hasFeature(plan,FEATURES.FULL_AI)?T.text:T.textDim,fontSize:12,fontFamily:T.sans,outline:"none",transition:"border-color 0.15s",cursor:hasFeature(plan,FEATURES.FULL_AI)?"text":"not-allowed",opacity:hasFeature(plan,FEATURES.FULL_AI)?1:0.6}}
                     onFocus={e=>{if(hasFeature(plan,FEATURES.FULL_AI))e.target.style.borderColor=T.cyan;}} onBlur={e=>e.target.style.borderColor=hasFeature(plan,FEATURES.FULL_AI)?T.border:T.amber+"40"}/>
-                  <button onClick={()=>hasFeature(plan,FEATURES.FULL_AI)&&send()} disabled={!hasFeature(plan,FEATURES.FULL_AI)} title={!hasFeature(plan,FEATURES.FULL_AI)?"Upgrade to Professional for free-form AI chat":undefined} style={{background:hasFeature(plan,FEATURES.FULL_AI)?`linear-gradient(135deg,${T.cyan},${T.violet})`:`${T.amber}20`,border:hasFeature(plan,FEATURES.FULL_AI)?"none":`1px solid ${T.amber}40`,borderRadius:9,width:38,height:38,cursor:hasFeature(plan,FEATURES.FULL_AI)?"pointer":"not-allowed",color:hasFeature(plan,FEATURES.FULL_AI)?T.bg:T.amber,fontSize:hasFeature(plan,FEATURES.FULL_AI)?16:14,fontWeight:700,flexShrink:0,boxShadow:hasFeature(plan,FEATURES.FULL_AI)?`0 2px 10px ${T.cyan}40`:"none",opacity:hasFeature(plan,FEATURES.FULL_AI)?1:0.7}}>{hasFeature(plan,FEATURES.FULL_AI)?"Ã¢ÂÂ":"Ã°ÂÂÂ"}</button>
+                  <button onClick={()=>hasFeature(plan,FEATURES.FULL_AI)&&send()} disabled={!hasFeature(plan,FEATURES.FULL_AI)} title={!hasFeature(plan,FEATURES.FULL_AI)?"Upgrade to Professional for free-form AI chat":undefined} style={{background:hasFeature(plan,FEATURES.FULL_AI)?`linear-gradient(135deg,${T.cyan},${T.violet})`:`${T.amber}20`,border:hasFeature(plan,FEATURES.FULL_AI)?"none":`1px solid ${T.amber}40`,borderRadius:9,width:38,height:38,cursor:hasFeature(plan,FEATURES.FULL_AI)?"pointer":"not-allowed",color:hasFeature(plan,FEATURES.FULL_AI)?T.bg:T.amber,fontSize:hasFeature(plan,FEATURES.FULL_AI)?16:14,fontWeight:700,flexShrink:0,boxShadow:hasFeature(plan,FEATURES.FULL_AI)?`0 2px 10px ${T.cyan}40`:"none",opacity:hasFeature(plan,FEATURES.FULL_AI)?1:0.7}}>{hasFeature(plan,FEATURES.FULL_AI)?"â":"ð"}</button>
                 </div>
                 {!hasFeature(plan,FEATURES.FULL_AI)&&(
                   <div style={{padding:"0 12px 8px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
@@ -1652,7 +1652,7 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
                     <span style={{fontSize:9,color:T.cyan,fontFamily:T.sans,fontWeight:700,cursor:"pointer",textDecoration:"underline"}} onClick={()=>onUpgrade&&onUpgrade()}>â Upgrade</span>
                   </div>
                 )}
-                {hasFeature(plan,FEATURES.FULL_AI)&&<div style={{padding:"0 12px 8px",fontSize:9,color:T.textDim,fontFamily:T.sans}}>Powered by Claude Â· {hasFeature(plan,FEATURES.FULL_AI)?"Context-aware of all on-screen data":"Basic mode Ã¢ÂÂ upgrade for full financial context"}</div>}
+                {hasFeature(plan,FEATURES.FULL_AI)&&<div style={{padding:"0 12px 8px",fontSize:9,color:T.textDim,fontFamily:T.sans}}>Powered by Claude ÃÂ· {hasFeature(plan,FEATURES.FULL_AI)?"Context-aware of all on-screen data":"Basic mode â upgrade for full financial context"}</div>}
               </>
             )}
 
@@ -1661,7 +1661,7 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
                 {/* Starter: alerts are gated */}
                 {!hasFeature(plan,FEATURES.FULL_AI)&&(
                   <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",height:"100%",gap:10,padding:16,textAlign:"center"}}>
-                    <span style={{fontSize:28}}>Ã°ÂÂÂ</span>
+                    <span style={{fontSize:28}}>ð</span>
                     <div style={{color:T.cyan,fontFamily:T.sans,fontWeight:700,fontSize:12}}>Anomaly Alerts</div>
                     <div style={{color:T.textDim,fontFamily:T.sans,fontSize:11,lineHeight:1.6}}>Proactive anomaly detection is a Professional feature. Upgrade to get real-time alerts on revenue misses, cash risks, AR aging, and more.</div>
                     <div style={{background:T.cyanDim,border:`1px solid ${T.cyanMid}`,borderRadius:8,padding:"5px 14px",color:T.cyan,fontSize:10,fontFamily:T.sans,fontWeight:700}}>â Upgrade to Professional</div>
@@ -1669,7 +1669,7 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
                 )}
                 {hasFeature(plan,FEATURES.FULL_AI)&&anomalies.length===0 && (
                   <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",height:"100%",gap:6}}>
-                    <span style={{fontSize:24}}>Ã¢ÂÂ</span>
+                    <span style={{fontSize:24}}>â</span>
                     <span style={{color:T.textDim,fontFamily:T.sans,fontSize:11}}>No anomalies detected</span>
                   </div>
                 )}
@@ -1693,14 +1693,14 @@ function BottomAIPanel({ activeTab, context, anomalies=[], panelOpen, setPanelOp
   );
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ P&L Row Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ P&L Row ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function PnLRow({label,monthly,isHeader,isTotal,indent,color,showSpark,negative}) {
   const tot=sum(monthly), avg=tot/12, sc=color||(negative?T.rose:T.emerald);
   return (
     <div style={{borderBottom:`1px solid ${isHeader||isTotal?T.border:T.border+"60"}`,background:isHeader?T.card:isTotal?(color?color+"15":T.cyanDim):"transparent"}}>
       <div style={{display:"grid",gridTemplateColumns:"200px repeat(12, 1fr) 80px 80px 60px",alignItems:"center",padding:isHeader?"10px 0":"7px 0"}}>
         <div style={{paddingLeft:indent?24:12,paddingRight:8,fontFamily:isHeader||isTotal?T.display:T.sans,fontSize:isHeader?10:11,fontWeight:isHeader||isTotal?700:400,color:isHeader?T.textDim:isTotal?T.cyan:indent?T.textMid:T.text,textTransform:isHeader?"uppercase":"none",letterSpacing:isHeader?1:0,display:"flex",alignItems:"center",gap:4,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-          {indent&&<span style={{color:T.textDim,fontSize:9}}>Ã¢ÂÂ</span>}{label}
+          {indent&&<span style={{color:T.textDim,fontSize:9}}>â</span>}{label}
         </div>
         {monthly.map((v,i)=>(
           <div key={i} style={{fontFamily:T.mono,fontSize:10,color:isHeader?T.textDim:v<0?T.rose:isTotal?T.cyan:negative?T.rose:T.textMid,textAlign:"right",padding:"0 6px"}}>
@@ -1715,61 +1715,61 @@ function PnLRow({label,monthly,isHeader,isTotal,indent,color,showSpark,negative}
   );
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Monthly Revenue vs. Net Income Chart Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ Monthly Revenue vs. Net Income Chart ââââââââââââââââââââââââÃÂ¢ÃÂÃÂ
 function RevNetChart({ pnl }) {
   const [hovered, setHovered] = useState(null);
   const MONTHS_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-  // Ã¢ÂÂÃ¢ÂÂ SVG layout constants Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+  // ââ SVG layout constants ââââââââââââââââââââââââââââââââââââââââââ
   const W = 760, H = 270;
   const PAD = { top: 18, bottom: 50, left: 64, right: 60 };
   const cW  = W - PAD.left - PAD.right;  // 636
   const cH  = H - PAD.top  - PAD.bottom; // 202
   const slotW = cW / 12;                  // 53px per month
 
-  // Ã¢ÂÂÃ¢ÂÂ Series data Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+  // ââ Series data ââââââââââââââââââââââââââââââââââââââââââââââââââÃÂ¢ÃÂÃÂ
   const revs   = pnl.map(m => m.rev);
   const grosses = pnl.map(m => m.gross);
   const nets   = pnl.map(m => m.net);
 
-  // Ã¢ÂÂÃ¢ÂÂ Left Y-axis: Revenue / Gross Profit Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+  // ââ Left Y-axis: Revenue / Gross Profit ââââââââââââââââââââââââââ
   const REV_MAX = 150000;
   const revY  = v => PAD.top + (1 - Math.max(0, v) / REV_MAX) * cH;
   const revH  = v => Math.max(0, v) / REV_MAX * cH;
 
-  // Ã¢ÂÂÃ¢ÂÂ Right Y-axis: Net Income  (Ã¢ÂÂ5K â +25K) Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+  // ââ Right Y-axis: Net Income  (â5K â +25K) ââââââââââââââââââââââÃÂ¢ÃÂÃÂ
   const NET_MIN = -5000, NET_MAX = 25000, NET_RANGE = 30000;
   const netY  = v => PAD.top + (NET_MAX - v) / NET_RANGE * cH;
   const ZERO_Y = netY(0); // pixel-y of zero for net income
 
-  // Ã¢ÂÂÃ¢ÂÂ Quarterly grouping Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+  // ââ Quarterly grouping ââââââââââââââââââââââââââââââââââââââââââââ
   const qLabels = [
     { label:"Q1", q:0 }, { label:"Q2", q:1 },
     { label:"Q3", q:2 }, { label:"Q4", q:3 },
   ];
 
-  // Ã¢ÂÂÃ¢ÂÂ Net income line path Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+  // ââ Net income line path ââââââââââââââââââââââââââââââââââââââââââ
   const netPts = nets.map((v,i) =>
     `${PAD.left + (i+0.5)*slotW},${netY(v)}`).join(" ");
 
-  // Ã¢ÂÂÃ¢ÂÂ Right axis tick marks Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+  // ââ Right axis tick marks ââââââââââââââââââââââââââââââââââââââââÃÂ¢ÃÂÃÂ
   const rightTicks = [-5000, 0, 5000, 10000, 15000, 20000, 25000];
   const leftTicks  = [0, 30000, 60000, 90000, 120000, 150000];
 
-  // Ã¢ÂÂÃ¢ÂÂ Bar widths Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+  // ââ Bar widths ââââââââââââââââââââââââââââââââââââââââââââââââââââ
   const REV_BW = 26, GROSS_BW = 14;
 
-  // Ã¢ÂÂÃ¢ÂÂ Dot color by value Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+  // ââ Dot color by value ââââââââââââââââââââââââââââââââââââââââââââ
   const dotColor = v => v < 0 ? T.rose : v < 6000 ? T.amber : T.emerald;
 
-  // Ã¢ÂÂÃ¢ÂÂ Quarterly totals for annotation Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+  // ââ Quarterly totals for annotation ââââââââââââââââââââââââââââââ
   const qRevTotals = [0,1,2,3].map(q =>
     revs.slice(q*3, q*3+3).reduce((a,b)=>a+b,0));
 
   return (
     <div style={{ position:"relative", userSelect:"none" }}>
 
-      {/* Ã¢ÂÂÃ¢ÂÂ Legend Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */}
+      {/* ââ Legend ââââââââââââââââââââââââââââââââââââââââââââââââââÃÂ¢ÃÂÃÂ */}
       <div style={{ display:"flex", gap:18, alignItems:"center", marginBottom:10, flexWrap:"wrap" }}>
         {[
           { color:T.cyan,    label:"Monthly Revenue",  type:"bar"  },
@@ -1794,11 +1794,11 @@ function RevNetChart({ pnl }) {
             <div style={{ width:16, height:1, background:T.amber, opacity:0.5 }}/>
             <span style={{ fontFamily:T.mono, fontSize:8, color:T.textDim }}>Zero (Net Income)</span>
           </div>
-          <span style={{ fontFamily:T.mono, fontSize:8, color:T.textDim }}>Left axis = Revenue Â· Right axis = Net Income</span>
+          <span style={{ fontFamily:T.mono, fontSize:8, color:T.textDim }}>Left axis = Revenue ÃÂ· Right axis = Net Income</span>
         </div>
       </div>
 
-      {/* Ã¢ÂÂÃ¢ÂÂ SVG Chart Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */}
+      {/* ââ SVG Chart ââââââââââââââââââââââââââââââââââââââââââââââââ */}
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Revenue and net income chart" style={{ width:"100%", height:"auto", display:"block", overflow:"visible" }}>
         <defs>
           <linearGradient id="rnRevGrad" x1="0" y1="0" x2="0" y2="1">
@@ -1820,7 +1820,7 @@ function RevNetChart({ pnl }) {
           </clipPath>
         </defs>
 
-        {/* Ã¢ÂÂÃ¢ÂÂ Quarterly alternating bands Ã¢ÂÂÃ¢ÂÂ */}
+        {/* ââ Quarterly alternating bands ââ */}
         {[0,1,2,3].map(q => (
           <rect key={q}
             x={PAD.left + q*3*slotW} y={PAD.top}
@@ -1828,7 +1828,7 @@ function RevNetChart({ pnl }) {
             fill={q%2===0 ? "#ffffff07" : "transparent"}/>
         ))}
 
-        {/* Ã¢ÂÂÃ¢ÂÂ Left gridlines + labels Ã¢ÂÂÃ¢ÂÂ */}
+        {/* ââ Left gridlines + labels ââ */}
         {leftTicks.map(v => {
           const y = revY(v);
           return (
@@ -1844,7 +1844,7 @@ function RevNetChart({ pnl }) {
           );
         })}
 
-        {/* Ã¢ÂÂÃ¢ÂÂ Right axis labels (net income) Ã¢ÂÂÃ¢ÂÂ */}
+        {/* ââ Right axis labels (net income) ââ */}
         {rightTicks.map(v => {
           const y = netY(v);
           if (y < PAD.top-4 || y > PAD.top+cH+4) return null;
@@ -1858,11 +1858,11 @@ function RevNetChart({ pnl }) {
           );
         })}
 
-        {/* Ã¢ÂÂÃ¢ÂÂ Zero line for net income Ã¢ÂÂÃ¢ÂÂ */}
+        {/* ââ Zero line for net income ââ */}
         <line x1={PAD.left} x2={PAD.left+cW} y1={ZERO_Y} y2={ZERO_Y}
           stroke={T.amber} strokeWidth="1" strokeDasharray="5,4" opacity="0.45"/>
 
-        {/* Ã¢ÂÂÃ¢ÂÂ Quarterly vertical separators Ã¢ÂÂÃ¢ÂÂ */}
+        {/* ââ Quarterly vertical separators ââ */}
         {[3,6,9].map(qi => (
           <line key={`qs-${qi}`}
             x1={PAD.left+qi*slotW} x2={PAD.left+qi*slotW}
@@ -1870,12 +1870,12 @@ function RevNetChart({ pnl }) {
             stroke={T.border} strokeWidth="1" opacity="0.7"/>
         ))}
 
-        {/* Ã¢ÂÂÃ¢ÂÂ Axes Ã¢ÂÂÃ¢ÂÂ */}
+        {/* ââ Axes ââ */}
         <line x1={PAD.left}    x2={PAD.left}    y1={PAD.top} y2={PAD.top+cH} stroke={T.border} strokeWidth="1"/>
         <line x1={PAD.left+cW} x2={PAD.left+cW} y1={PAD.top} y2={PAD.top+cH} stroke={T.border} strokeWidth="1"/>
         <line x1={PAD.left}    x2={PAD.left+cW} y1={PAD.top+cH} y2={PAD.top+cH} stroke={T.border} strokeWidth="1"/>
 
-        {/* Ã¢ÂÂÃ¢ÂÂ Revenue bars Ã¢ÂÂÃ¢ÂÂ */}
+        {/* ââ Revenue bars ââ */}
         {revs.map((v,i) => {
           const x = PAD.left + i*slotW + (slotW-REV_BW)/2;
           const barH = revH(v), barY = revY(v);
@@ -1889,7 +1889,7 @@ function RevNetChart({ pnl }) {
           );
         })}
 
-        {/* Ã¢ÂÂÃ¢ÂÂ Gross profit bars (centered, narrower) Ã¢ÂÂÃ¢ÂÂ */}
+        {/* ââ Gross profit bars (centered, narrower) ââ */}
         {grosses.map((v,i) => {
           const x = PAD.left + i*slotW + (slotW-GROSS_BW)/2;
           const barH = revH(v), barY = revY(v);
@@ -1902,7 +1902,7 @@ function RevNetChart({ pnl }) {
           );
         })}
 
-        {/* Ã¢ÂÂÃ¢ÂÂ Net income vertical drop lines (negative months) Ã¢ÂÂÃ¢ÂÂ */}
+        {/* ââ Net income vertical drop lines (negative months) ââ */}
         {nets.map((v,i) => {
           if (v >= 0) return null;
           const cx = PAD.left + (i+0.5)*slotW;
@@ -1913,13 +1913,13 @@ function RevNetChart({ pnl }) {
           );
         })}
 
-        {/* Ã¢ÂÂÃ¢ÂÂ Net income polyline Ã¢ÂÂÃ¢ÂÂ */}
+        {/* ââ Net income polyline ââ */}
         <polyline points={netPts}
           fill="none" stroke="url(#rnNetGrad)" strokeWidth="2.5"
           strokeLinecap="round" strokeLinejoin="round"
           clipPath="url(#rnClip)"/>
 
-        {/* Ã¢ÂÂÃ¢ÂÂ Net income dots Ã¢ÂÂÃ¢ÂÂ */}
+        {/* ââ Net income dots ââ */}
         {nets.map((v,i) => {
           const cx = PAD.left + (i+0.5)*slotW;
           const cy = netY(v);
@@ -1933,14 +1933,14 @@ function RevNetChart({ pnl }) {
               {v < 0 && (
                 <text x={cx} y={cy-10} textAnchor="middle"
                   fontFamily={T.mono} fontSize="7.5" fill={T.rose} fontWeight="700">
-                  Ã¢ÂÂ¼
+                  â¼
                 </text>
               )}
             </g>
           );
         })}
 
-        {/* Ã¢ÂÂÃ¢ÂÂ Quarterly total annotations Ã¢ÂÂÃ¢ÂÂ */}
+        {/* ââ Quarterly total annotations ââ */}
         {qRevTotals.map((qRev, q) => {
           const centerX = PAD.left + (q*3 + 1.5)*slotW;
           return (
@@ -1953,7 +1953,7 @@ function RevNetChart({ pnl }) {
           );
         })}
 
-        {/* Ã¢ÂÂÃ¢ÂÂ Month labels Ã¢ÂÂÃ¢ÂÂ */}
+        {/* ââ Month labels ââ */}
         {MONTHS_SHORT.map((m,i) => {
           const x = PAD.left + (i+0.5)*slotW;
           const isHov = hovered===i;
@@ -1967,7 +1967,7 @@ function RevNetChart({ pnl }) {
           );
         })}
 
-        {/* Ã¢ÂÂÃ¢ÂÂ Q labels Ã¢ÂÂÃ¢ÂÂ */}
+        {/* ââ Q labels ââ */}
         {qLabels.map(({ label, q }) => {
           const x = PAD.left + (q*3 + 1.5)*slotW;
           return (
@@ -1979,7 +1979,7 @@ function RevNetChart({ pnl }) {
           );
         })}
 
-        {/* Ã¢ÂÂÃ¢ÂÂ Axis titles Ã¢ÂÂÃ¢ÂÂ */}
+        {/* ââ Axis titles ââ */}
         <text transform={`translate(12,${PAD.top+cH/2}) rotate(-90)`}
           textAnchor="middle" fontFamily={T.sans} fontSize="8" fill={T.textDim} letterSpacing="1">
           REVENUE / GROSS PROFIT
@@ -1989,7 +1989,7 @@ function RevNetChart({ pnl }) {
           NET INCOME
         </text>
 
-        {/* Ã¢ÂÂÃ¢ÂÂ Invisible hover capture zones Ã¢ÂÂÃ¢ÂÂ */}
+        {/* ââ Invisible hover capture zones ââ */}
         {MONTHS_SHORT.map((_,i) => (
           <rect key={`hz-${i}`}
             x={PAD.left+i*slotW} y={PAD.top}
@@ -2001,7 +2001,7 @@ function RevNetChart({ pnl }) {
         ))}
       </svg>
 
-      {/* Ã¢ÂÂÃ¢ÂÂ Tooltip Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */}
+      {/* ââ Tooltip ââââââââââââââââââââââââââââââââââââââââââââââââââÃÂ¢ÃÂÃÂ */}
       {hovered !== null && (() => {
         const i = hovered;
         const rev = revs[i], gross = grosses[i], net = nets[i];
@@ -2030,7 +2030,7 @@ function RevNetChart({ pnl }) {
             {[
               { label:"Revenue",     value:`$${Math.round(rev/1000)}K`,   color:T.cyan    },
               { label:"Gross Profit",value:`$${Math.round(gross/1000)}K`, color:T.emerald, sub:`${gm}% margin` },
-              { label:"Net Income",  value:net<0?`Ã¢ÂÂ$${Math.round(Math.abs(net/1000)*10)/10}K`:`$${Math.round(net/1000*10)/10}K`, color:dotColor(net), sub:`${nm}% margin` },
+              { label:"Net Income",  value:net<0?`â$${Math.round(Math.abs(net/1000)*10)/10}K`:`$${Math.round(net/1000*10)/10}K`, color:dotColor(net), sub:`${nm}% margin` },
             ].map(row => (
               <div key={row.label} style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", marginBottom:6, gap:12 }}>
                 <div>
@@ -2044,7 +2044,7 @@ function RevNetChart({ pnl }) {
               <div style={{ display:"flex", justifyContent:"space-between" }}>
                 <span style={{ fontFamily:T.sans, fontSize:8, color:T.textDim }}>Q{Math.floor(i/3)+1} month {i%3+1} of 3</span>
                 <span style={{ fontFamily:T.mono, fontSize:8, color:net<0?T.rose:T.emerald, fontWeight:700 }}>
-                  {net<0?"Ã¢ÂÂ¼ Loss":"Ã¢ÂÂ² Profit"}
+                  {net<0?"â¼ Loss":"â² Profit"}
                 </span>
               </div>
             </div>
@@ -2055,7 +2055,7 @@ function RevNetChart({ pnl }) {
   );
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ P&L Breakdown Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ P&L Breakdown ââââââââââââââââââââââââââââââââââââââââââââââÃÂ¢ÃÂÃÂ
 function PnLBreakdown({aiContext}) {
   const pnl=computePnL(BASE_PNL);
   const col=k=>pnl.map(m=>m[k]);
@@ -2077,29 +2077,29 @@ function PnLBreakdown({aiContext}) {
         </div>
         <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"16px 18px",marginBottom:20}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-            <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14}}>Ã°ÂÂÂ Monthly Revenue vs. Net Income</div>
-            <div style={{fontFamily:T.mono,fontSize:8,color:T.textDim,letterSpacing:1}}>FY {new Date().getFullYear()} Â· Hover month for detail</div>
+            <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14}}>ð Monthly Revenue vs. Net Income</div>
+            <div style={{fontFamily:T.mono,fontSize:8,color:T.textDim,letterSpacing:1}}>FY {new Date().getFullYear()} ÃÂ· Hover month for detail</div>
           </div>
           <RevNetChart pnl={pnl}/>
         </div>
         <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,overflow:"hidden",marginBottom:20}}>
           <div style={{padding:"14px 16px",borderBottom:`1px solid ${T.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-            <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14}}>Ã°ÂÂÂ Full P&L Statement Ã¢ÂÂ FY {new Date().getFullYear()}</div>
+            <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14}}>ð Full P&L Statement â FY {new Date().getFullYear()}</div>
             <div style={{color:T.textDim,fontSize:9,fontFamily:T.mono}}>All amounts in USD</div>
           </div>
           <div style={{overflowX:"auto"}}>
             <PnLRow label="MONTH" monthly={MONTHS.map(()=>0)} isHeader showSpark={false}/>
-            <PnLRow label="Ã¢ÂÂ¸ REVENUE" monthly={totalRev} isTotal color={T.cyan} showSpark/>
+            <PnLRow label="â¸ REVENUE" monthly={totalRev} isTotal color={T.cyan} showSpark/>
             <PnLRow label="Product Sales" monthly={dc("productSales")} indent showSpark color={T.cyan}/>
             <PnLRow label="Service Fees" monthly={dc("serviceFees")} indent showSpark color={T.cyan}/>
             <PnLRow label="Recurring Revenue" monthly={dc("recurringRevenue")} indent showSpark color={T.violet}/>
             <PnLRow label="Other Revenue" monthly={dc("otherRevenue")} indent showSpark color={T.teal}/>
-            <PnLRow label="Ã¢ÂÂ¸ COST OF GOODS SOLD" monthly={totalCogs} isTotal color={T.rose} negative showSpark/>
+            <PnLRow label="â¸ COST OF GOODS SOLD" monthly={totalCogs} isTotal color={T.rose} negative showSpark/>
             <PnLRow label="Inventory / Materials" monthly={dc("inventory")} indent negative showSpark color={T.rose}/>
             <PnLRow label="Direct Labor" monthly={dc("directLabor")} indent negative showSpark color={T.rose}/>
             <PnLRow label="Shipping & Fulfillment" monthly={dc("shipping")} indent negative showSpark color={T.amber}/>
-            <PnLRow label="Ã¢ÂÂ GROSS PROFIT" monthly={grossProfit} isTotal color={T.emerald} showSpark/>
-            <PnLRow label="Ã¢ÂÂ¸ OPERATING EXPENSES" monthly={totalOpex} isTotal color={T.amber} negative showSpark/>
+            <PnLRow label="â GROSS PROFIT" monthly={grossProfit} isTotal color={T.emerald} showSpark/>
+            <PnLRow label="â¸ OPERATING EXPENSES" monthly={totalOpex} isTotal color={T.amber} negative showSpark/>
             <PnLRow label="Payroll & Benefits" monthly={dc("payroll")} indent negative showSpark color={T.amber}/>
             <PnLRow label="Rent & Facilities" monthly={dc("rent")} indent negative showSpark color={T.textMid}/>
             <PnLRow label="Marketing & Advertising" monthly={dc("marketing")} indent negative showSpark color={T.amber}/>
@@ -2109,18 +2109,18 @@ function PnLBreakdown({aiContext}) {
             <PnLRow label="Professional Services" monthly={dc("professionalSvc")} indent negative showSpark color={T.textMid}/>
             <PnLRow label="Equipment & Maintenance" monthly={dc("equipment")} indent negative showSpark color={T.textDim}/>
             <PnLRow label="Miscellaneous" monthly={dc("miscExpenses")} indent negative showSpark color={T.textDim}/>
-            <PnLRow label="Ã¢ÂÂ EBITDA" monthly={ebitda} isTotal color={T.violet} showSpark/>
+            <PnLRow label="â EBITDA" monthly={ebitda} isTotal color={T.violet} showSpark/>
             <PnLRow label="Depreciation & Amortization" monthly={MONTHS.map(()=>1200)} indent negative showSpark color={T.textDim}/>
             <PnLRow label="Interest Expense" monthly={MONTHS.map(()=>850)} indent negative showSpark color={T.textDim}/>
             <PnLRow label="Income Taxes (21%)" monthly={col("taxes")} indent negative color={T.rose} showSpark/>
-            <PnLRow label="Ã¢ÂÂ NET INCOME" monthly={netIncome} isTotal color={T.cyan} showSpark/>
+            <PnLRow label="â NET INCOME" monthly={netIncome} isTotal color={T.cyan} showSpark/>
           </div>
         </div>
     </div>
   );
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Scenario Planner Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ Scenario Planner ââââââââââââââââââââââââââââââââââââââââââââÃÂ¢ÃÂÃÂ
 function ScenarioPlanner({aiContext, plan="professional"}) {
   const [active,setActive]=useState("base");
   const [cm,setCm]=useState({revenue:1,cogs:1,opex:1});
@@ -2146,21 +2146,21 @@ function ScenarioPlanner({aiContext, plan="professional"}) {
   const wfMax=Math.max(...wf.map(d=>Math.abs(d.value)));
   return (
     <div>
-      {/* Ã¢ÂÂÃ¢ÂÂ Save / Library modals Ã¢ÂÂÃ¢ÂÂ */}
+      {/* ââ Save / Library modals ââ */}
       {showSave && <ScenarioSaveModal multipliers={useC?cm:SCENARIOS_DEF[active]} onSave={sc=>{setSavedName(sc.name);setShowSave(false);}} onClose={()=>setShowSave(false)}/>}
       {showLibrary && <ScenarioLibrary onLoad={(mults,name)=>{setCm(mults);setUseC(true);setSavedName(name);}} onClose={()=>setShowLibrary(false)}/>}
 
-      {/* Ã¢ÂÂÃ¢ÂÂ Scenario action bar Ã¢ÂÂÃ¢ÂÂ */}
+      {/* ââ Scenario action bar ââ */}
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16,flexWrap:"wrap",gap:8}}>
         <div style={{display:"flex",alignItems:"center",gap:8}}>
-          {savedName && <span style={{fontSize:10,color:T.emerald,background:T.emeraldDim,border:`1px solid ${T.emerald}30`,borderRadius:99,padding:"2px 10px",fontFamily:T.mono,fontWeight:700}}>Ã¢ÂÂ Loaded: {savedName}</span>}
+          {savedName && <span style={{fontSize:10,color:T.emerald,background:T.emeraldDim,border:`1px solid ${T.emerald}30`,borderRadius:99,padding:"2px 10px",fontFamily:T.mono,fontWeight:700}}>â Loaded: {savedName}</span>}
         </div>
         <div style={{display:"flex",gap:8}}>
           <button onClick={()=>canSave?setShowLibrary(true):null} title={canSave?"View saved scenarios":"Upgrade to Professional to save scenarios"} style={{background:T.surface,border:`1px solid ${canSave?T.border:T.amber+"40"}`,borderRadius:8,padding:"6px 13px",cursor:canSave?"pointer":"not-allowed",color:canSave?T.textMid:T.amber,fontSize:11,fontFamily:T.sans,fontWeight:600}}>
-            Ã°ÂÂÂ {canSave?"Library":"Ã°ÂÂÂ Library"}
+            ð {canSave?"Library":"ð Library"}
           </button>
           <button onClick={()=>canSave?setShowSave(true):null} title={canSave?"Save current scenario":"Upgrade to Professional to save scenarios"} style={{background:canSave?`${T.cyan}15`:`${T.amber}12`,border:`1px solid ${canSave?T.cyan+"40":T.amber+"40"}`,borderRadius:8,padding:"6px 13px",cursor:canSave?"pointer":"not-allowed",color:canSave?T.cyan:T.amber,fontSize:11,fontFamily:T.sans,fontWeight:700}}>
-            Ã°ÂÂÂ¾ {canSave?"Save Scenario":"Ã°ÂÂÂ Save"}
+            ð¾ {canSave?"Save Scenario":"ð Save"}
           </button>
         </div>
       </div>
@@ -2185,17 +2185,17 @@ function ScenarioPlanner({aiContext, plan="professional"}) {
         </div>
         <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"16px 18px",marginBottom:20}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
-            <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14}}>Ã°ÂÂÂÃ¯Â¸Â Custom Scenario Builder</div>
+            <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14}}>ðï¸ Custom Scenario Builder</div>
             {!canUseNumInput && (
               <div style={{display:"flex",alignItems:"center",gap:6,background:T.violetDim,border:`1px solid ${T.violet}40`,borderRadius:20,padding:"4px 12px"}}>
-                <span style={{fontSize:11}}>Ã°ÂÂÂ</span>
-                <span style={{fontSize:10,color:T.violet,fontFamily:T.sans,fontWeight:600}}>Numeric inputs Ã¢ÂÂ Pro & Enterprise</span>
+                <span style={{fontSize:11}}>ð</span>
+                <span style={{fontSize:10,color:T.violet,fontFamily:T.sans,fontWeight:600}}>Numeric inputs â Pro & Enterprise</span>
               </div>
             )}
             {canUseNumInput && (
               <div style={{display:"flex",alignItems:"center",gap:6,background:T.emeraldDim,border:`1px solid ${T.emerald}40`,borderRadius:20,padding:"4px 12px"}}>
-                <span style={{fontSize:11}}>Ã¢ÂÂ¦</span>
-                <span style={{fontSize:10,color:T.emerald,fontFamily:T.sans,fontWeight:600}}>{plan==="enterprise"?"Enterprise":"Professional"} Ã¢ÂÂ Numeric inputs enabled</span>
+                <span style={{fontSize:11}}>â¦</span>
+                <span style={{fontSize:10,color:T.emerald,fontFamily:T.sans,fontWeight:600}}>{plan==="enterprise"?"Enterprise":"Professional"} â Numeric inputs enabled</span>
               </div>
             )}
           </div>
@@ -2217,10 +2217,10 @@ function ScenarioPlanner({aiContext, plan="professional"}) {
                         onFocus={e=>e.target.style.borderColor=c}
                         onBlur={e=>e.target.style.borderColor=c+"60"}
                       />
-                      <span style={{fontSize:11,color:c,fontFamily:"'JetBrains Mono',monospace",fontWeight:700}}>ÃÂ</span>
+                      <span style={{fontSize:11,color:c,fontFamily:"'JetBrains Mono',monospace",fontWeight:700}}>ÃÂÃÂ</span>
                     </div>
                   ) : (
-                    <span style={{fontSize:11,color:c,fontFamily:"'JetBrains Mono',monospace",fontWeight:700}}>{cm[k].toFixed(2)}ÃÂ</span>
+                    <span style={{fontSize:11,color:c,fontFamily:"'JetBrains Mono',monospace",fontWeight:700}}>{cm[k].toFixed(2)}ÃÂÃÂ</span>
                   )}
                 </div>
                 <input type="range" min="0.5" max="2.0" step="0.01" value={cm[k]}
@@ -2228,9 +2228,9 @@ function ScenarioPlanner({aiContext, plan="professional"}) {
                   style={{width:"100%",accentColor:c,cursor:"pointer"}}/>
                 {canUseNumInput && (
                   <div style={{display:"flex",justifyContent:"space-between",marginTop:4}}>
-                    <span style={{fontSize:8,color:T.textDim,fontFamily:"'JetBrains Mono',monospace"}}>0.50ÃÂ</span>
-                    <span style={{fontSize:8,color:T.textDim,fontFamily:"'JetBrains Mono',monospace"}}>1.00ÃÂ</span>
-                    <span style={{fontSize:8,color:T.textDim,fontFamily:"'JetBrains Mono',monospace"}}>2.00ÃÂ</span>
+                    <span style={{fontSize:8,color:T.textDim,fontFamily:"'JetBrains Mono',monospace"}}>0.50ÃÂÃÂ</span>
+                    <span style={{fontSize:8,color:T.textDim,fontFamily:"'JetBrains Mono',monospace"}}>1.00ÃÂÃÂ</span>
+                    <span style={{fontSize:8,color:T.textDim,fontFamily:"'JetBrains Mono',monospace"}}>2.00ÃÂÃÂ</span>
                   </div>
                 )}
               </div>
@@ -2243,7 +2243,7 @@ function ScenarioPlanner({aiContext, plan="professional"}) {
           </div>}
         </div>
         <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"16px 18px"}}>
-          <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:14}}>Ã°ÂÂÂ Income Waterfall Ã¢ÂÂ {useC?"Custom":SCENARIOS_DEF[active].label} Scenario</div>
+          <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:14}}>ð Income Waterfall â {useC?"Custom":SCENARIOS_DEF[active].label} Scenario</div>
           {wf.map(d=>(
             <div key={d.label} style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
               <div style={{width:160,fontSize:10,color:T.textMid,fontFamily:T.sans,textAlign:"right",flexShrink:0}}>{d.label}</div>
@@ -2258,7 +2258,7 @@ function ScenarioPlanner({aiContext, plan="professional"}) {
   );
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Cash Flow Forecast Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ Cash Flow Forecast ââââââââââââââââââââââââââââââââââââââââââÃÂ¢ÃÂÃÂ
 function CashFlowForecast({aiContext}) {
   const [view,setView]=useState("bars");
   const [sel,setSel]=useState(null);
@@ -2276,7 +2276,7 @@ function CashFlowForecast({aiContext}) {
   return (
     <div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:18}}>
-          {[{l:"Current Balance",v:fmt(CF.openingBalance,true),s:"As of today",c:T.cyan},{l:"13-Wk Projected",v:fmt(endBal,true),s:endBal>CF.openingBalance?"Ã¢ÂÂ Positive trend":"Ã¢ÂÂ Watch closely",c:endBal>CF.openingBalance?T.emerald:T.rose},{l:"Minimum Balance",v:fmt(minBal,true),s:`Week ${minWk} Ã¢ÂÂ lowest point`,c:minBal<50000?T.rose:T.amber},{l:"Avg Weekly Net",v:fmt((endBal-CF.openingBalance)/13,true),s:"Inflows minus outflows",c:T.violet}].map(k=>(
+          {[{l:"Current Balance",v:fmt(CF.openingBalance,true),s:"As of today",c:T.cyan},{l:"13-Wk Projected",v:fmt(endBal,true),s:endBal>CF.openingBalance?"â Positive trend":"â Watch closely",c:endBal>CF.openingBalance?T.emerald:T.rose},{l:"Minimum Balance",v:fmt(minBal,true),s:`Week ${minWk} â lowest point`,c:minBal<50000?T.rose:T.amber},{l:"Avg Weekly Net",v:fmt((endBal-CF.openingBalance)/13,true),s:"Inflows minus outflows",c:T.violet}].map(k=>(
             <div key={k.l} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:10,padding:"12px 16px"}}>
               <div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>{k.l}</div>
               <div style={{fontSize:17,fontWeight:700,fontFamily:T.mono,color:k.c}}>{k.v}</div>
@@ -2285,21 +2285,21 @@ function CashFlowForecast({aiContext}) {
           ))}
         </div>
         <div style={{display:"flex",gap:6,marginBottom:14}}>
-          {[["bars","Ã°ÂÂÂ Cash Flow Bars"],["table","Ã°ÂÂÂ Weekly Detail"],["runway","Ã°ÂÂÂ Balance Runway"]].map(([v,l])=>(
+          {[["bars","ð Cash Flow Bars"],["table","ð Weekly Detail"],["runway","ð Balance Runway"]].map(([v,l])=>(
             <button key={v} onClick={()=>setView(v)} style={{background:view===v?T.cyanDim:"transparent",border:`1px solid ${view===v?T.cyanMid:T.border}`,borderRadius:8,padding:"6px 12px",color:view===v?T.cyan:T.textMid,fontSize:11,fontFamily:T.sans,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>{l}</button>
           ))}
         </div>
 
         {view==="bars"&&(
           <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"16px 18px",marginBottom:18}}>
-            <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:14}}>Ã°ÂÂÂ§ Weekly Cash Flow Ã¢ÂÂ 13-Week Forecast</div>
+            <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:14}}>ð§ Weekly Cash Flow â 13-Week Forecast</div>
             <div style={{display:"flex",alignItems:"flex-end",gap:3,height:210}}>
               {W.map((w,i)=>{
                 const iH=(inflows[i]/maxBar)*130, oH=(outflows[i]/maxBar)*130, low=balances[i]<60000;
                 const active=sel===i;
                 return (
                   <div key={w} onClick={()=>setSel(sel===i?null:i)} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:1,cursor:"pointer",opacity:sel!==null&&sel!==i?0.4:1,transition:"opacity 0.15s",position:"relative"}}>
-                    {low&&<div style={{position:"absolute",top:0,left:"50%",transform:"translateX(-50%)",fontSize:8,color:T.rose,zIndex:1}}>Ã¢ÂÂ </div>}
+                    {low&&<div style={{position:"absolute",top:0,left:"50%",transform:"translateX(-50%)",fontSize:8,color:T.rose,zIndex:1}}>â </div>}
                     {/* Grouped side-by-side bars growing upward from same baseline */}
                     <div style={{width:"100%",display:"flex",flexDirection:"row",alignItems:"flex-end",height:140,gap:1}}>
                       {/* Inflow bar + label */}
@@ -2340,7 +2340,7 @@ function CashFlowForecast({aiContext}) {
                 </div>
                 <div style={{marginTop:10,paddingTop:10,borderTop:`1px solid ${T.border}`,display:"flex",gap:20}}>
                   <div><span style={{fontSize:9,color:T.textDim,fontFamily:T.sans}}>Running Balance: </span><span style={{fontSize:11,color:balances[sel]<60000?T.rose:T.cyan,fontFamily:T.mono,fontWeight:700}}>{fmt(balances[sel])}</span></div>
-                  {balances[sel]<60000&&<span style={{fontSize:10,color:T.rose,fontFamily:T.sans}}>Ã¢ÂÂ Ã¯Â¸Â Below $60K threshold</span>}
+                  {balances[sel]<60000&&<span style={{fontSize:10,color:T.rose,fontFamily:T.sans}}>â ï¸ Below $60K threshold</span>}
                 </div>
               </div>
             )}
@@ -2349,7 +2349,7 @@ function CashFlowForecast({aiContext}) {
 
         {view==="table"&&(
           <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,overflow:"hidden",marginBottom:18}}>
-            <div style={{padding:"14px 16px",borderBottom:`1px solid ${T.border}`,color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14}}>Ã°ÂÂÂ 13-Week Cash Flow Detail</div>
+            <div style={{padding:"14px 16px",borderBottom:`1px solid ${T.border}`,color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14}}>ð 13-Week Cash Flow Detail</div>
             <div style={{overflowX:"auto"}}>
               <table style={{width:"100%",borderCollapse:"collapse",fontSize:10,fontFamily:T.mono}}>
                 <thead><tr style={{background:T.surface}}>
@@ -2360,18 +2360,18 @@ function CashFlowForecast({aiContext}) {
                 <tbody>
                   {[
                     {l:"Total Inflows",d:inflows,c:T.emerald,b:true},
-                    {l:"Ã¢ÂÂ Collections",d:inf.collections,c:T.emerald,in:true},
-                    {l:"Ã¢ÂÂ New Contracts",d:inf.newContracts,c:T.emerald,in:true},
-                    {l:"Ã¢ÂÂ Recurring",d:inf.recurring,c:T.emerald,in:true},
-                    {l:"Ã¢ÂÂ Other Income",d:inf.other,c:T.teal,in:true},
+                    {l:"â Collections",d:inf.collections,c:T.emerald,in:true},
+                    {l:"â New Contracts",d:inf.newContracts,c:T.emerald,in:true},
+                    {l:"â Recurring",d:inf.recurring,c:T.emerald,in:true},
+                    {l:"â Other Income",d:inf.other,c:T.teal,in:true},
                     {l:"Total Outflows",d:outflows,c:T.rose,b:true},
-                    {l:"Ã¢ÂÂ Payroll",d:out.payroll,c:T.rose,in:true},
-                    {l:"Ã¢ÂÂ Vendors",d:out.vendors,c:T.amber,in:true},
-                    {l:"Ã¢ÂÂ Rent",d:out.rent,c:T.violet,in:true},
-                    {l:"Ã¢ÂÂ Taxes",d:out.taxes,c:T.orange,in:true},
-                    {l:"Ã¢ÂÂ Debt Service",d:out.debtService,c:T.textMid,in:true},
-                    {l:"Ã¢ÂÂ CapEx",d:out.capex,c:T.cyan,in:true},
-                    {l:"Ã¢ÂÂ Other",d:out.other,c:T.teal,in:true},
+                    {l:"â Payroll",d:out.payroll,c:T.rose,in:true},
+                    {l:"â Vendors",d:out.vendors,c:T.amber,in:true},
+                    {l:"â Rent",d:out.rent,c:T.violet,in:true},
+                    {l:"â Taxes",d:out.taxes,c:T.orange,in:true},
+                    {l:"â Debt Service",d:out.debtService,c:T.textMid,in:true},
+                    {l:"â CapEx",d:out.capex,c:T.cyan,in:true},
+                    {l:"â Other",d:out.other,c:T.teal,in:true},
                     {l:"Net Cash Flow",d:nets,c:T.violet,b:true,net:true},
                     {l:"Running Balance",d:balances,c:T.cyan,b:true,bal:true},
                   ].map(row=>(
@@ -2393,7 +2393,7 @@ function CashFlowForecast({aiContext}) {
 
         {view==="runway"&&(
           <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"16px 18px",marginBottom:18}}>
-            <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:14}}>Ã°ÂÂÂ 13-Week Balance Runway</div>
+            <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:14}}>ð 13-Week Balance Runway</div>
             <div style={{height:160,position:"relative"}}>
               <svg viewBox="0 0 400 130" style={{width:"100%",height:"100%"}} preserveAspectRatio="none">
                 <defs><linearGradient id="bg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={T.cyan} stopOpacity="0.2"/><stop offset="100%" stopColor={T.cyan} stopOpacity="0"/></linearGradient></defs>
@@ -2422,7 +2422,7 @@ function CashFlowForecast({aiContext}) {
                 <div key={w} style={{background:balances[i]<60000?T.roseDim:T.surface,border:`1px solid ${balances[i]<60000?T.rose+"40":T.border}`,borderRadius:8,padding:"8px 10px"}}>
                   <div style={{fontSize:9,color:T.textDim,fontFamily:T.mono}}>{w}</div>
                   <div style={{fontSize:12,fontWeight:700,fontFamily:T.mono,color:balances[i]<60000?T.rose:T.text}}>{fmt(balances[i],true)}</div>
-                  <div style={{fontSize:9,color:nets[i]>=0?T.emerald:T.rose,fontFamily:T.sans}}>{nets[i]>=0?"Ã¢ÂÂ":"Ã¢ÂÂ"}{fmt(Math.abs(nets[i]),true)}</div>
+                  <div style={{fontSize:9,color:nets[i]>=0?T.emerald:T.rose,fontFamily:T.sans}}>{nets[i]>=0?"â":"â"}{fmt(Math.abs(nets[i]),true)}</div>
                 </div>
               ))}
             </div>
@@ -2430,7 +2430,7 @@ function CashFlowForecast({aiContext}) {
         )}
 
         <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"16px 18px"}}>
-          <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:14}}>Ã°ÂÂÂ¸ 13-Week Outflow Composition</div>
+          <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:14}}>ð¸ 13-Week Outflow Composition</div>
           {CATS.map(cat=>{
             const t=sum(W.map((_,i)=>out[cat.k][i]));
             return (
@@ -2449,7 +2449,7 @@ function CashFlowForecast({aiContext}) {
   );
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ AR Aging Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ AR Aging ââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function ARaging({aiContext}) {
   const [sort,setSort]=useState("total");
   const [filter,setFilter]=useState("all");
@@ -2469,7 +2469,7 @@ function ARaging({aiContext}) {
   return (
     <div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10,marginBottom:18}}>
-          {[{l:"Current",v:curr,c:T.emerald},{l:"1Ã¢ÂÂ30 Days",v:d30,c:T.cyan},{l:"31Ã¢ÂÂ60 Days",v:d60,c:T.amber},{l:"61Ã¢ÂÂ90 Days",v:d90,c:T.orange},{l:"90+ Days",v:d90p,c:T.rose}].map(b=>(
+          {[{l:"Current",v:curr,c:T.emerald},{l:"1â30 Days",v:d30,c:T.cyan},{l:"31â60 Days",v:d60,c:T.amber},{l:"61â90 Days",v:d90,c:T.orange},{l:"90+ Days",v:d90p,c:T.rose}].map(b=>(
             <div key={b.l} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:10,padding:"12px 14px"}}>
               <div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>{b.l}</div>
               <div style={{fontSize:17,fontWeight:700,fontFamily:T.mono,color:b.c}}>{fmt(b.v,true)}</div>
@@ -2480,7 +2480,7 @@ function ARaging({aiContext}) {
         </div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:18}}>
           <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"16px 18px"}}>
-            <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:14}}>Ã°ÂÂÂ AR Distribution</div>
+            <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:14}}>ð AR Distribution</div>
             <div style={{display:"flex",height:20,borderRadius:6,overflow:"hidden",gap:2}}>
               {[[curr,T.emerald],[d30,T.cyan],[d60,T.amber],[d90,T.orange],[d90p,T.rose]].map(([v,c],i)=>v>0&&<div key={i} style={{width:`${v/tot*100}%`,background:c}}/>)}
             </div>
@@ -2491,7 +2491,7 @@ function ARaging({aiContext}) {
             </div>
           </div>
           <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"16px 18px"}}>
-            <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:14}}>Ã°ÂÂÂ Collections Health</div>
+            <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:14}}>ð Collections Health</div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
               {[{l:"Total AR",v:fmt(tot,true),c:T.cyan},{l:"DSO",v:`${dso} days`,c:dso<45?T.emerald:dso<60?T.amber:T.rose},{l:"Past Due",v:fmt(d30+d60+d90+d90p,true),c:T.orange},{l:"At-Risk",v:fmt(d60+d90+d90p,true),c:T.rose}].map(s=>(
                 <div key={s.l}><div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:0.5}}>{s.l}</div><div style={{fontSize:14,fontWeight:700,fontFamily:T.mono,color:s.c,marginTop:2}}>{s.v}</div></div>
@@ -2512,7 +2512,7 @@ function ARaging({aiContext}) {
         </div>
         <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,overflow:"hidden"}}>
           <div style={{padding:"12px 16px",borderBottom:`1px solid ${T.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-            <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14}}>Ã°ÂÂÂ¬ AR Aging Ã¢ÂÂ {sorted.length} Clients</div>
+            <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14}}>ð¬ AR Aging â {sorted.length} Clients</div>
             <div style={{color:T.textDim,fontSize:9,fontFamily:T.mono}}>As of {new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}</div>
           </div>
           <div style={{overflowX:"auto"}}>
@@ -2552,7 +2552,7 @@ function ARaging({aiContext}) {
   );
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Regional Comparison Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ Regional Comparison ââââââââââââââââââââââââââââââââââââââââââ
 function RegionalComparison({aiContext}) {
   const [view,setView]=useState("overview");
   const [sort,setSort]=useState("revenue");
@@ -2580,7 +2580,7 @@ function RegionalComparison({aiContext}) {
   return (
     <div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:18}}>
-          {[{l:"Portfolio Revenue",v:fmt(totalRev,true),s:`${REGIONAL_CLIENTS.length} clients`,c:T.cyan},{l:"Avg Net Margin",v:pct(avgMargin),s:"Weighted by revenue",c:T.emerald},{l:"Avg Growth Rate",v:pct(avgGrowth),s:avgGrowth>0?"Ã¢ÂÂ Expanding":"Ã¢ÂÂ Contracting",c:avgGrowth>0?T.emerald:T.rose},{l:"Avg NPS Score",v:avgNps.toString(),s:avgNps>65?"Strong loyalty":"Needs attention",c:avgNps>65?T.emerald:T.amber}].map(s=>(
+          {[{l:"Portfolio Revenue",v:fmt(totalRev,true),s:`${REGIONAL_CLIENTS.length} clients`,c:T.cyan},{l:"Avg Net Margin",v:pct(avgMargin),s:"Weighted by revenue",c:T.emerald},{l:"Avg Growth Rate",v:pct(avgGrowth),s:avgGrowth>0?"â Expanding":"â Contracting",c:avgGrowth>0?T.emerald:T.rose},{l:"Avg NPS Score",v:avgNps.toString(),s:avgNps>65?"Strong loyalty":"Needs attention",c:avgNps>65?T.emerald:T.amber}].map(s=>(
             <div key={s.l} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:10,padding:"12px 16px"}}>
               <div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>{s.l}</div>
               <div style={{fontSize:18,fontWeight:700,fontFamily:T.mono,color:s.c}}>{s.v}</div>
@@ -2589,7 +2589,7 @@ function RegionalComparison({aiContext}) {
           ))}
         </div>
         <div style={{display:"flex",gap:6,marginBottom:14}}>
-          {[["overview","Ã°ÂÂÂºÃ¯Â¸Â Regional Overview"],["clients","Ã°ÂÂÂ¥ Client Detail"],["matrix","Ã°ÂÂÂ Performance Matrix"]].map(([v,l])=>(
+          {[["overview","ðºï¸ Regional Overview"],["clients","ð¥ Client Detail"],["matrix","ð Performance Matrix"]].map(([v,l])=>(
             <button key={v} onClick={()=>setView(v)} style={{background:view===v?T.cyanDim:"transparent",border:`1px solid ${view===v?T.cyanMid:T.border}`,borderRadius:8,padding:"6px 12px",color:view===v?T.cyan:T.textMid,fontSize:11,fontFamily:T.sans,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>{l}</button>
           ))}
         </div>
@@ -2601,7 +2601,7 @@ function RegionalComparison({aiContext}) {
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
                   <div>
                     <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14}}>{r.region}</div>
-                    <div style={{color:T.textDim,fontSize:10,fontFamily:T.sans,marginTop:2}}>{r.clients} clients Â· {r.cities}</div>
+                    <div style={{color:T.textDim,fontSize:10,fontFamily:T.sans,marginTop:2}}>{r.clients} clients ÃÂ· {r.cities}</div>
                   </div>
                   <div style={{textAlign:"right"}}>
                     <div style={{color:T.cyan,fontFamily:T.mono,fontWeight:700,fontSize:16}}>{fmt(r.revenue,true)}</div>
@@ -2665,7 +2665,7 @@ function RegionalComparison({aiContext}) {
         {view==="matrix"&&(
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
             <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"16px 18px"}}>
-              <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:14}}>Ã°ÂÂÂ Revenue vs. Margin Scatter (bubble = NPS)</div>
+              <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:14}}>ð Revenue vs. Margin Scatter (bubble = NPS)</div>
               <div style={{position:"relative",height:220,background:T.surface,borderRadius:8,overflow:"hidden"}}>
                 {[0.25,0.5,0.75].map(f=><div key={f} style={{position:"absolute",left:`${f*100}%`,top:0,bottom:0,width:1,background:T.border}}/>)}
                 {[0.25,0.5,0.75].map(f=><div key={f} style={{position:"absolute",top:`${f*100}%`,left:0,right:0,height:1,background:T.border}}/>)}
@@ -2716,7 +2716,7 @@ function RegionalComparison({aiContext}) {
   );
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Integrations Field Input Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ Integrations Field Input ââââââââââââââââââââââââââââââââââââÃÂ¢ÃÂÃÂ
 function IntegrationFieldInput({label,value,onChange,placeholder,type="text",show,onToggle}) {
   return (
     <div style={{marginBottom:14}}>
@@ -2725,15 +2725,15 @@ function IntegrationFieldInput({label,value,onChange,placeholder,type="text",sho
         <input type={type==="password"&&!show?"password":"text"} value={value} onChange={onChange} placeholder={placeholder}
           style={{width:"100%",background:T.surface,border:`1px solid ${T.border}`,borderRadius:8,padding:"10px 12px",color:T.text,fontSize:12,fontFamily:T.mono,outline:"none",paddingRight:type==="password"?40:12,boxSizing:"border-box"}}
           onFocus={e=>e.target.style.borderColor=T.cyan} onBlur={e=>e.target.style.borderColor=T.border}/>
-        {type==="password"&&<button onClick={onToggle} style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",color:T.textDim,fontSize:12}}>{show?"Ã°ÂÂÂ":"Ã°ÂÂÂ"}</button>}
+        {type==="password"&&<button onClick={onToggle} style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",color:T.textDim,fontSize:12}}>{show?"ð":"ð"}</button>}
       </div>
     </div>
   );
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ CFO Simulation Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ CFO Simulation ââââââââââââââââââââââââââââââââââââââââââââââ
 /**
- * CFOSimulation Ã¢ÂÂ AI-powered 30-day product evaluation from a CFO's perspective.
+ * CFOSimulation â AI-powered 30-day product evaluation from a CFO's perspective.
  * Calls POST /api/ai/cfo-simulation (server handles prompts + Anthropic key).
  * Falls back to MOCK_RESULT if the API call fails.
  * Gated to Professional+ via FEATURES.CFO_SIMULATION.
@@ -2743,57 +2743,57 @@ function IntegrationFieldInput({label,value,onChange,placeholder,type="text",sho
 const MOCK_RESULT = {
   persona:{ name:"Sarah Chen", company:"Acme SaaS Co.", arr:"$25M", team:40 },
   phases:[
-    { id:"onboarding", title:"First Impressions", days:"1Ã¢ÂÂ5", rating:7,
-      summary:"FinanceOS loads cleanly and the dark theme signals sophistication. The 12-tab structure is logically organised and most KPIs surface immediately in the top nav. Onboarding friction is low for a finance-literate user, though the absence of a guided walkthrough or sample-data tour adds 30Ã¢ÂÂ60 minutes to orientation time.",
-      findings:["Dark theme and data-dense layout read as a serious financial tool immediately","Key KPIs (Revenue, Net Income, Gross Margin, MRR) visible in the top nav without any clicks","Tab grouping (core vs ops) reduces cognitive load","Plan-gating is transparent Ã¢ÂÂ locked states explain what you're missing and why"],
-      friction:["No in-app onboarding tour or contextual tooltips on first load","All data is hardcoded Acme Corp demo Ã¢ÂÂ connecting my own QBO data requires navigating to Integrations first","No empty-state guidance explaining what to do before data is connected","Mobile layout is not viable for a CFO reviewing numbers between meetings"] },
-    { id:"monitoring", title:"Financial Monitoring", days:"6Ã¢ÂÂ10", rating:6,
+    { id:"onboarding", title:"First Impressions", days:"1â5", rating:7,
+      summary:"FinanceOS loads cleanly and the dark theme signals sophistication. The 12-tab structure is logically organised and most KPIs surface immediately in the top nav. Onboarding friction is low for a finance-literate user, though the absence of a guided walkthrough or sample-data tour adds 30â60 minutes to orientation time.",
+      findings:["Dark theme and data-dense layout read as a serious financial tool immediately","Key KPIs (Revenue, Net Income, Gross Margin, MRR) visible in the top nav without any clicks","Tab grouping (core vs ops) reduces cognitive load","Plan-gating is transparent â locked states explain what you're missing and why"],
+      friction:["No in-app onboarding tour or contextual tooltips on first load","All data is hardcoded Acme Corp demo â connecting my own QBO data requires navigating to Integrations first","No empty-state guidance explaining what to do before data is connected","Mobile layout is not viable for a CFO reviewing numbers between meetings"] },
+    { id:"monitoring", title:"Financial Monitoring", days:"6â10", rating:6,
       summary:"Daily monitoring is functional but relies on static seed data. The P&L, BvA, and Cash Flow tabs answer the core questions (what changed, why did margins move) but the answers are always the same until QBO is live. The anomaly detection panel shows promise but fires too broadly without threshold customisation.",
       findings:["P&L tab surfaces revenue mix, COGS, and OPEX trend in a single view without drilling","Budget vs Actual variance table is colour-coded and immediately actionable","AI chat panel on Professional provides fast contextual answers to margin and variance questions","Anomaly alerts identify material deviations before I would catch them manually"],
-      friction:["All chart data is hardcoded Ã¢ÂÂ no live numbers until QBO/Plaid sync is established","Anomaly thresholds cannot be configured; 5% variance alerts fire constantly and reduce signal quality","No drill-down from a chart data point to the underlying transactions","Cash Flow shows a 13-week forecast but the methodology (linear extrapolation vs driver-based) is unclear"] },
-    { id:"forecasting", title:"Forecasting & Planning", days:"11Ã¢ÂÂ15", rating:7,
-      summary:"The Scenario Planner is the strongest differentiator in the product Ã¢ÂÂ three parallel cases with adjustable multipliers is genuinely useful for board prep. Headcount Planning covers hiring cost at a role level. The main gap is that scenarios are disconnected from each other and from the cash flow forecast.",
+      friction:["All chart data is hardcoded â no live numbers until QBO/Plaid sync is established","Anomaly thresholds cannot be configured; 5% variance alerts fire constantly and reduce signal quality","No drill-down from a chart data point to the underlying transactions","Cash Flow shows a 13-week forecast but the methodology (linear extrapolation vs driver-based) is unclear"] },
+    { id:"forecasting", title:"Forecasting & Planning", days:"11â15", rating:7,
+      summary:"The Scenario Planner is the strongest differentiator in the product â three parallel cases with adjustable multipliers is genuinely useful for board prep. Headcount Planning covers hiring cost at a role level. The main gap is that scenarios are disconnected from each other and from the cash flow forecast.",
       findings:["Bear / Base / Bull case with slider-adjustable multipliers answers 'what if' questions in real time","Headcount roster with fully-loaded cost per role is a real time-saver vs spreadsheets","SaaS Metrics tab (MRR waterfall, NRR, LTV:CAC) is board-ready out of the box","Scenario outputs update all connected charts simultaneously"],
-      friction:["Scenarios cannot be saved, named, or shared with the VP Finance or board","No link between the Scenario Planner and Cash Flow Ã¢ÂÂ a revenue downside doesn't auto-update runway","Headcount planning lacks offer letter staging and equity dilution modelling","No rolling 12-month forecast mode Ã¢ÂÂ the tool is backward-looking more than forward-looking"] },
-    { id:"reporting", title:"Executive Reporting", days:"16Ã¢ÂÂ20", rating:6,
+      friction:["Scenarios cannot be saved, named, or shared with the VP Finance or board","No link between the Scenario Planner and Cash Flow â a revenue downside doesn't auto-update runway","Headcount planning lacks offer letter staging and equity dilution modelling","No rolling 12-month forecast mode â the tool is backward-looking more than forward-looking"] },
+    { id:"reporting", title:"Executive Reporting", days:"16â20", rating:6,
       summary:"The C-Suite Report tab (Enterprise only) provides CEO / CFO / CIO differentiated views that are genuinely useful for board prep. However, the report is view-only with no export and no narrative editing capability. Preparing a full board deck still requires manually copying numbers into PowerPoint.",
-      findings:["C-Suite Report differentiates by executive role Ã¢ÂÂ the CFO view surfaces leverage ratios and margin trend correctly","AI Strategic Analysis panel provides board-level commentary that saves 1Ã¢ÂÂ2 hours of narrative writing","Financial highlight cards are visually clean enough to screenshot for a board update","Risk matrix prioritises issues by severity ÃÂ effort Ã¢ÂÂ that's the right framework"],
-      friction:["No PDF or PowerPoint export from any tab Ã¢ÂÂ this alone blocks board-meeting adoption","Charts cannot be annotated with management commentary before sharing","No way to create a custom reporting period (e.g. trailing 3 months vs calendar year)","C-Suite Report is Enterprise-only Ã¢ÂÂ a $99/mo Professional user cannot produce a board summary"] },
-    { id:"operations", title:"Operational Planning", days:"21Ã¢ÂÂ25", rating:6,
-      summary:"Department heads can use the Headcount and Budget vs Actual tabs without training, which is a real advantage over Mosaic or Jirav. The AR Aging and Clients tabs give the VP Sales visibility into revenue concentration. The main gap is no budgeting workflow Ã¢ÂÂ there is no way for a department head to submit or revise a budget inside the tool.",
+      findings:["C-Suite Report differentiates by executive role â the CFO view surfaces leverage ratios and margin trend correctly","AI Strategic Analysis panel provides board-level commentary that saves 1â2 hours of narrative writing","Financial highlight cards are visually clean enough to screenshot for a board update","Risk matrix prioritises issues by severity ÃÂÃÂ effort â that's the right framework"],
+      friction:["No PDF or PowerPoint export from any tab â this alone blocks board-meeting adoption","Charts cannot be annotated with management commentary before sharing","No way to create a custom reporting period (e.g. trailing 3 months vs calendar year)","C-Suite Report is Enterprise-only â a $99/mo Professional user cannot produce a board summary"] },
+    { id:"operations", title:"Operational Planning", days:"21â25", rating:6,
+      summary:"Department heads can use the Headcount and Budget vs Actual tabs without training, which is a real advantage over Mosaic or Jirav. The AR Aging and Clients tabs give the VP Sales visibility into revenue concentration. The main gap is no budgeting workflow â there is no way for a department head to submit or revise a budget inside the tool.",
       findings:["Headcount tab is accessible enough for a VP Engineering to self-serve on cost questions","AR Aging risk buckets (current / 30 / 60 / 90+) surface collections priorities without a custom report","Client revenue concentration chart immediately shows when one client represents >20% of revenue","Integrations tab has a clean sync activity log that the ops team can monitor without a data analyst"],
-      friction:["No collaborative budgeting workflow Ã¢ÂÂ department heads cannot propose or submit budget revisions","No sales pipeline integration (Salesforce / HubSpot) Ã¢ÂÂ ARR forecast is manual","No approval workflow for headcount additions Ã¢ÂÂ the tool records hires but doesn't route approvals","Clients tab is regional-only; no customer health score or churn risk score per account"] },
-    { id:"strategy", title:"Strategic Decision Support", days:"26Ã¢ÂÂ30", rating:6,
-      summary:"FinanceOS answers 'what happened' reliably. It partially answers 'what will happen' through scenario modelling. It does not yet answer 'what should we do' Ã¢ÂÂ the strategic recommendation layer is thin. The AI assistant provides good commentary but stops short of prescriptive financial strategy.",
-      findings:["LTV:CAC ratio and CAC payback period tell me immediately whether the growth engine is efficient","NRR above / below 100% threshold is surfaced with the right context","Cash runway is prominent in the Cash Flow tab Ã¢ÂÂ a critical metric for a 40-person SaaS company","Anomaly detection has caught two genuine issues in 30 days that I would have found 2 weeks later"],
-      friction:["No capital allocation framework Ã¢ÂÂ the tool cannot help me decide between hiring, marketing spend, or product investment","No cohort analysis for revenue retention Ã¢ÂÂ I cannot see whether the 2022 cohort retains better than 2023","No unit economics decomposition by product line, geography, or sales channel","Strategic AI commentary is accurate but generic Ã¢ÂÂ it does not learn from my company's specific financial history"] },
+      friction:["No collaborative budgeting workflow â department heads cannot propose or submit budget revisions","No sales pipeline integration (Salesforce / HubSpot) â ARR forecast is manual","No approval workflow for headcount additions â the tool records hires but doesn't route approvals","Clients tab is regional-only; no customer health score or churn risk score per account"] },
+    { id:"strategy", title:"Strategic Decision Support", days:"26â30", rating:6,
+      summary:"FinanceOS answers 'what happened' reliably. It partially answers 'what will happen' through scenario modelling. It does not yet answer 'what should we do' â the strategic recommendation layer is thin. The AI assistant provides good commentary but stops short of prescriptive financial strategy.",
+      findings:["LTV:CAC ratio and CAC payback period tell me immediately whether the growth engine is efficient","NRR above / below 100% threshold is surfaced with the right context","Cash runway is prominent in the Cash Flow tab â a critical metric for a 40-person SaaS company","Anomaly detection has caught two genuine issues in 30 days that I would have found 2 weeks later"],
+      friction:["No capital allocation framework â the tool cannot help me decide between hiring, marketing spend, or product investment","No cohort analysis for revenue retention â I cannot see whether the 2022 cohort retains better than 2023","No unit economics decomposition by product line, geography, or sales channel","Strategic AI commentary is accurate but generic â it does not learn from my company's specific financial history"] },
   ],
   aiCapability:{
     summary:"The AI assistant is above average for an FP&A tool but below what a CFO expects from a dedicated AI layer. It is contextually aware of the tab you're on and provides fast, relevant answers to quantitative questions. It does not yet perform multi-step reasoning, cohort analysis, or proactive scenario recommendations.",
-    strengths:["Context-aware Ã¢ÂÂ knows which tab you're on and references the correct data in answers","Anomaly detection fires on material variances before the CFO catches them manually","Preset prompt pills cover the 80% of questions asked in a monthly review","AI commentary in the C-Suite Report saves 1Ã¢ÂÂ2 hours of board narrative writing"],
-    weaknesses:["Does not retain context across sessions Ã¢ÂÂ every conversation starts from scratch","Cannot answer questions that span multiple tabs (e.g. 'how does our churn rate affect headcount budget?')","AI responses are accurate but generic Ã¢ÂÂ they don't reflect my company's specific financial history or goals","No proactive AI Ã¢ÂÂ it waits to be asked rather than surfacing insights unprompted"],
-    verdict:"The AI adds genuine value at the Professional tier Ã¢ÂÂ it is not cosmetic. However, it is a Q&A assistant, not a financial co-pilot. Mosaic's AI layer performs deeper multi-step analysis. The anomaly detection is the strongest AI feature.",
+    strengths:["Context-aware â knows which tab you're on and references the correct data in answers","Anomaly detection fires on material variances before the CFO catches them manually","Preset prompt pills cover the 80% of questions asked in a monthly review","AI commentary in the C-Suite Report saves 1â2 hours of board narrative writing"],
+    weaknesses:["Does not retain context across sessions â every conversation starts from scratch","Cannot answer questions that span multiple tabs (e.g. 'how does our churn rate affect headcount budget?')","AI responses are accurate but generic â they don't reflect my company's specific financial history or goals","No proactive AI â it waits to be asked rather than surfacing insights unprompted"],
+    verdict:"The AI adds genuine value at the Professional tier â it is not cosmetic. However, it is a Q&A assistant, not a financial co-pilot. Mosaic's AI layer performs deeper multi-step analysis. The anomaly detection is the strongest AI feature.",
     isCosmetic:false,
   },
   competitorComparison:{
     summary:"FinanceOS is most competitive against Fathom and early-stage Runway. It loses to Mosaic and Cube on data model depth and collaborative budgeting. Its biggest advantage is price-to-feature ratio and a UI that non-finance stakeholders can actually use.",
     competitors:[
-      { name:"Cube", stronger:["Lower price point for SMB","Faster setup Ã¢ÂÂ no spreadsheet migration","More intuitive UI for non-finance users"], weaker:["Cube has native Excel/Google Sheets sync Ã¢ÂÂ FinanceOS has no spreadsheet integration","Cube supports multi-dimensional modelling; FinanceOS is single-entity","Cube has a collaborative budget workflow; FinanceOS has none"] },
-      { name:"Mosaic", stronger:["FinanceOS is 3ÃÂ cheaper at the Professional tier","FinanceOS UI is faster to navigate for non-analysts","Scenario planner UX is more intuitive than Mosaic's"], weaker:["Mosaic has a far deeper data model with custom metrics and dimensions","Mosaic's AI performs multi-step financial reasoning; FinanceOS AI is single-turn","Mosaic has native Salesforce integration for pipeline-to-ARR forecasting"] },
+      { name:"Cube", stronger:["Lower price point for SMB","Faster setup â no spreadsheet migration","More intuitive UI for non-finance users"], weaker:["Cube has native Excel/Google Sheets sync â FinanceOS has no spreadsheet integration","Cube supports multi-dimensional modelling; FinanceOS is single-entity","Cube has a collaborative budget workflow; FinanceOS has none"] },
+      { name:"Mosaic", stronger:["FinanceOS is 3ÃÂÃÂ cheaper at the Professional tier","FinanceOS UI is faster to navigate for non-analysts","Scenario planner UX is more intuitive than Mosaic's"], weaker:["Mosaic has a far deeper data model with custom metrics and dimensions","Mosaic's AI performs multi-step financial reasoning; FinanceOS AI is single-turn","Mosaic has native Salesforce integration for pipeline-to-ARR forecasting"] },
       { name:"Runway", stronger:["FinanceOS has more built-in SaaS metric depth (NRR, waterfall, churn)","FinanceOS anomaly detection is more proactive","FinanceOS AR aging is more detailed"], weaker:["Runway has a more polished headcount planning workflow with approval routing","Runway supports custom financial models; FinanceOS uses fixed templates","Runway has better real-time collaboration for remote finance teams"] },
       { name:"Fathom", stronger:["FinanceOS scenario planner is significantly more powerful","FinanceOS AI assistant is more contextual than Fathom's","FinanceOS SaaS metrics depth exceeds Fathom for subscription businesses"], weaker:["Fathom has better PDF report export for board packs","Fathom has stronger QuickBooks consolidation for multi-entity","Fathom is easier for a non-technical accountant to operate"] },
-      { name:"Jirav", stronger:["FinanceOS has a cleaner UI Ã¢ÂÂ Jirav feels enterprise-heavy","FinanceOS is faster to set up for a 40-person company","FinanceOS pricing is more accessible for seed/Series A companies"], weaker:["Jirav has a full collaborative FP&A workflow with version control on budgets","Jirav has deeper Salesforce and HubSpot pipeline integration","Jirav supports workforce planning at a department-budget level FinanceOS cannot match"] },
+      { name:"Jirav", stronger:["FinanceOS has a cleaner UI â Jirav feels enterprise-heavy","FinanceOS is faster to set up for a 40-person company","FinanceOS pricing is more accessible for seed/Series A companies"], weaker:["Jirav has a full collaborative FP&A workflow with version control on budgets","Jirav has deeper Salesforce and HubSpot pipeline integration","Jirav supports workforce planning at a department-budget level FinanceOS cannot match"] },
     ],
   },
   productTrust:{
-    summary:"I trust the financial logic in FinanceOS at the display layer Ã¢ÂÂ the P&L, Balance Sheet, and Cash Flow are structurally sound and the calculations are consistent across tabs. What reduces trust is the static demo data: I cannot verify whether the formulas hold under edge cases (negative EBITDA, multi-currency, mid-year hires) until I connect my real data. The absence of any audit trail or data lineage documentation is a moderate trust gap.",
-    trustSignals:["Three-statement model is internally consistent Ã¢ÂÂ Balance Sheet ties to P&L and Cash Flow","Anomaly detection logic is transparent Ã¢ÂÂ it explains why a flag was raised","Plan gating is honest Ã¢ÂÂ locked states describe exactly what you're missing","Stripe and Supabase logos in the integration layer signal production-grade infrastructure"],
-    trustBreakers:["All financial data is hardcoded demo data until QBO/Plaid sync is live Ã¢ÂÂ I cannot validate formula logic on my own numbers","No audit log for who changed what in financial data","Forecast methodology is not documented Ã¢ÂÂ I cannot verify whether cash runway uses simple extrapolation or a driver-based model","No data lineage panel showing where each number originates"],
+    summary:"I trust the financial logic in FinanceOS at the display layer â the P&L, Balance Sheet, and Cash Flow are structurally sound and the calculations are consistent across tabs. What reduces trust is the static demo data: I cannot verify whether the formulas hold under edge cases (negative EBITDA, multi-currency, mid-year hires) until I connect my real data. The absence of any audit trail or data lineage documentation is a moderate trust gap.",
+    trustSignals:["Three-statement model is internally consistent â Balance Sheet ties to P&L and Cash Flow","Anomaly detection logic is transparent â it explains why a flag was raised","Plan gating is honest â locked states describe exactly what you're missing","Stripe and Supabase logos in the integration layer signal production-grade infrastructure"],
+    trustBreakers:["All financial data is hardcoded demo data until QBO/Plaid sync is live â I cannot validate formula logic on my own numbers","No audit log for who changed what in financial data","Forecast methodology is not documented â I cannot verify whether cash runway uses simple extrapolation or a driver-based model","No data lineage panel showing where each number originates"],
     trustScore:6,
   },
   finalDecision:{
     choice:"Maybe after improvements",
-    reasoning:"FinanceOS gets the fundamentals right Ã¢ÂÂ the UI is fast, the SaaS metrics depth is genuine, and the AI assistant saves real time on monthly close. But two blockers prevent primary adoption: there is no export capability for board reporting, and there is no collaborative budgeting workflow. Until a CFO can take the output of FinanceOS directly into a board meeting without rebuilding it in PowerPoint, it remains a monitoring and analysis tool, not the system of record. At $99/mo it is exceptional value if those two gaps are closed.",
+    reasoning:"FinanceOS gets the fundamentals right â the UI is fast, the SaaS metrics depth is genuine, and the AI assistant saves real time on monthly close. But two blockers prevent primary adoption: there is no export capability for board reporting, and there is no collaborative budgeting workflow. Until a CFO can take the output of FinanceOS directly into a board meeting without rebuilding it in PowerPoint, it remains a monitoring and analysis tool, not the system of record. At $99/mo it is exceptional value if those two gaps are closed.",
     keyConditions:["PDF / PowerPoint export from any tab or report","Collaborative budget workflow with department-head submission","Saved, named, shareable scenarios","Salesforce or HubSpot pipeline-to-ARR integration","Audit log and data lineage for financial data"],
   },
   scorecard:{
@@ -2802,12 +2802,12 @@ const MOCK_RESULT = {
     competitiveStrength:6, overall:7,
   },
   brutalHonesty:{
-    biggestWeaknesses:["No export Ã¢ÂÂ every report is trapped inside the browser","No collaborative budgeting Ã¢ÂÂ the tool monitors spend but cannot set or revise budgets","Scenarios are ephemeral Ã¢ÂÂ they cannot be saved, versioned, or shared","All data is demo-mode until integrations are live Ã¢ÂÂ reduces evaluation confidence","C-Suite Report is Enterprise-only, which prices out the typical FinanceOS buyer"],
+    biggestWeaknesses:["No export â every report is trapped inside the browser","No collaborative budgeting â the tool monitors spend but cannot set or revise budgets","Scenarios are ephemeral â they cannot be saved, versioned, or shared","All data is demo-mode until integrations are live â reduces evaluation confidence","C-Suite Report is Enterprise-only, which prices out the typical FinanceOS buyer"],
     missingFeatures:["PDF and PowerPoint export","Collaborative budget submission workflow","Salesforce / HubSpot pipeline integration","Saved and versioned scenarios","Cohort revenue retention analysis","Custom reporting periods","Multi-currency support"],
-    uxIssues:["No mobile-responsive layout Ã¢ÂÂ CFOs review on phones","No keyboard shortcuts for power users","Tab overflow on smaller screens clips the pricing and integrations tabs","Loading state on first Anthropic call is slow with no progress indication"],
+    uxIssues:["No mobile-responsive layout â CFOs review on phones","No keyboard shortcuts for power users","Tab overflow on smaller screens clips the pricing and integrations tabs","Loading state on first Anthropic call is slow with no progress indication"],
   },
   topImprovements:[
-    { rank:1, title:"PDF & PowerPoint Export", impact:"Removes the #1 adoption blocker for board reporting. A CFO who can export directly from FinanceOS saves 3Ã¢ÂÂ5 hours per board cycle.", effort:"High" },
+    { rank:1, title:"PDF & PowerPoint Export", impact:"Removes the #1 adoption blocker for board reporting. A CFO who can export directly from FinanceOS saves 3â5 hours per board cycle.", effort:"High" },
     { rank:2, title:"Saved & Named Scenarios", impact:"Scenarios currently vanish on tab change. Saving Bear/Base/Bull cases with version history transforms the tool from a calculator into a planning system.", effort:"Medium" },
     { rank:3, title:"Collaborative Budget Workflow", impact:"Department heads need to submit and revise budgets inside the tool. Without this, the CFO still manages budgets in spreadsheets alongside FinanceOS.", effort:"High" },
     { rank:4, title:"Salesforce / HubSpot Pipeline Integration", impact:"ARR forecast is the most critical forward-looking metric. Connecting pipeline data makes the forecast accurate instead of manual.", effort:"High" },
@@ -2830,14 +2830,14 @@ const SIM_SECTION_TABS = [
   { id:"fixes",        label:"Top 10 Fixes" },
 ];
 
-const PHASE_ICONS   = ["Ã°ÂÂÂ","Ã°ÂÂÂ","Ã°ÂÂÂ®","Ã°ÂÂÂ","Ã°ÂÂÂ¥","Ã°ÂÂÂ¯"];
+const PHASE_ICONS   = ["ð","ð","ð®","ð","ð¥","ð¯"];
 const PHASE_COLORS  = [T.cyan, T.emerald, T.violet, T.amber, T.teal, T.orange];
 const COMP_COLORS   = { Cube:T.cyan, Mosaic:T.violet, Runway:T.emerald, Fathom:T.teal, Jirav:T.amber };
 const DECISION_META = {
-  "No":                          { color:T.rose,    icon:"Ã¢ÂÂ" },
-  "Maybe after improvements":    { color:T.amber,   icon:"Ã¢ÂÂ" },
-  "Yes as a secondary tool":     { color:T.cyan,    icon:"Ã¢ÂÂ" },
-  "Yes as the primary FP&A platform": { color:T.emerald, icon:"Ã¢ÂÂ" },
+  "No":                          { color:T.rose,    icon:"â" },
+  "Maybe after improvements":    { color:T.amber,   icon:"â" },
+  "Yes as a secondary tool":     { color:T.cyan,    icon:"â" },
+  "Yes as the primary FP&A platform": { color:T.emerald, icon:"â" },
 };
 const SCORECARD_LABELS = [
   ["financialInsightQuality","Financial Insight Quality"],
@@ -2872,7 +2872,7 @@ function SimCard({ children, style={} }) {
   );
 }
 
-function SimBullet({ items, icon="Ã¢ÂÂº", color=T.textMid }) {
+function SimBullet({ items, icon="âº", color=T.textMid }) {
   if(!items?.length) return null;
   return (
     <div style={{display:"flex",flexDirection:"column",gap:7}}>
@@ -2904,10 +2904,10 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
   const timerRef = useRef(null);
   const [loadingStep, setLoadingStep] = useState(0);
 
-  // Ã¢ÂÂÃ¢ÂÂ Inline AI assistant state Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+  // ââ Inline AI assistant state ââââââââââââââââââââââââââââââââââÃÂ¢ÃÂÃÂ
   const [aiInput, setAiInput]     = useState("");
   const [aiMsgs, setAiMsgs]       = useState([
-    { role:"assistant", content:"Ã°ÂÂÂ¯ **CFO Simulation AI** Ã¢ÂÂ Run the 30-day simulation, then ask me anything about the results, competitive gaps, or what to build next." }
+    { role:"assistant", content:"ð¯ **CFO Simulation AI** â Run the 30-day simulation, then ask me anything about the results, competitive gaps, or what to build next." }
   ]);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiOpen, setAiOpen]       = useState(true);
@@ -2935,10 +2935,10 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
         }),
       });
       const d = await res.json();
-      const reply = res.ok ? (d.text || "No response.") : `Ã¢ÂÂ Ã¯Â¸Â ${d?.message || "AI unavailable."}`;
+      const reply = res.ok ? (d.text || "No response.") : `â ï¸ ${d?.message || "AI unavailable."}`;
       setAiMsgs(m => [...m, { role:"assistant", content: reply }]);
     } catch {
-      setAiMsgs(m => [...m, { role:"assistant", content:"Ã¢ÂÂ Ã¯Â¸Â Connection error Ã¢ÂÂ check your internet and try again." }]);
+      setAiMsgs(m => [...m, { role:"assistant", content:"â ï¸ Connection error â check your internet and try again." }]);
     }
     setAiLoading(false);
   };
@@ -2948,12 +2948,12 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
   );
 
   const LOADING_STEPS = [
-    "Reviewing P&L and revenue structureÃ¢ÂÂ¦",
-    "Stress-testing the Scenario PlannerÃ¢ÂÂ¦",
-    "Benchmarking against Mosaic, Cube, RunwayÃ¢ÂÂ¦",
-    "Evaluating AI assistant depthÃ¢ÂÂ¦",
-    "Preparing board-deck assessmentÃ¢ÂÂ¦",
-    "Compiling 30-day CFO verdictÃ¢ÂÂ¦",
+    "Reviewing P&L and revenue structureâ¦",
+    "Stress-testing the Scenario Plannerâ¦",
+    "Benchmarking against Mosaic, Cube, Runwayâ¦",
+    "Evaluating AI assistant depthâ¦",
+    "Preparing board-deck assessmentâ¦",
+    "Compiling 30-day CFO verdictâ¦",
   ];
 
   async function runSimulation() {
@@ -2964,7 +2964,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
     timerRef.current = setInterval(()=>setLoadingStep(s=>(s+1)%LOADING_STEPS.length), 3000);
 
     try {
-      // POST to the server route Ã¢ÂÂ prompts live server-side
+      // POST to the server route â prompts live server-side
       const data = await api.ai.cfoSimulation({});
       const raw  = (data?.text || "").replace(/```json|```/g,"").trim();
       const parsed = JSON.parse(raw);
@@ -2972,11 +2972,11 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
       setSimStatus("done");
       setSection("overview");
     } catch(err) {
-      // Graceful fallback Ã¢ÂÂ use mock result so the tab is never blank
+      // Graceful fallback â use mock result so the tab is never blank
       console.warn("[CFOSimulation] API error, using mock result:", err.message);
       setResult(MOCK_RESULT);
       setSimStatus("done");
-      setSimError("Live API unavailable Ã¢ÂÂ showing example simulation. Connect a Professional account to run a live analysis.");
+      setSimError("Live API unavailable â showing example simulation. Connect a Professional account to run a live analysis.");
       setSection("overview");
     } finally {
       clearInterval(timerRef.current);
@@ -2986,7 +2986,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
   const r = result;
   const decMeta = r ? (DECISION_META[r.finalDecision?.choice] || DECISION_META["Maybe after improvements"]) : null;
 
-  // Ã¢ÂÂÃ¢ÂÂ Inline AI panel Ã¢ÂÂ always visible at top of CFO Sim tab Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+  // ââ Inline AI panel â always visible at top of CFO Sim tab ââââââ
   const AI_PILLS = [
     "What's the CFO's biggest concern?",
     "Which competitor gap is most urgent?",
@@ -3001,7 +3001,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
         onClick={()=>setAiOpen(o=>!o)}
         style={{display:"flex",alignItems:"center",gap:10,padding:"12px 18px",cursor:"pointer",borderBottom: aiOpen ? `1px solid ${T.border}` : "none"}}
       >
-        <div style={{width:28,height:28,borderRadius:8,background:`linear-gradient(135deg,${T.cyan},${T.violet})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0}}>Ã°ÂÂ¤Â</div>
+        <div style={{width:28,height:28,borderRadius:8,background:`linear-gradient(135deg,${T.cyan},${T.violet})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0}}>ð¤</div>
         <div style={{flex:1}}>
           <div style={{fontSize:12,fontWeight:700,color:T.cyan,fontFamily:T.display,lineHeight:1}}>AI FP&A Assistant</div>
           <div style={{fontSize:9,color:T.textDim,fontFamily:T.mono,marginTop:2,letterSpacing:1}}>CFO SIMULATION ADVISOR</div>
@@ -3017,7 +3017,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
             {aiMsgs.map((m,i) => (
               <div key={i} style={{display:"flex",gap:8,justifyContent:m.role==="user"?"flex-end":"flex-start"}}>
                 {m.role==="assistant" && (
-                  <div style={{width:22,height:22,borderRadius:6,background:`${T.cyan}20`,border:`1px solid ${T.cyan}30`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,flexShrink:0,marginTop:1}}>Ã°ÂÂ¤Â</div>
+                  <div style={{width:22,height:22,borderRadius:6,background:`${T.cyan}20`,border:`1px solid ${T.cyan}30`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,flexShrink:0,marginTop:1}}>ð¤</div>
                 )}
                 <div style={{
                   maxWidth:"82%",fontSize:12,lineHeight:1.6,fontFamily:T.sans,
@@ -3033,7 +3033,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
             ))}
             {aiLoading && (
               <div style={{display:"flex",gap:8}}>
-                <div style={{width:22,height:22,borderRadius:6,background:`${T.cyan}20`,border:`1px solid ${T.cyan}30`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,flexShrink:0}}>Ã°ÂÂ¤Â</div>
+                <div style={{width:22,height:22,borderRadius:6,background:`${T.cyan}20`,border:`1px solid ${T.cyan}30`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,flexShrink:0}}>ð¤</div>
                 <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:"12px 12px 12px 4px",padding:"8px 12px",display:"flex",gap:4,alignItems:"center"}}>
                   {[0,1,2].map(i=><div key={i} style={{width:5,height:5,borderRadius:"50%",background:T.cyan,animation:`bounce 1s ease-in-out ${i*0.15}s infinite`}}/>)}
                 </div>
@@ -3060,7 +3060,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
               value={aiInput}
               onChange={e=>canUseAI&&setAiInput(e.target.value)}
               onKeyDown={e=>e.key==="Enter"&&canUseAI&&sendAI()}
-              placeholder={canUseAI ? "Ask about the simulation resultsÃ¢ÂÂ¦" : "Upgrade to Professional to use AI assistant"}
+              placeholder={canUseAI ? "Ask about the simulation resultsâ¦" : "Upgrade to Professional to use AI assistant"}
               style={{flex:1,background:T.card,border:`1px solid ${T.border}`,borderRadius:9,padding:"9px 13px",color:T.text,fontSize:12,fontFamily:T.sans,outline:"none"}}
             />
             <button
@@ -3068,7 +3068,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
               disabled={!canUseAI||!aiInput.trim()||aiLoading}
               style={{background:canUseAI&&aiInput.trim()?`linear-gradient(135deg,${T.cyan},${T.violet})`:T.border,border:"none",borderRadius:9,padding:"9px 16px",color:T.bg,fontSize:12,fontFamily:T.sans,fontWeight:700,cursor:canUseAI&&aiInput.trim()?"pointer":"not-allowed"}}
             >
-              {aiLoading?"Ã¢ÂÂ¦":"Send"}
+              {aiLoading?"â¦":"Send"}
             </button>
           </div>
         </div>
@@ -3076,7 +3076,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
     </div>
   );
 
-  // Ã¢ÂÂÃ¢ÂÂ Idle state Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+  // ââ Idle state ââââââââââââââââââââââââââââââââââââââââââââââââââ
   if(simStatus === "idle") return (
     <div>
       {inlineAIPanel}
@@ -3092,14 +3092,14 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
             30-Day CFO Simulation
           </div>
           <div style={{color:T.textMid,fontFamily:T.sans,fontSize:13,lineHeight:1.7,maxWidth:580,marginBottom:28}}>
-            Claude acts as CFO of a <strong style={{color:T.text}}>$25M ARR SaaS company</strong> and evaluates FinanceOS across 30 simulated days Ã¢ÂÂ scoring financial insight, forecasting, executive reporting, and competitive positioning against Mosaic, Cube, Runway, Fathom, and Jirav.
+            Claude acts as CFO of a <strong style={{color:T.text}}>$25M ARR SaaS company</strong> and evaluates FinanceOS across 30 simulated days â scoring financial insight, forecasting, executive reporting, and competitive positioning against Mosaic, Cube, Runway, Fathom, and Jirav.
           </div>
           <div style={{display:"flex",gap:14,flexWrap:"wrap",marginBottom:28}}>
             {[
-              {icon:"Ã°ÂÂÂ",label:"6 CFO workflows",sub:"Day 1Ã¢ÂÂ30 simulation"},
-              {icon:"Ã¢ÂÂÃ¯Â¸Â",label:"5 competitors",sub:"Head-to-head gaps"},
-              {icon:"Ã°ÂÂÂ¯",label:"10 top fixes",sub:"Prioritised by impact"},
-              {icon:"Ã°ÂÂÂ",label:"7-category scorecard",sub:"Honest ratings"},
+              {icon:"ð",label:"6 CFO workflows",sub:"Day 1â30 simulation"},
+              {icon:"âï¸",label:"5 competitors",sub:"Head-to-head gaps"},
+              {icon:"ð¯",label:"10 top fixes",sub:"Prioritised by impact"},
+              {icon:"ð",label:"7-category scorecard",sub:"Honest ratings"},
             ].map(({icon,label,sub})=>(
               <div key={label} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:10,padding:"10px 14px",display:"flex",alignItems:"center",gap:10}}>
                 <span style={{fontSize:18}}>{icon}</span>
@@ -3113,16 +3113,16 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
           <button onClick={runSimulation} style={{background:`linear-gradient(135deg,${T.cyan},${T.violet})`,border:"none",borderRadius:11,padding:"13px 32px",color:T.bg,fontSize:14,fontFamily:T.display,fontWeight:800,cursor:"pointer",boxShadow:`0 4px 24px ${T.cyan}35`,letterSpacing:0.2}}>
             Run 30-Day CFO Simulation â
           </button>
-          <span style={{marginLeft:16,fontSize:10,color:T.textDim,fontFamily:T.mono}}>~30 seconds Â· Powered by Claude Sonnet</span>
+          <span style={{marginLeft:16,fontSize:10,color:T.textDim,fontFamily:T.mono}}>~30 seconds ÃÂ· Powered by Claude Sonnet</span>
         </div>
       </div>
 
       {/* What you'll get */}
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14}}>
         {[
-          {icon:"Ã°ÂÂÂ",title:"Brutally honest",body:"Claude doesn't assume the product works. It looks for friction, missing capabilities, and CFO-specific blockers."},
-          {icon:"Ã¢ÂÂÃ¯Â¸Â",title:"Competitive context",body:"For each competitor (Mosaic, Cube, Runway, Fathom, Jirav) Ã¢ÂÂ where FinanceOS wins and where it loses."},
-          {icon:"Ã°ÂÂÂºÃ¯Â¸Â",title:"Actionable roadmap",body:"Top 10 improvements ranked by CFO impact and development effort Ã¢ÂÂ a ready-to-share product backlog."},
+          {icon:"ð",title:"Brutally honest",body:"Claude doesn't assume the product works. It looks for friction, missing capabilities, and CFO-specific blockers."},
+          {icon:"âï¸",title:"Competitive context",body:"For each competitor (Mosaic, Cube, Runway, Fathom, Jirav) â where FinanceOS wins and where it loses."},
+          {icon:"ðºï¸",title:"Actionable roadmap",body:"Top 10 improvements ranked by CFO impact and development effort â a ready-to-share product backlog."},
         ].map(({icon,title,body})=>(
           <SimCard key={title}>
             <div style={{fontSize:22,marginBottom:10}}>{icon}</div>
@@ -3134,18 +3134,18 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
     </div>
   );
 
-  // Ã¢ÂÂÃ¢ÂÂ Loading state Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+  // ââ Loading state ââââââââââââââââââââââââââââââââââââââââââââââÃÂ¢ÃÂÃÂ
   if(simStatus === "loading") return (
     <div>
       {inlineAIPanel}
       <div style={{maxWidth:520,margin:"60px auto 0",textAlign:"center",padding:"0 20px"}}>
       <div style={{width:52,height:52,borderRadius:"50%",border:`2px solid ${T.border}`,borderTop:`2px solid ${T.cyan}`,margin:"0 auto 24px",animation:"spin 1s linear infinite"}}/>
-      <div style={{fontSize:16,fontWeight:700,color:T.text,fontFamily:T.display,marginBottom:8}}>Simulation runningÃ¢ÂÂ¦</div>
+      <div style={{fontSize:16,fontWeight:700,color:T.text,fontFamily:T.display,marginBottom:8}}>Simulation runningâ¦</div>
       <div style={{fontSize:11,color:T.cyan,fontFamily:T.mono,minHeight:18,animation:"pulse 2s ease-in-out infinite"}}>
         {LOADING_STEPS[loadingStep]}
       </div>
       <div style={{marginTop:28,display:"flex",flexDirection:"column",gap:8}}>
-        {["Day 1Ã¢ÂÂ10: First impressions + financial monitoring","Day 11Ã¢ÂÂ20: Forecasting + board meeting prep","Day 21Ã¢ÂÂ30: Ops planning + strategic review + verdict"].map((s,i)=>(
+        {["Day 1â10: First impressions + financial monitoring","Day 11â20: Forecasting + board meeting prep","Day 21â30: Ops planning + strategic review + verdict"].map((s,i)=>(
           <div key={i} style={{fontSize:10,color:T.textDim,fontFamily:T.sans,background:T.surface,borderRadius:8,padding:"8px 14px",border:`1px solid ${T.border}`,textAlign:"left"}}>{s}</div>
         ))}
       </div>
@@ -3153,14 +3153,14 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
     </div>
   );
 
-  // Ã¢ÂÂÃ¢ÂÂ Results Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+  // ââ Results ââââââââââââââââââââââââââââââââââââââââââââââââââââÃÂ¢ÃÂÃÂ
   return (
     <div>
       {inlineAIPanel}
       {/* Fallback/demo notice */}
       {simError && (
         <div style={{background:T.amberDim,border:`1px solid ${T.amber}30`,borderRadius:10,padding:"10px 16px",marginBottom:16,display:"flex",alignItems:"center",gap:10}}>
-          <span style={{fontSize:14}}>Ã¢ÂÂ Ã¯Â¸Â</span>
+          <span style={{fontSize:14}}>â ï¸</span>
           <span style={{fontSize:11,color:T.amber,fontFamily:T.sans}}>{simError}</span>
           <button onClick={runSimulation} style={{marginLeft:"auto",background:"transparent",border:`1px solid ${T.amber}40`,borderRadius:7,padding:"5px 12px",color:T.amber,fontSize:10,fontFamily:T.sans,cursor:"pointer",flexShrink:0}}>Retry</button>
         </div>
@@ -3174,7 +3174,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
           </div>
           <div>
             <div style={{fontSize:14,fontWeight:700,color:T.text,fontFamily:T.display}}>{r?.persona?.name}</div>
-            <div style={{fontSize:10,color:T.textDim,fontFamily:T.mono}}>{r?.persona?.company} Â· {r?.persona?.arr} ARR Â· {r?.persona?.team} employees</div>
+            <div style={{fontSize:10,color:T.textDim,fontFamily:T.mono}}>{r?.persona?.company} ÃÂ· {r?.persona?.arr} ARR ÃÂ· {r?.persona?.team} employees</div>
           </div>
         </div>
         <div style={{display:"flex",gap:20,marginLeft:"auto",flexWrap:"wrap"}}>
@@ -3189,7 +3189,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
             </div>
           ))}
         </div>
-        <button onClick={()=>{setSimStatus("idle");setResult(null);setSimError("");}} style={{background:"transparent",border:`1px solid ${T.border}`,borderRadius:8,padding:"6px 14px",color:T.textDim,fontSize:10,fontFamily:T.sans,cursor:"pointer",flexShrink:0}}>Ã¢ÂÂº Re-run</button>
+        <button onClick={()=>{setSimStatus("idle");setResult(null);setSimError("");}} style={{background:"transparent",border:`1px solid ${T.border}`,borderRadius:8,padding:"6px 14px",color:T.textDim,fontSize:10,fontFamily:T.sans,cursor:"pointer",flexShrink:0}}>âº Re-run</button>
       </div>
 
       {/* Internal section nav */}
@@ -3205,7 +3205,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
         ))}
       </div>
 
-      {/* Ã¢ÂÂÃ¢ÂÂ Overview Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */}
+      {/* ââ Overview ââââââââââââââââââââââââââââââââââââââÃÂ¢ÃÂÃÂ */}
       {section==="overview" && (
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
@@ -3221,7 +3221,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
             </SimCard>
             <SimCard>
               <SimSectionLabel text="Biggest Weaknesses" color={T.rose}/>
-              <SimBullet items={r?.brutalHonesty?.biggestWeaknesses?.slice(0,5)} icon="Ã¢ÂÂ" color={T.rose}/>
+              <SimBullet items={r?.brutalHonesty?.biggestWeaknesses?.slice(0,5)} icon="â" color={T.rose}/>
             </SimCard>
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
@@ -3247,13 +3247,13 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
             </SimCard>
             <SimCard>
               <SimSectionLabel text="Missing Features" color={T.amber}/>
-              <SimBullet items={r?.brutalHonesty?.missingFeatures?.slice(0,6)} icon="Ã¢ÂÂ" color={T.amber}/>
+              <SimBullet items={r?.brutalHonesty?.missingFeatures?.slice(0,6)} icon="â" color={T.amber}/>
             </SimCard>
           </div>
         </div>
       )}
 
-      {/* Ã¢ÂÂÃ¢ÂÂ 30-Day Phases Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */}
+      {/* ââ 30-Day Phases ââââââââââââââââââââââââââââââââââ */}
       {section==="phases" && (
         <div style={{display:"flex",flexDirection:"column",gap:12}}>
           {r?.phases?.map((ph,i)=>{
@@ -3280,7 +3280,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
                   <div style={{marginTop:16,paddingTop:16,borderTop:`1px solid ${T.border}`,paddingLeft:50,display:"grid",gridTemplateColumns:"1fr 1fr",gap:20}}>
                     <div>
                       <div style={{fontSize:9,color:T.emerald,fontFamily:T.mono,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",marginBottom:10}}>What Works</div>
-                      <SimBullet items={ph.findings} icon="Ã¢ÂÂ" color={T.emerald}/>
+                      <SimBullet items={ph.findings} icon="â" color={T.emerald}/>
                     </div>
                     <div>
                       <div style={{fontSize:9,color:T.rose,fontFamily:T.mono,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",marginBottom:10}}>Friction Points</div>
@@ -3294,15 +3294,15 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
         </div>
       )}
 
-      {/* Ã¢ÂÂÃ¢ÂÂ AI Review Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */}
+      {/* ââ AI Review ââââââââââââââââââââââââââââââââââââââ */}
       {section==="ai" && (
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
           <SimCard>
             <SimSectionLabel text="AI Capability Review" color={T.violet}/>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
               {r?.aiCapability?.isCosmetic
-                ? <span style={{fontSize:10,color:T.amber,background:T.amberDim,border:`1px solid ${T.amber}30`,borderRadius:99,padding:"2px 9px",fontFamily:T.mono,fontWeight:700}}>Ã¢ÂÂ Ã¯Â¸Â Largely Cosmetic</span>
-                : <span style={{fontSize:10,color:T.emerald,background:T.emeraldDim,border:`1px solid ${T.emerald}30`,borderRadius:99,padding:"2px 9px",fontFamily:T.mono,fontWeight:700}}>Ã¢ÂÂ Adds Genuine Value</span>
+                ? <span style={{fontSize:10,color:T.amber,background:T.amberDim,border:`1px solid ${T.amber}30`,borderRadius:99,padding:"2px 9px",fontFamily:T.mono,fontWeight:700}}>â ï¸ Largely Cosmetic</span>
+                : <span style={{fontSize:10,color:T.emerald,background:T.emeraldDim,border:`1px solid ${T.emerald}30`,borderRadius:99,padding:"2px 9px",fontFamily:T.mono,fontWeight:700}}>â Adds Genuine Value</span>
               }
             </div>
             <div style={{fontSize:12,color:T.textMid,fontFamily:T.sans,lineHeight:1.65,marginBottom:16}}>{r?.aiCapability?.summary}</div>
@@ -3314,7 +3314,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
             <SimCard>
               <div style={{fontSize:9,color:T.emerald,fontFamily:T.mono,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",marginBottom:12}}>Strengths</div>
-              <SimBullet items={r?.aiCapability?.strengths} icon="Ã¢ÂÂ" color={T.emerald}/>
+              <SimBullet items={r?.aiCapability?.strengths} icon="â" color={T.emerald}/>
             </SimCard>
             <SimCard>
               <div style={{fontSize:9,color:T.rose,fontFamily:T.mono,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",marginBottom:12}}>Weaknesses</div>
@@ -3324,7 +3324,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
         </div>
       )}
 
-      {/* Ã¢ÂÂÃ¢ÂÂ Competitors Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */}
+      {/* ââ Competitors ââââââââââââââââââââââââââââââââââââ */}
       {section==="competitors" && (
         <div>
           <SimCard style={{marginBottom:14}}>
@@ -3342,11 +3342,11 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
                   </div>
                   <div style={{marginBottom:12}}>
                     <div style={{fontSize:9,color:T.emerald,fontFamily:T.mono,fontWeight:700,letterSpacing:1.5,marginBottom:8}}>FINANCEIOS STRONGER AT</div>
-                    <SimBullet items={comp.stronger||[]} icon="Ã¢ÂÂ²" color={T.emerald}/>
+                    <SimBullet items={comp.stronger||[]} icon="â²" color={T.emerald}/>
                   </div>
                   <div style={{borderTop:`1px solid ${T.border}`,paddingTop:12}}>
                     <div style={{fontSize:9,color:T.rose,fontFamily:T.mono,fontWeight:700,letterSpacing:1.5,marginBottom:8}}>{comp.name.toUpperCase()} STRONGER AT</div>
-                    <SimBullet items={comp.weaker||[]} icon="Ã¢ÂÂ¼" color={T.rose}/>
+                    <SimBullet items={comp.weaker||[]} icon="â¼" color={T.rose}/>
                   </div>
                 </SimCard>
               );
@@ -3355,7 +3355,7 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
         </div>
       )}
 
-      {/* Ã¢ÂÂÃ¢ÂÂ Scorecard Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */}
+      {/* ââ Scorecard ââââââââââââââââââââââââââââââââââââââ */}
       {section==="scorecard" && (
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
           <SimCard>
@@ -3379,13 +3379,13 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
                 <span style={{fontSize:9,color:T.textDim,fontFamily:T.mono,textTransform:"uppercase",letterSpacing:1.5}}>Trust Score</span>
                 <span style={{fontSize:14,fontWeight:800,color:r?.productTrust?.trustScore>=7?T.emerald:r?.productTrust?.trustScore>=5?T.amber:T.rose,fontFamily:T.mono}}>{r?.productTrust?.trustScore}/10</span>
               </div>
-              <SimBullet items={r?.productTrust?.trustBreakers?.slice(0,3)} icon="Ã¢ÂÂ" color={T.rose}/>
+              <SimBullet items={r?.productTrust?.trustBreakers?.slice(0,3)} icon="â" color={T.rose}/>
             </SimCard>
           </div>
         </div>
       )}
 
-      {/* Ã¢ÂÂÃ¢ÂÂ Verdict Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */}
+      {/* ââ Verdict ââââââââââââââââââââââââââââââââââââââââ */}
       {section==="verdict" && (
         <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:16}}>
           <SimCard style={{background:`linear-gradient(135deg,${decMeta?.color}08,${T.card})`,borderColor:`${decMeta?.color}35`}}>
@@ -3401,17 +3401,17 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
             <SimCard>
               <div style={{fontSize:9,color:T.rose,fontFamily:T.mono,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",marginBottom:12}}>Biggest Weaknesses</div>
-              <SimBullet items={r?.brutalHonesty?.biggestWeaknesses} icon="Ã¢ÂÂ" color={T.rose}/>
+              <SimBullet items={r?.brutalHonesty?.biggestWeaknesses} icon="â" color={T.rose}/>
             </SimCard>
             <SimCard>
               <div style={{fontSize:9,color:T.amber,fontFamily:T.mono,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",marginBottom:12}}>Missing Features</div>
-              <SimBullet items={r?.brutalHonesty?.missingFeatures?.slice(0,5)} icon="Ã¢ÂÂ" color={T.amber}/>
+              <SimBullet items={r?.brutalHonesty?.missingFeatures?.slice(0,5)} icon="â" color={T.amber}/>
             </SimCard>
           </div>
         </div>
       )}
 
-      {/* Ã¢ÂÂÃ¢ÂÂ Top 10 Fixes Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */}
+      {/* ââ Top 10 Fixes ââââââââââââââââââââââââââââââââââÃÂ¢ÃÂÃÂ */}
       {section==="fixes" && (
         <div style={{display:"flex",flexDirection:"column",gap:10}}>
           <SimCard style={{marginBottom:4}}>
@@ -3441,8 +3441,8 @@ function CFOSimulation({ plan="professional", aiContext={} }) {
   );
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Integrations Page Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
-/** Dot Ã¢ÂÂ connection status indicator. Hoisted to module scope to prevent recreation on every render. */
+// ââÃÂ¢ÃÂÃÂ Integrations Page ââââââââââââââââââââââââââââââââââââââââââââ
+/** Dot â connection status indicator. Hoisted to module scope to prevent recreation on every render. */
 function Dot({connected, syncing}) {
   return (
     <div style={{display:"flex",alignItems:"center",gap:6}}>
@@ -3468,7 +3468,7 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
         const [qboStatus, plaidStatus] = await Promise.all([api.qbo.status(), api.plaid.status()]);
         if(qboStatus.connected) { setQbStep("connected"); setQb(q=>({...q,connected:true,lastSync:qboStatus.lastSync?.completed_at||"Previously"})); }
         if(plaidStatus.connected) { setPlaidStep("connected"); setPlaid(p=>({...p,connected:true,lastSync:plaidStatus.lastSync?.completed_at||"Previously"})); }
-      } catch(e) { /* not authenticated yet Ã¢ÂÂ ignore */ }
+      } catch(e) { /* not authenticated yet â ignore */ }
 
       // Handle QB OAuth redirect back (?qbo=connected or ?qbo=error)
       const params = new URLSearchParams(window.location.search);
@@ -3487,7 +3487,7 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
 
   const connectQB=async()=>{
     setQbError(""); setQbStep("auth");
-    addLog("Checking QuickBooks configurationÃ¢ÂÂ¦","info");
+    addLog("Checking QuickBooks configurationâ¦","info");
     try {
       const r=await fetch(api.qbo.connectUrl(),{redirect:'manual'});
       if(r.type==='opaqueredirect'||r.status===0){window.location.href=api.qbo.connectUrl();return;}
@@ -3499,10 +3499,10 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
   };
   const syncQB=async()=>{
     setQb(q=>({...q,syncing:true}));
-    addLog("Syncing QuickBooks dataÃ¢ÂÂ¦","info");
+    addLog("Syncing QuickBooks dataâ¦","info");
     try {
       const r = await api.qbo.sync(new Date().getFullYear());
-      addLog(`Sync complete Ã¢ÂÂ ${r.recordsSynced||0} records updated.`,"success");
+      addLog(`Sync complete â ${r.recordsSynced||0} records updated.`,"success");
       setQb(q=>({...q,syncing:false,lastSync:new Date().toLocaleTimeString()}));
     } catch(err) {
       addLog(`Sync failed: ${err.message}`,"error");
@@ -3525,15 +3525,15 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
   });
   const connectPlaid=async()=>{
     setPlaidError(""); setPlaidStep("linking");
-    addLog("Fetching Plaid Link tokenÃ¢ÂÂ¦","info");
+    addLog("Fetching Plaid Link tokenâ¦","info");
     try {
       await loadPlaidScript();
       const {linkToken} = await api.plaid.linkToken();
-      addLog("Launching Plaid LinkÃ¢ÂÂ¦","info");
+      addLog("Launching Plaid Linkâ¦","info");
       const handler = window.Plaid.create({
         token: linkToken,
         onSuccess: async(publicToken, meta) => {
-          addLog("Bank authorized. Exchanging tokensÃ¢ÂÂ¦","info");
+          addLog("Bank authorized. Exchanging tokensâ¦","info");
           try {
             await api.plaid.exchange(publicToken, meta.institution?.name||"");
             const status = await api.plaid.status();
@@ -3552,7 +3552,7 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
   };
   const syncPlaid=async()=>{
     setPlaid(p=>({...p,syncing:true}));
-    addLog("Refreshing Plaid transactionsÃ¢ÂÂ¦","info");
+    addLog("Refreshing Plaid transactionsâ¦","info");
     try {
       await api.plaid.sync();
       addLog("Plaid sync complete.","success");
@@ -3572,15 +3572,15 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
   return (
     <div style={{maxWidth:1100,margin:"0 auto"}}>
       <div style={{marginBottom:24}}>
-        <div style={{color:T.text,fontFamily:T.display,fontWeight:800,fontSize:22}}>Ã°ÂÂÂ Integrations</div>
+        <div style={{color:T.text,fontFamily:T.display,fontWeight:800,fontSize:22}}>ð Integrations</div>
         <div style={{color:T.textDim,fontFamily:T.sans,fontSize:13,marginTop:4}}>Connect your accounting software and bank accounts to automatically sync financial data into your dashboard.</div>
         {/* Starter read-only banner */}
         {!hasFeature(plan,FEATURES.INTEGRATIONS_SYNC)&&(
           <div style={{marginTop:14,background:T.amberDim,border:`1px solid ${T.amber}30`,borderRadius:10,padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
             <div style={{display:"flex",alignItems:"center",gap:8}}>
-              <span style={{fontSize:14}}>Ã°ÂÂÂ</span>
+              <span style={{fontSize:14}}>ð</span>
               <div>
-                <div style={{color:T.amber,fontFamily:T.sans,fontWeight:700,fontSize:12}}>Read-Only Access Ã¢ÂÂ Starter Plan</div>
+                <div style={{color:T.amber,fontFamily:T.sans,fontWeight:700,fontSize:12}}>Read-Only Access â Starter Plan</div>
                 <div style={{color:T.textDim,fontFamily:T.sans,fontSize:11,marginTop:1}}>You can view integration settings but connecting and syncing requires a Professional plan.</div>
               </div>
             </div>
@@ -3593,10 +3593,10 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
         <div style={{background:T.card,border:`1px solid ${qb.connected?T.emerald+"50":T.border}`,borderRadius:16,overflow:"hidden",boxShadow:qb.connected?`0 0 24px ${T.emerald}10`:"none"}}>
           <div style={{padding:"20px 24px",borderBottom:`1px solid ${T.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
             <div style={{display:"flex",alignItems:"center",gap:12}}>
-              <div style={{width:44,height:44,borderRadius:12,background:"linear-gradient(135deg,#2CA01C,#1A6B10)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,boxShadow:"0 4px 12px #2CA01C40"}}>Ã°ÂÂÂ</div>
+              <div style={{width:44,height:44,borderRadius:12,background:"linear-gradient(135deg,#2CA01C,#1A6B10)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,boxShadow:"0 4px 12px #2CA01C40"}}>ð</div>
               <div>
                 <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:16}}>QuickBooks Online</div>
-                <div style={{color:T.textDim,fontFamily:T.sans,fontSize:11,marginTop:2}}>by Intuit Â· OAuth 2.0</div>
+                <div style={{color:T.textDim,fontFamily:T.sans,fontSize:11,marginTop:2}}>by Intuit ÃÂ· OAuth 2.0</div>
               </div>
             </div>
             <Dot connected={qb.connected} syncing={qb.syncing}/>
@@ -3604,25 +3604,25 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
           <div style={{padding:"20px 24px"}}>
             {!qb.connected&&<>
               <div style={{background:T.surface,borderRadius:10,padding:"12px 14px",marginBottom:16,border:`1px solid ${T.border}`}}>
-                <div style={{fontSize:10,color:T.amber,fontFamily:T.sans,fontWeight:600,marginBottom:4}}>Ã¢ÂÂÃ¯Â¸Â OAuth Setup</div>
+                <div style={{fontSize:10,color:T.amber,fontFamily:T.sans,fontWeight:600,marginBottom:4}}>âï¸ OAuth Setup</div>
                 <div style={{fontSize:11,color:T.textMid,fontFamily:T.sans,lineHeight:1.6}}>Clicking Connect will open Intuit's authorization page. Approve access, then you'll be redirected back here. Your <span style={{color:T.cyan,fontFamily:T.mono}}>QB_CLIENT_ID</span> and <span style={{color:T.cyan,fontFamily:T.mono}}>QB_CLIENT_SECRET</span> are set in your server <span style={{color:T.cyan,fontFamily:T.mono}}>.env</span> file.</div>
               </div>
-              {qbError&&<div style={{background:T.roseDim,border:`1px solid ${T.rose}40`,borderRadius:8,padding:"8px 12px",marginBottom:12,fontSize:11,color:T.rose,fontFamily:T.sans}}>Ã¢ÂÂ Ã¯Â¸Â {qbError}</div>}
+              {qbError&&<div style={{background:T.roseDim,border:`1px solid ${T.rose}40`,borderRadius:8,padding:"8px 12px",marginBottom:12,fontSize:11,color:T.rose,fontFamily:T.sans}}>â ï¸ {qbError}</div>}
               {hasFeature(plan,FEATURES.INTEGRATIONS_SYNC)?(
                 <button onClick={connectQB} disabled={qbStep==="auth"} style={{width:"100%",background:"linear-gradient(135deg,#2CA01C,#1A6B10)",border:"none",borderRadius:10,padding:"12px",color:"#fff",fontSize:13,fontFamily:T.sans,fontWeight:700,cursor:qbStep==="auth"?"not-allowed":"pointer",opacity:qbStep==="auth"?0.6:1}}>
-                  {qbStep==="auth"?"Ã¢ÂÂ³ Redirecting to Intuit...":"Ã°ÂÂÂ Connect with QuickBooks"}
+                  {qbStep==="auth"?"â³ Redirecting to Intuit...":"ð Connect with QuickBooks"}
                 </button>
               ):(
                 <button onClick={onUpgrade} style={{width:"100%",background:T.amberDim,border:`1px solid ${T.amber}40`,borderRadius:10,padding:"12px",color:T.amber,fontSize:13,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>
-                  Ã°ÂÂÂ Upgrade to Professional to Connect
+                  ð Upgrade to Professional to Connect
                 </button>
               )}
             </>}
             {qb.connected&&<>
               <div style={{background:"#2CA01C15",border:"1px solid #2CA01C40",borderRadius:10,padding:"12px 14px",marginBottom:16,display:"flex",alignItems:"center",gap:10}}>
-                <span style={{fontSize:16}}>Ã¢ÂÂ</span>
-                <div><div style={{color:T.emerald,fontFamily:T.sans,fontWeight:700,fontSize:12}}>Acme Corp Ã¢ÂÂ QuickBooks Online Premium</div>
-                <div style={{color:T.textDim,fontFamily:T.mono,fontSize:10}}>Realm: 9130356057836091 Â· Synced: {qb.lastSync}</div></div>
+                <span style={{fontSize:16}}>â</span>
+                <div><div style={{color:T.emerald,fontFamily:T.sans,fontWeight:700,fontSize:12}}>Acme Corp â QuickBooks Online Premium</div>
+                <div style={{color:T.textDim,fontFamily:T.mono,fontSize:10}}>Realm: 9130356057836091 ÃÂ· Synced: {qb.lastSync}</div></div>
               </div>
               <div style={{marginBottom:16}}>
                 <div style={{fontSize:10,color:T.textDim,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:10}}>Sync Settings</div>
@@ -3633,16 +3633,16 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
                   {k:"payroll",l:"Payroll Data",d:"Employee costs & benefits"}].map(it=>(
                   <div key={it.k} onClick={()=>setQb(q=>({...q,syncItems:{...q.syncItems,[it.k]:!q.syncItems[it.k]}}))}
                     style={{display:"flex",alignItems:"center",gap:12,padding:"8px 10px",borderRadius:8,cursor:"pointer",marginBottom:4,background:qb.syncItems[it.k]?T.emeraldDim:"transparent",border:`1px solid ${qb.syncItems[it.k]?T.emerald+"30":T.border}`}}>
-                    <div style={{width:18,height:18,borderRadius:5,background:qb.syncItems[it.k]?"#2CA01C":T.border,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,flexShrink:0,color:"#fff"}}>{qb.syncItems[it.k]?"Ã¢ÂÂ":""}</div>
+                    <div style={{width:18,height:18,borderRadius:5,background:qb.syncItems[it.k]?"#2CA01C":T.border,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,flexShrink:0,color:"#fff"}}>{qb.syncItems[it.k]?"â":""}</div>
                     <div style={{flex:1}}><div style={{fontSize:11,color:T.text,fontFamily:T.sans,fontWeight:600}}>{it.l}</div><div style={{fontSize:9,color:T.textDim,fontFamily:T.sans}}>{it.d}</div></div>
                   </div>
                 ))}
               </div>
               <div style={{display:"flex",gap:10}}>
                 {hasFeature(plan,FEATURES.INTEGRATIONS_SYNC)?(
-                  <button onClick={syncQB} disabled={qb.syncing} style={{flex:2,background:"linear-gradient(135deg,#2CA01C,#1A6B10)",border:"none",borderRadius:10,padding:"11px",color:"#fff",fontSize:12,fontFamily:T.sans,fontWeight:700,cursor:qb.syncing?"not-allowed":"pointer",opacity:qb.syncing?0.6:1}}>{qb.syncing?"Ã¢ÂÂ³ Syncing...":"Ã°ÂÂÂ Sync Now"}</button>
+                  <button onClick={syncQB} disabled={qb.syncing} style={{flex:2,background:"linear-gradient(135deg,#2CA01C,#1A6B10)",border:"none",borderRadius:10,padding:"11px",color:"#fff",fontSize:12,fontFamily:T.sans,fontWeight:700,cursor:qb.syncing?"not-allowed":"pointer",opacity:qb.syncing?0.6:1}}>{qb.syncing?"â³ Syncing...":"ð Sync Now"}</button>
                 ):(
-                  <button onClick={onUpgrade} style={{flex:2,background:T.amberDim,border:`1px solid ${T.amber}40`,borderRadius:10,padding:"11px",color:T.amber,fontSize:12,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>Ã°ÂÂÂ Upgrade to Sync</button>
+                  <button onClick={onUpgrade} style={{flex:2,background:T.amberDim,border:`1px solid ${T.amber}40`,borderRadius:10,padding:"11px",color:T.amber,fontSize:12,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>ð Upgrade to Sync</button>
                 )}
                 <button onClick={disconnectQB} style={{flex:1,background:"transparent",border:`1px solid ${T.rose}40`,borderRadius:10,padding:"11px",color:T.rose,fontSize:12,fontFamily:T.sans,cursor:"pointer"}}>Disconnect</button>
               </div>
@@ -3654,10 +3654,10 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
         <div style={{background:T.card,border:`1px solid ${plaid.connected?T.cyan+"50":T.border}`,borderRadius:16,overflow:"hidden",boxShadow:plaid.connected?`0 0 24px ${T.cyan}10`:"none"}}>
           <div style={{padding:"20px 24px",borderBottom:`1px solid ${T.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
             <div style={{display:"flex",alignItems:"center",gap:12}}>
-              <div style={{width:44,height:44,borderRadius:12,background:"linear-gradient(135deg,#22C55E,#16A34A)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,boxShadow:"0 4px 12px #00B2E340"}}>Ã°ÂÂÂ¦</div>
+              <div style={{width:44,height:44,borderRadius:12,background:"linear-gradient(135deg,#22C55E,#16A34A)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,boxShadow:"0 4px 12px #00B2E340"}}>ð¦</div>
               <div>
                 <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:16}}>Plaid</div>
-                <div style={{color:T.textDim,fontFamily:T.sans,fontSize:11,marginTop:2}}>Bank account linking Â· 12,000+ institutions</div>
+                <div style={{color:T.textDim,fontFamily:T.sans,fontSize:11,marginTop:2}}>Bank account linking ÃÂ· 12,000+ institutions</div>
               </div>
             </div>
             <Dot connected={plaid.connected} syncing={plaid.syncing}/>
@@ -3665,23 +3665,23 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
           <div style={{padding:"20px 24px"}}>
             {!plaid.connected&&<>
               <div style={{background:T.surface,borderRadius:10,padding:"12px 14px",marginBottom:16,border:`1px solid ${T.border}`}}>
-                <div style={{fontSize:10,color:T.amber,fontFamily:T.sans,fontWeight:600,marginBottom:4}}>Ã¢ÂÂÃ¯Â¸Â Bank Setup</div>
+                <div style={{fontSize:10,color:T.amber,fontFamily:T.sans,fontWeight:600,marginBottom:4}}>âï¸ Bank Setup</div>
                 <div style={{fontSize:11,color:T.textMid,fontFamily:T.sans,lineHeight:1.6}}>Clicking Connect will open Plaid's secure bank connection flow. Approve access and your bank data will sync automatically. Your <span style={{color:T.cyan,fontFamily:T.mono}}>PLAID_CLIENT_ID</span> and <span style={{color:T.cyan,fontFamily:T.mono}}>PLAID_SECRET</span> are set in your Vercel environment variables. <span style={{color:T.cyan,fontFamily:T.mono}}>.env</span> file.</div>
               </div>
-              {plaidError&&<div style={{background:T.roseDim,border:`1px solid ${T.rose}40`,borderRadius:8,padding:"8px 12px",marginBottom:12,fontSize:11,color:T.rose,fontFamily:T.sans}}>Ã¢ÂÂ Ã¯Â¸Â {plaidError}</div>}
+              {plaidError&&<div style={{background:T.roseDim,border:`1px solid ${T.rose}40`,borderRadius:8,padding:"8px 12px",marginBottom:12,fontSize:11,color:T.rose,fontFamily:T.sans}}>â ï¸ {plaidError}</div>}
               {hasFeature(plan,FEATURES.INTEGRATIONS_SYNC)?(
                 <button onClick={connectPlaid} disabled={plaidStep==="linking"} style={{width:"100%",background:"linear-gradient(135deg,#00B2E3,#0074B7)",border:"none",borderRadius:10,padding:"12px",color:"#fff",fontSize:13,fontFamily:T.sans,fontWeight:700,cursor:plaidStep==="linking"?"not-allowed":"pointer",opacity:plaidStep==="linking"?0.6:1}}>
-                  {plaidStep==="linking"?"Ã¢ÂÂ³ Connecting to Plaid...":"Ã°ÂÂÂ¦ Connect with Plaid"}
+                  {plaidStep==="linking"?"â³ Connecting to Plaid...":"ð¦ Connect with Plaid"}
                 </button>
               ):(
                 <button onClick={onUpgrade} style={{width:"100%",background:T.amberDim,border:`1px solid ${T.amber}40`,borderRadius:10,padding:"12px",color:T.amber,fontSize:13,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>
-                  Ã°ÂÂÂ Upgrade to Professional to Connect Bank
+                  ð Upgrade to Professional to Connect Bank
                 </button>
               )}
             </>}
             {plaid.connected&&<>
               <div style={{background:"#00B2E315",border:"1px solid #00B2E340",borderRadius:10,padding:"12px 14px",marginBottom:16,display:"flex",alignItems:"center",gap:10}}>
-                <span style={{fontSize:16}}>Ã¢ÂÂ</span>
+                <span style={{fontSize:16}}>â</span>
                 <div><div style={{color:T.cyan,fontFamily:T.sans,fontWeight:700,fontSize:12}}>{plaid.accounts.length} Accounts Linked</div>
                 <div style={{color:T.textDim,fontFamily:T.mono,fontSize:10}}>Last refresh: {plaid.lastSync}</div></div>
               </div>
@@ -3689,11 +3689,11 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
                 {plaid.accounts.map(ac=>(
                   <div key={ac.id} style={{display:"flex",alignItems:"center",gap:12,background:T.surface,borderRadius:10,padding:"10px 14px",border:`1px solid ${T.border}`}}>
                     <div style={{width:32,height:32,borderRadius:8,background:ac.type==="credit"?T.roseDim:ac.type==="investment"?T.violetDim:T.cyanDim,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0}}>
-                      {ac.type==="credit"?"Ã°ÂÂÂ³":ac.type==="investment"?"Ã°ÂÂÂ":"Ã°ÂÂÂ¦"}
+                      {ac.type==="credit"?"ð³":ac.type==="investment"?"ð":"ð¦"}
                     </div>
                     <div style={{flex:1,minWidth:0}}>
                       <div style={{fontSize:11,color:T.text,fontFamily:T.sans,fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{ac.name}</div>
-                      <div style={{fontSize:9,color:T.textDim,fontFamily:T.mono}}>Â·Â·Â·Â·{ac.mask} Â· {ac.inst}</div>
+                      <div style={{fontSize:9,color:T.textDim,fontFamily:T.mono}}>ÃÂ·ÃÂ·ÃÂ·ÃÂ·{ac.mask} ÃÂ· {ac.inst}</div>
                     </div>
                     <div style={{textAlign:"right",flexShrink:0}}>
                       <div style={{fontSize:12,fontWeight:700,fontFamily:T.mono,color:ac.balance<0?T.rose:T.emerald}}>{fmt(ac.balance)}</div>
@@ -3704,9 +3704,9 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
               </div>
               <div style={{display:"flex",gap:10}}>
                 {hasFeature(plan,FEATURES.INTEGRATIONS_SYNC)?(
-                  <button onClick={syncPlaid} disabled={plaid.syncing} style={{flex:2,background:"linear-gradient(135deg,#00B2E3,#0074B7)",border:"none",borderRadius:10,padding:"11px",color:"#fff",fontSize:12,fontFamily:T.sans,fontWeight:700,cursor:plaid.syncing?"not-allowed":"pointer",opacity:plaid.syncing?0.6:1}}>{plaid.syncing?"Ã¢ÂÂ³ Refreshing...":"Ã°ÂÂÂ Refresh Accounts"}</button>
+                  <button onClick={syncPlaid} disabled={plaid.syncing} style={{flex:2,background:"linear-gradient(135deg,#00B2E3,#0074B7)",border:"none",borderRadius:10,padding:"11px",color:"#fff",fontSize:12,fontFamily:T.sans,fontWeight:700,cursor:plaid.syncing?"not-allowed":"pointer",opacity:plaid.syncing?0.6:1}}>{plaid.syncing?"â³ Refreshing...":"ð Refresh Accounts"}</button>
                 ):(
-                  <button onClick={onUpgrade} style={{flex:2,background:T.amberDim,border:`1px solid ${T.amber}40`,borderRadius:10,padding:"11px",color:T.amber,fontSize:12,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>Ã°ÂÂÂ Upgrade to Sync</button>
+                  <button onClick={onUpgrade} style={{flex:2,background:T.amberDim,border:`1px solid ${T.amber}40`,borderRadius:10,padding:"11px",color:T.amber,fontSize:12,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>ð Upgrade to Sync</button>
                 )}
                 <button onClick={disconnectPlaid} style={{flex:1,background:"transparent",border:`1px solid ${T.rose}40`,borderRadius:10,padding:"11px",color:T.rose,fontSize:12,fontFamily:T.sans,cursor:"pointer"}}>Disconnect</button>
               </div>
@@ -3718,14 +3718,14 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
       {/* Activity Log */}
       <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:16,padding:"20px 24px",marginBottom:20}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-          <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14}}>Ã°ÂÂÂ¡ Activity Log</div>
+          <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14}}>ð¡ Activity Log</div>
           {log.length>0&&<button onClick={()=>setLog([])} style={{background:"transparent",border:`1px solid ${T.border}`,borderRadius:6,padding:"4px 10px",color:T.textDim,fontSize:10,fontFamily:T.sans,cursor:"pointer"}}>Clear</button>}
         </div>
         {log.length===0?<div style={{textAlign:"center",padding:"28px",color:T.textDim,fontFamily:T.sans,fontSize:12}}>No activity yet. Connect an integration above to see sync events here.</div>:(
           <div style={{display:"flex",flexDirection:"column",gap:4,maxHeight:200,overflowY:"auto"}}>
             {log.map((e,i)=>(
               <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"6px 10px",borderRadius:6,background:e.type==="success"?T.emeraldDim:e.type==="error"?T.roseDim:T.surface,border:`1px solid ${e.type==="success"?T.emerald+"20":e.type==="error"?T.rose+"20":T.border}`}}>
-                <span style={{fontSize:10}}>{e.type==="success"?"Ã¢ÂÂ":"Ã¢ÂÂ¹Ã¯Â¸Â"}</span>
+                <span style={{fontSize:10}}>{e.type==="success"?"â":"â¹ï¸"}</span>
                 <span style={{flex:1,fontSize:11,color:T.textMid,fontFamily:T.sans}}>{e.msg}</span>
                 <span style={{fontSize:9,color:T.textDim,fontFamily:T.mono}}>{e.ts}</span>
               </div>
@@ -3736,12 +3736,12 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
 
       {/* Feature callouts */}
       <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14}}>
-        {[{i:"Ã¢ÂÂ¡",t:"Real-Time Sync",d:"Data refreshes every 15 minutes automatically once connected"},
-          {i:"Ã°ÂÂÂ",t:"Bank-Grade Security",d:"256-bit AES encryption, SOC 2 Type II certified, never stores passwords"},
-          {i:"Ã°ÂÂÂÃ¯Â¸Â",t:"Smart Categorization",d:"AI auto-maps transactions to your P&L categories with 95%+ accuracy"},
-          {i:"Ã°ÂÂÂ",t:"Historical Import",d:"Pull up to 24 months of historical data on first connect"},
-          {i:"Ã°ÂÂÂ",t:"Anomaly Alerts",d:"Automatic alerts when transactions deviate from expected patterns"},
-          {i:"Ã°ÂÂÂ",t:"Two-Way Sync",d:"Changes in QuickBooks reflect in the dashboard within minutes"}].map(f=>(
+        {[{i:"â¡",t:"Real-Time Sync",d:"Data refreshes every 15 minutes automatically once connected"},
+          {i:"ð",t:"Bank-Grade Security",d:"256-bit AES encryption, SOC 2 Type II certified, never stores passwords"},
+          {i:"ðï¸",t:"Smart Categorization",d:"AI auto-maps transactions to your P&L categories with 95%+ accuracy"},
+          {i:"ð",t:"Historical Import",d:"Pull up to 24 months of historical data on first connect"},
+          {i:"ð",t:"Anomaly Alerts",d:"Automatic alerts when transactions deviate from expected patterns"},
+          {i:"ð",t:"Two-Way Sync",d:"Changes in QuickBooks reflect in the dashboard within minutes"}].map(f=>(
           <div key={f.t} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"16px 18px"}}>
             <div style={{fontSize:20,marginBottom:8}}>{f.i}</div>
             <div style={{color:T.text,fontFamily:T.sans,fontWeight:700,fontSize:12,marginBottom:4}}>{f.t}</div>
@@ -3753,11 +3753,11 @@ function IntegrationsPage({plan="professional", onUpgrade}) {
   );
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Pricing Page Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
-/** CellVal Ã¢ÂÂ hoisted outside PricingPage so it isn't recreated on every render */
+// ââÃÂ¢ÃÂÃÂ Pricing Page ââââââââââââââââââââââââââââââââââââââââââââââââÃÂ¢ÃÂÃÂ
+/** CellVal â hoisted outside PricingPage so it isn't recreated on every render */
 function CellVal({v, color}) {
-  if (v === true)  return <span style={{color:T.emerald,fontSize:16,lineHeight:1}}>Ã¢ÂÂ</span>;
-  if (v === false) return <span style={{color:T.border,fontSize:14}}>Ã¢ÂÂ</span>;
+  if (v === true)  return <span style={{color:T.emerald,fontSize:16,lineHeight:1}}>â</span>;
+  if (v === false) return <span style={{color:T.border,fontSize:14}}>â</span>;
   return <span style={{fontSize:10,color:color||T.textMid,fontFamily:T.sans,fontWeight:600}}>{v}</span>;
 }
 
@@ -3779,7 +3779,7 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
 
   const PLANS=[
     {
-      id:"starter", name:"Growth", icon:"Ã°ÂÂÂ±", price:1199, annualPrice:949, color:T.teal, popular:false,
+      id:"starter", name:"Growth", icon:"ð±", price:1199, annualPrice:949, color:T.teal, popular:false,
       tagline:"Basic financial visibility for early-stage businesses.",
       cta:"Start Free",
       ctaNote:"No credit card required",
@@ -3793,7 +3793,7 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
         "Client Overview",
         "CSV Data Import",
         "Basic AI Insights",
-        "1 Company Â· 90-day history",
+        "1 Company ÃÂ· 90-day history",
         "Email support",
       ],
     },
@@ -3801,11 +3801,11 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
       id:"professional", name:"Pro", icon:"â", price:2499, annualPrice:1999, color:T.cyan, popular:true,
       tagline:"The complete FP&A system for growing companies.",
       cta:"Start 14-Day Trial",
-      ctaNote:"Free for 14 days Â· No credit card",
+      ctaNote:"Free for 14 days ÃÂ· No credit card",
       description:"Everything a CFO or finance lead needs: scenario planning, collaborative budgeting, saved scenarios, executive reporting, live integrations, and full AI analysis on every tab.",
       features:[
         "Everything in Growth",
-        "C-Suite Executive Report Ã¢ÂÂ¦ NEW",
+        "C-Suite Executive Report â¦ NEW",
         "Scenario Planner (Bear / Base / Bull)",
         "Save & Share Scenarios",
         "Collaborative Budgeting + Approvals",
@@ -3816,15 +3816,15 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
         "PDF + CSV Export on all reports",
         "Live QuickBooks & Plaid Sync",
         "CFO Simulation",
-        "5 Companies Â· 24-month history",
+        "5 Companies ÃÂ· 24-month history",
         "Priority support",
       ],
     },
     {
-      id:"enterprise", name:"CFO Suite", icon:"Ã°ÂÂÂ¢", price:4499, annualPrice:3599, color:T.violet, popular:false,
+      id:"enterprise", name:"CFO Suite", icon:"ð¢", price:4499, annualPrice:3599, color:T.violet, popular:false,
       tagline:"Multi-entity, compliance, and scale.",
       cta:"Contact Sales",
-      ctaNote:"Custom pricing Â· Dedicated onboarding",
+      ctaNote:"Custom pricing ÃÂ· Dedicated onboarding",
       description:"Unlimited entities, SSO/SAML, API access, white-label, advanced role permissions, audit logs, and a dedicated account manager. Built for operators managing multiple companies.",
       features:[
         "Everything in Pro",
@@ -3900,7 +3900,7 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
   if(step==="success"){
     return(
       <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"60vh",gap:20,textAlign:"center",animation:"fadeIn 0.4s ease"}}>
-        <div style={{fontSize:64,lineHeight:1}}>Ã°ÂÂÂ</div>
+        <div style={{fontSize:64,lineHeight:1}}>ð</div>
         <div style={{background:`linear-gradient(135deg,${T.cyan},${T.violet})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",fontFamily:T.display,fontWeight:800,fontSize:28}}>You're all set!</div>
         <div style={{color:T.textMid,fontFamily:T.sans,fontSize:14,maxWidth:420,lineHeight:1.7}}>Your plan is now active. All features are immediately available across every tab of your dashboard.</div>
         <button onClick={()=>{setStep("plans");onPlanChange&&onPlanChange(currentPlan);}}
@@ -3925,13 +3925,13 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
       {/* Header */}
       <div style={{textAlign:"center",marginBottom:44}}>
         <div style={{display:"inline-flex",alignItems:"center",gap:6,background:T.cyanDim,border:`1px solid ${T.cyan}40`,borderRadius:20,padding:"4px 14px",marginBottom:14}}>
-          <span style={{fontSize:9,color:T.cyan,fontFamily:T.mono,fontWeight:800,textTransform:"uppercase",letterSpacing:1.5}}>Ã°ÂÂÂ³ Simple Pricing</span>
+          <span style={{fontSize:9,color:T.cyan,fontFamily:T.mono,fontWeight:800,textTransform:"uppercase",letterSpacing:1.5}}>ð³ Simple Pricing</span>
         </div>
         <div style={{background:`linear-gradient(135deg,#FFFFFF 0%,${T.text} 35%,${T.cyan}CC 100%)`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",fontFamily:T.display,fontWeight:800,fontSize:40,marginBottom:10,lineHeight:1.1}}>
           Plans that grow with your business
         </div>
         <div style={{color:T.textDim,fontFamily:T.sans,fontSize:14,marginBottom:24,maxWidth:440,margin:"0 auto 24px"}}>
-          Trusted by 500+ growing businesses. Start free Ã¢ÂÂ upgrade when you're ready to plan, forecast, and scale with confidence.
+          Trusted by 500+ growing businesses. Start free â upgrade when you're ready to plan, forecast, and scale with confidence.
         </div>
         {/* Billing toggle */}
         <div style={{display:"inline-flex",alignItems:"center",gap:4,background:T.card,border:`1px solid ${T.border}`,borderRadius:50,padding:"5px 6px"}}>
@@ -3956,12 +3956,12 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
               {/* Most popular badge */}
               {isCenter&&(
                 <div style={{background:`linear-gradient(90deg,${T.cyan},${T.violet})`,padding:"6px 0",textAlign:"center"}}>
-                  <span style={{color:T.bg,fontSize:10,fontFamily:T.mono,fontWeight:800,letterSpacing:1.5,textTransform:"uppercase"}}>Ã¢Â­Â Most Popular Â· Best for Small Business</span>
+                  <span style={{color:T.bg,fontSize:10,fontFamily:T.mono,fontWeight:800,letterSpacing:1.5,textTransform:"uppercase"}}>â­ Most Popular ÃÂ· Best for Small Business</span>
                 </div>
               )}
               {isCurrent&&(
                 <div style={{background:`${plan.color}18`,borderBottom:`1px solid ${plan.color}30`,padding:"5px 0",textAlign:"center"}}>
-                  <span style={{color:plan.color,fontSize:9,fontFamily:T.mono,fontWeight:800,letterSpacing:1,textTransform:"uppercase"}}>Ã¢ÂÂ Your Current Plan</span>
+                  <span style={{color:plan.color,fontSize:9,fontFamily:T.mono,fontWeight:800,letterSpacing:1,textTransform:"uppercase"}}>â Your Current Plan</span>
                 </div>
               )}
               <div style={{padding:"28px 24px 24px"}}>
@@ -3981,17 +3981,17 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
                     {plan.id!=="enterprise"&&<span style={{color:T.textDim,fontFamily:T.sans,fontSize:13,marginBottom:4}}>/mo</span>}
                   </div>
                   {billing==="annual"&&plan.id!=="enterprise"&&(
-                    <div style={{fontSize:10,color:T.emerald,fontFamily:T.sans,marginTop:4}}>Ã¢ÂÂ Save ${gs(plan)} per year</div>
+                    <div style={{fontSize:10,color:T.emerald,fontFamily:T.sans,marginTop:4}}>â Save ${gs(plan)} per year</div>
                   )}
                   {plan.id==="enterprise"&&<div style={{fontSize:10,color:T.textDim,fontFamily:T.sans,marginTop:4}}>Talk to sales for volume pricing</div>}
                 </div>
                 {/* CTA */}
                 {isCurrent?(
-                  <button disabled style={{width:"100%",background:T.surface,border:`1px solid ${T.border}`,borderRadius:11,padding:"12px",color:T.textDim,fontSize:12,fontFamily:T.sans,fontWeight:700,cursor:"not-allowed",marginBottom:20}}>Ã¢ÂÂ Current Plan</button>
+                  <button disabled style={{width:"100%",background:T.surface,border:`1px solid ${T.border}`,borderRadius:11,padding:"12px",color:T.textDim,fontSize:12,fontFamily:T.sans,fontWeight:700,cursor:"not-allowed",marginBottom:20}}>â Current Plan</button>
                 ):(
                   <button onClick={()=>handleCTA(plan)} disabled={!!isProc} className="pricing-cta"
                     style={{width:"100%",background:isCenter?`linear-gradient(135deg,${T.cyan},${T.violet})`:`${plan.color}18`,border:`1.5px solid ${plan.color}${isCenter?"":"60"}`,borderRadius:11,padding:"12px",color:isCenter?T.bg:plan.color,fontSize:12,fontFamily:T.sans,fontWeight:800,cursor:isProc?"wait":"pointer",marginBottom:8,letterSpacing:0.2,opacity:isProc?0.7:1,boxShadow:isCenter?`0 4px 20px ${T.cyan}30`:"none"}}>
-                    {isProc?"Ã¢ÂÂ³ RedirectingÃ¢ÂÂ¦":plan.cta}
+                    {isProc?"â³ Redirectingâ¦":plan.cta}
                   </button>
                 )}
                 <div style={{textAlign:"center",fontSize:10,color:T.textDim,fontFamily:T.sans,marginBottom:20}}>{plan.ctaNote}</div>
@@ -3999,7 +3999,7 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
                 <div style={{borderTop:`1px solid ${T.border}`,paddingTop:16,display:"flex",flexDirection:"column",gap:7}}>
                   {plan.features.map((f,i)=>(
                     <div key={i} style={{display:"flex",alignItems:"flex-start",gap:8}}>
-                      <span style={{color:plan.color,fontSize:11,flexShrink:0,marginTop:1,fontWeight:700}}>Ã¢ÂÂ</span>
+                      <span style={{color:plan.color,fontSize:11,flexShrink:0,marginTop:1,fontWeight:700}}>â</span>
                       <span style={{fontSize:11,color:i===0&&pi>0?T.textMid:T.textDim,fontFamily:T.sans,lineHeight:1.45,fontWeight:i===0&&pi>0?600:400}}>{f}</span>
                     </div>
                   ))}
@@ -4012,7 +4012,7 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
 
       {/* Trust bar */}
       <div style={{background:`linear-gradient(135deg,${T.card},${T.surface})`,border:`1px solid ${T.border}`,borderRadius:14,padding:"18px 28px",marginBottom:40,display:"flex",alignItems:"center",justifyContent:"center",gap:32,flexWrap:"wrap",boxShadow:`inset 0 1px 0 ${T.borderHover}40`}}>
-        {[["Ã°ÂÂÂ","Bank-grade encryption"],["Ã¢ÂÂ","Cancel anytime, no questions"],["Ã¢ÂÂ¡","No setup fees ever"],["Ã°ÂÂÂ","Used by 500+ small businesses"],["Ã°ÂÂÂ³","Powered by Stripe"]].map(([i,t])=>(
+        {[["ð","Bank-grade encryption"],["â","Cancel anytime, no questions"],["â¡","No setup fees ever"],["ð","Used by 500+ small businesses"],["ð³","Powered by Stripe"]].map(([i,t])=>(
           <div key={t} style={{display:"flex",alignItems:"center",gap:7}}>
             <span style={{fontSize:13}}>{i}</span>
             <span style={{fontSize:11,color:T.textMid,fontFamily:T.sans,fontWeight:500}}>{t}</span>
@@ -4063,7 +4063,7 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
                   {!isCurrent&&(
                     <button onClick={()=>handleCTA(plan)} disabled={!!isProc} className="pricing-cta"
                       style={{background:plan.popular?`linear-gradient(135deg,${T.cyan},${T.violet})`:`${plan.color}18`,border:`1px solid ${plan.color}50`,borderRadius:8,padding:"8px 10px",color:plan.popular?T.bg:plan.color,fontSize:10,fontFamily:T.sans,fontWeight:700,cursor:isProc?"wait":"pointer",width:"100%",whiteSpace:"nowrap",boxShadow:plan.popular?`0 2px 12px ${T.cyan}30`:"none"}}>
-                      {isProc?"Ã¢ÂÂ¦":plan.id==="enterprise"?"Contact":"Get Started"}
+                      {isProc?"â¦":plan.id==="enterprise"?"Contact":"Get Started"}
                     </button>
                   )}
                   {isCurrent&&<span style={{fontSize:10,color:plan.color,fontFamily:T.mono,fontWeight:600}}>Current</span>}
@@ -4076,10 +4076,10 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
 
       {/* Benefit copy strip */}
       <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14,marginBottom:40}}>
-        {[{i:"Ã°ÂÂÂ¯",h:"Make faster decisions",d:"Every tab gives you the context to act, not just the numbers to stare at."},
-          {i:"Ã°ÂÂÂ¡",h:"See problems early",d:"Anomaly alerts and cash flow forecasts surface risks before they become crises."},
-          {i:"Ã°ÂÂÂ",h:"Understand your profit",d:"AI-powered analysis tells you what's driving margins Ã¢ÂÂ in plain language."},
-          {i:"Ã°ÂÂÂÃ¯Â¸Â",h:"Plan without spreadsheets",d:"Scenarios, headcount, and SaaS metrics all in one place. No VLOOKUP required."},
+        {[{i:"ð¯",h:"Make faster decisions",d:"Every tab gives you the context to act, not just the numbers to stare at."},
+          {i:"ð¡",h:"See problems early",d:"Anomaly alerts and cash flow forecasts surface risks before they become crises."},
+          {i:"ð",h:"Understand your profit",d:"AI-powered analysis tells you what's driving margins â in plain language."},
+          {i:"ðï¸",h:"Plan without spreadsheets",d:"Scenarios, headcount, and SaaS metrics all in one place. No VLOOKUP required."},
         ].map(b=>(
           <div key={b.h} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:13,padding:"18px 20px"}}>
             <div style={{width:44,height:44,borderRadius:12,background:`${T.cyan}12`,border:`1px solid ${T.cyan}25`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,marginBottom:14}}>{b.i}</div>
@@ -4091,8 +4091,8 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
 
       {/* FAQ */}
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:32}}>
-        {[{q:"Is there a free trial?",a:"Professional includes a 14-day free trial. No credit card required to start Ã¢ÂÂ you'll only be charged when your trial ends."},
-          {q:"Can I cancel anytime?",a:"Yes. Cancel with one click from your account settings. You keep access until the end of your billing period Ã¢ÂÂ no questions asked."},
+        {[{q:"Is there a free trial?",a:"Professional includes a 14-day free trial. No credit card required to start â you'll only be charged when your trial ends."},
+          {q:"Can I cancel anytime?",a:"Yes. Cancel with one click from your account settings. You keep access until the end of your billing period â no questions asked."},
           {q:"Can I switch plans?",a:"Absolutely. Upgrade or downgrade anytime. Upgrades are immediate; downgrades apply at the next billing cycle."},
           {q:"Is my financial data secure?",a:"All data is encrypted at rest (AES-256) and in transit (TLS 1.3). We are SOC 2 Type II certified and never sell your data."},
           {q:"What's the AI assistant?",a:"The AI FP&A assistant analyzes your actual financial data and provides actionable insights, forecasts, and plain-English explanations on every tab."},
@@ -4111,7 +4111,7 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
           <div style={{background:T.card,border:`1.5px solid ${T.violet}50`,borderRadius:20,padding:"36px",maxWidth:460,width:"100%",boxShadow:`0 0 80px ${T.violet}20`}} onClick={e=>e.stopPropagation()}>
             {!contactSent?(
               <>
-                <div style={{color:T.text,fontFamily:T.display,fontWeight:800,fontSize:20,marginBottom:6}}>Ã°ÂÂÂ¢ Let's talk Enterprise</div>
+                <div style={{color:T.text,fontFamily:T.display,fontWeight:800,fontSize:20,marginBottom:6}}>ð¢ Let's talk Enterprise</div>
                 <div style={{color:T.textDim,fontFamily:T.sans,fontSize:12,lineHeight:1.7,marginBottom:24}}>Tell us a bit about your needs and our team will reach out within one business day with custom pricing.</div>
                 {[{l:"Work email",p:"you@company.com",t:"email"},{l:"Company name",p:"Acme Corp",t:"text"},{l:"Number of entities",p:"2, 5, 10+",t:"text"}].map(f=>(
                   <div key={f.l} style={{marginBottom:14}}>
@@ -4127,7 +4127,7 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
               </>
             ):(
               <div style={{textAlign:"center",padding:"20px 0"}}>
-                <div style={{fontSize:48,marginBottom:16}}>Ã¢ÂÂ</div>
+                <div style={{fontSize:48,marginBottom:16}}>â</div>
                 <div style={{color:T.text,fontFamily:T.display,fontWeight:800,fontSize:18,marginBottom:10}}>Message sent!</div>
                 <div style={{color:T.textDim,fontFamily:T.sans,fontSize:12,lineHeight:1.7,marginBottom:24}}>Our team will be in touch within one business day.</div>
                 <button onClick={()=>{setContactOpen(false);setContactSent(false);}} style={{background:`linear-gradient(135deg,${T.violet},${T.cyan})`,border:"none",borderRadius:10,padding:"12px 28px",color:T.bg,fontSize:13,fontFamily:T.sans,fontWeight:700,cursor:"pointer"}}>Back to Dashboard</button>
@@ -4139,7 +4139,7 @@ function PricingPage({currentPlan="starter", onPlanChange}) {
     </div>
   );
 }
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Budget vs. Actuals Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ Budget vs. Actuals ââââââââââââââââââââââââââââââââââââââââââÃÂ¢ÃÂÃÂ
 function BudgetVsActuals({aiContext}) {
   const [view,setView]=useState("summary");
   const [selMonth,setSelMonth]=useState(null);
@@ -4152,7 +4152,7 @@ function BudgetVsActuals({aiContext}) {
   const vRev=varRow(aRev,bRev), vOpex=varRow(aOpex,bOpex), vNet=varRow(aNet,bNet), vGross=varRow(aGross,bGross);
   const totVRev=sum(vRev), totVOpex=sum(vOpex), totVNet=sum(vNet);
   const varColor=(v,expFav="pos")=>(expFav==="pos"?v>=0:v<=0)?T.emerald:T.rose;
-  const varFlag=(v,expFav="pos")=>(expFav==="pos"?v>=0:v<=0)?"Ã¢ÂÂ²":"Ã¢ÂÂ¼";
+  const varFlag=(v,expFav="pos")=>(expFav==="pos"?v>=0:v<=0)?"â²":"â¼";
   const LINES=[
     {label:"Total Revenue",    act:aRev,  bud:bRev,  var:vRev,   fav:"pos"},
     {label:"Gross Profit",     act:aGross,bud:bGross,var:vGross, fav:"pos"},
@@ -4184,14 +4184,14 @@ function BudgetVsActuals({aiContext}) {
             <div key={k.l} style={{background:T.card,border:`1px solid ${good?c+"40":T.border}`,borderRadius:12,padding:"14px 16px",boxShadow:good?"none":`0 0 16px ${T.rose}10`}}>
               <div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>{k.l}</div>
               <div style={{fontSize:20,fontWeight:800,fontFamily:T.mono,color:c}}>{k.isRatio?pct(k.v)+" of budget":fmt(Math.abs(k.v),true)}</div>
-              {!k.isRatio&&<div style={{fontSize:10,color:c,fontFamily:T.sans,marginTop:4}}>{good?"Ã¢ÂÂ² Favorable":"Ã¢ÂÂ¼ Unfavorable"} Â· {pct(Math.abs(k.pct||0))} vs budget</div>}
+              {!k.isRatio&&<div style={{fontSize:10,color:c,fontFamily:T.sans,marginTop:4}}>{good?"â² Favorable":"â¼ Unfavorable"} ÃÂ· {pct(Math.abs(k.pct||0))} vs budget</div>}
             </div>
           );
         })}
       </div>
 
       <div style={{display:"flex",gap:6,marginBottom:14}}>
-        {[["summary","Ã°ÂÂÂ Summary BvA"],["depts","Ã°ÂÂÂ¢ Dept Breakdown"],["rolling","Ã°ÂÂÂ Rolling Forecast"]].map(([v,l])=>(
+        {[["summary","ð Summary BvA"],["depts","ð¢ Dept Breakdown"],["rolling","ð Rolling Forecast"]].map(([v,l])=>(
           <button key={v} onClick={()=>setView(v)} style={{background:view===v?T.cyanDim:"transparent",border:`1px solid ${view===v?T.cyanMid:T.border}`,borderRadius:8,padding:"6px 14px",color:view===v?T.cyan:T.textMid,fontSize:11,fontFamily:T.sans,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>{l}</button>
         ))}
       </div>
@@ -4200,12 +4200,12 @@ function BudgetVsActuals({aiContext}) {
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
           <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,overflow:"hidden"}}>
             <div style={{padding:"12px 16px",borderBottom:`1px solid ${T.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-              <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14}}>Ã°ÂÂÂ Budget vs. Actuals Ã¢ÂÂ FY {new Date().getFullYear()}</div>
+              <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14}}>ð Budget vs. Actuals â FY {new Date().getFullYear()}</div>
               <div style={{display:"flex",gap:12,fontSize:9,color:T.textDim,fontFamily:T.mono}}>
-                <span style={{color:T.cyan}}>Ã¢ÂÂ  Actual</span>
-                <span style={{color:T.violet}}>Ã¢ÂÂ  Budget</span>
-                <span style={{color:T.emerald}}>Ã¢ÂÂ² Fav</span>
-                <span style={{color:T.rose}}>Ã¢ÂÂ¼ Unfav</span>
+                <span style={{color:T.cyan}}>â  Actual</span>
+                <span style={{color:T.violet}}>â  Budget</span>
+                <span style={{color:T.emerald}}>â² Fav</span>
+                <span style={{color:T.rose}}>â¼ Unfav</span>
               </div>
             </div>
             <div style={{overflowX:"auto"}}>
@@ -4228,11 +4228,11 @@ function BudgetVsActuals({aiContext}) {
                         <td style={{padding:"7px 12px",color:T.text,fontFamily:T.sans,fontWeight:600,fontSize:10}}>{row.label}</td>
                         {row.act.map((v,i)=><td key={i} style={{padding:"7px 6px",textAlign:"right",fontFamily:T.mono,fontSize:10,color:T.textMid}}>{fmt(v,true)}</td>)}
                         <td style={{padding:"7px 8px",textAlign:"right",fontFamily:T.mono,fontSize:10,fontWeight:700,color:T.cyan}}>{fmt(totA,true)}</td>
-                        <td style={{padding:"7px 8px",textAlign:"right",fontFamily:T.mono,fontSize:10,fontWeight:700,color:good?T.emerald:T.rose}}>{good?"Ã¢ÂÂ²":"Ã¢ÂÂ¼"}{fmt(Math.abs(totV),true)}</td>
+                        <td style={{padding:"7px 8px",textAlign:"right",fontFamily:T.mono,fontSize:10,fontWeight:700,color:good?T.emerald:T.rose}}>{good?"â²":"â¼"}{fmt(Math.abs(totV),true)}</td>
                         <td style={{padding:"7px 8px",textAlign:"right",fontFamily:T.mono,fontSize:10,color:good?T.emerald:T.rose}}>{pct(Math.abs(safeDiv(totV,totB)))}</td>
                       </tr>,
                       <tr key={row.label+"-b"} style={{background:T.surface+"80",borderBottom:`1px solid ${T.border}`}}>
-                        <td style={{padding:"4px 12px",color:T.textDim,fontFamily:T.sans,fontSize:9,paddingLeft:24}}>Ã¢ÂÂ Budget</td>
+                        <td style={{padding:"4px 12px",color:T.textDim,fontFamily:T.sans,fontSize:9,paddingLeft:24}}>â Budget</td>
                         {row.bud.map((v,i)=><td key={i} style={{padding:"4px 6px",textAlign:"right",fontFamily:T.mono,fontSize:9,color:T.textDim}}>{fmt(v,true)}</td>)}
                         <td style={{padding:"4px 8px",textAlign:"right",fontFamily:T.mono,fontSize:9,color:T.textDim}}>{fmt(totB,true)}</td>
                         <td colSpan="2"/>
@@ -4245,7 +4245,7 @@ function BudgetVsActuals({aiContext}) {
           </div>
 
           <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"16px 18px"}}>
-            <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:14}}>Ã°ÂÂÂ Monthly Variance Heatmap</div>
+            <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:14}}>ð Monthly Variance Heatmap</div>
             <div style={{display:"grid",gridTemplateColumns:"160px repeat(12,1fr)",gap:2}}>
               {[""].concat(MONTHS).map((m,i)=><div key={i} style={{padding:"4px 0",textAlign:"center",fontSize:8,color:T.textDim,fontFamily:T.mono}}>{m}</div>)}
               {LINES.map(row=>([
@@ -4253,7 +4253,7 @@ function BudgetVsActuals({aiContext}) {
                 ...row.var.map((v,i)=>{
                   const good=row.fav==="pos"?v>=0:v<=0;
                   const intensity=Math.min(Math.abs(v)/15000,1);
-                  return <div key={i} title={`${MONTHS[i]}: ${good?"Ã¢ÂÂ²":"Ã¢ÂÂ¼"}${fmt(Math.abs(v),true)}`}
+                  return <div key={i} title={`${MONTHS[i]}: ${good?"â²":"â¼"}${fmt(Math.abs(v),true)}`}
                     style={{height:22,borderRadius:3,background:good?`rgba(0,229,160,${0.15+intensity*0.5})`:`rgba(255,77,106,${0.15+intensity*0.5})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:7,color:good?T.emerald:T.rose,fontFamily:T.mono,fontWeight:700,cursor:"default"}}>
                     {fmt(v,true)}
                   </div>;
@@ -4286,7 +4286,7 @@ function BudgetVsActuals({aiContext}) {
                   {MONTHS.map((m,i)=>{
                     const va=dept.act[i]-dept.bud[i]; const g=va<=0;
                     const h=Math.min(Math.abs(va)/3000*100,100);
-                    return <div key={m} title={`${m}: ${g?"Ã¢ÂÂ²":"Ã¢ÂÂ¼"}${fmt(Math.abs(va),true)}`}
+                    return <div key={m} title={`${m}: ${g?"â²":"â¼"}${fmt(Math.abs(va),true)}`}
                       style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"flex-end",alignItems:"center"}}>
                       <div style={{width:"100%",height:`${h}%`,minHeight:2,background:g?T.emerald+"60":T.rose+"60",borderRadius:"2px 2px 0 0"}}/>
                     </div>;
@@ -4304,7 +4304,7 @@ function BudgetVsActuals({aiContext}) {
       {view==="rolling"&&(
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
           <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"16px 18px"}}>
-            <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:4}}>Ã°ÂÂÂ Rolling Forecast Ã¢ÂÂ Updated Monthly</div>
+            <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:4}}>ð Rolling Forecast â Updated Monthly</div>
             <div style={{color:T.textDim,fontSize:10,fontFamily:T.sans,marginBottom:16}}>Forward-looking view combining YTD actuals with updated quarterly projections</div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:18}}>
               {RF_MONTHS.map((q,i)=>(
@@ -4325,7 +4325,7 @@ function BudgetVsActuals({aiContext}) {
                     <div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>{item.l}</div>
                     <div style={{fontSize:22,fontWeight:800,fontFamily:T.mono,color:item.c}}>{fmt(item.v,true)}</div>
                     <div style={{display:"flex",gap:16,marginTop:8}}>
-                      <div><div style={{fontSize:8,color:T.textDim,fontFamily:T.sans}}>VS BUDGET</div><div style={{fontSize:12,color:good?T.emerald:T.rose,fontFamily:T.mono,fontWeight:700}}>{good?"Ã¢ÂÂ²":"Ã¢ÂÂ¼"}{fmt(Math.abs(variance),true)}</div></div>
+                      <div><div style={{fontSize:8,color:T.textDim,fontFamily:T.sans}}>VS BUDGET</div><div style={{fontSize:12,color:good?T.emerald:T.rose,fontFamily:T.mono,fontWeight:700}}>{good?"â²":"â¼"}{fmt(Math.abs(variance),true)}</div></div>
                       <div><div style={{fontSize:8,color:T.textDim,fontFamily:T.sans}}>ATTAINMENT</div><div style={{fontSize:12,color:item.c,fontFamily:T.mono,fontWeight:700}}>{pct(item.v/item.bv)}</div></div>
                     </div>
                   </div>
@@ -4339,12 +4339,12 @@ function BudgetVsActuals({aiContext}) {
   );
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Balance Sheet Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
-/** BSRow Ã¢ÂÂ balance sheet line row. Hoisted to module scope. */
+// ââÃÂ¢ÃÂÃÂ Balance Sheet ââââââââââââââââââââââââââââââââââââââââââââââââ
+/** BSRow â balance sheet line row. Hoisted to module scope. */
 function BSRow({label, value, indent, isTotal, color, bold}) {
   return (
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:isTotal?"8px 0":"5px 0",borderBottom:isTotal?`1px solid ${T.border}40`:"none",background:isTotal?T.cyanDim+"30":"transparent",borderRadius:isTotal?4:0}}>
-      <span style={{fontSize:isTotal?11:10,color:isTotal?T.text:T.textMid,fontFamily:isTotal?T.display:T.sans,fontWeight:isTotal||bold?700:400,paddingLeft:indent?20:0}}>{indent&&<span style={{color:T.textDim,marginRight:4}}>Ã¢ÂÂ</span>}{label}</span>
+      <span style={{fontSize:isTotal?11:10,color:isTotal?T.text:T.textMid,fontFamily:isTotal?T.display:T.sans,fontWeight:isTotal||bold?700:400,paddingLeft:indent?20:0}}>{indent&&<span style={{color:T.textDim,marginRight:4}}>â</span>}{label}</span>
       <span style={{fontSize:isTotal?12:10,color:color||(isTotal?T.cyan:T.textMid),fontFamily:T.mono,fontWeight:isTotal?700:400}}>{fmt(value)}</span>
     </div>
   );
@@ -4381,7 +4381,7 @@ function BalanceSheet({aiContext}) {
       <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:18}}>
         {[
           {l:"Current Ratio",   v:currRatio.toFixed(2)+"x", sub:currRatio>=2?"Strong":currRatio>=1.5?"Healthy":"Watch", c:currRatio>=1.5?T.emerald:currRatio>=1?T.amber:T.rose},
-          {l:"Quick Ratio",     v:quickRatio.toFixed(2)+"x", sub:quickRatio>=1?"Healthy":"Below 1x Ã¢ÂÂ risk", c:quickRatio>=1?T.emerald:T.rose},
+          {l:"Quick Ratio",     v:quickRatio.toFixed(2)+"x", sub:quickRatio>=1?"Healthy":"Below 1x â risk", c:quickRatio>=1?T.emerald:T.rose},
           {l:"Debt-to-Equity",  v:debtToEquity.toFixed(2)+"x", sub:debtToEquity<=1.5?"Manageable":"High leverage", c:debtToEquity<=1.5?T.emerald:T.amber},
           {l:"Working Capital", v:fmt(workingCapital,true), sub:`${pct(workingCapital/totalAssets)} of assets`, c:workingCapital>0?T.emerald:T.rose},
         ].map(k=>(
@@ -4395,7 +4395,7 @@ function BalanceSheet({aiContext}) {
 
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
         <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"16px 18px"}}>
-          <div style={{color:T.cyan,fontFamily:T.display,fontWeight:700,fontSize:13,marginBottom:12}}>ASSETS Ã¢ÂÂ {MONTHS[mo]} 2024</div>
+          <div style={{color:T.cyan,fontFamily:T.display,fontWeight:700,fontSize:13,marginBottom:12}}>ASSETS â {MONTHS[mo]} 2024</div>
           <div style={{color:T.textDim,fontSize:9,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:8,paddingBottom:4,borderBottom:`1px solid ${T.border}`}}>Current Assets</div>
           <BSRow label="Cash & Equivalents"   value={cash} indent color={T.cyan}/>
           <BSRow label="Accounts Receivable"  value={ar}   indent color={T.cyan}/>
@@ -4411,7 +4411,7 @@ function BalanceSheet({aiContext}) {
         </div>
 
         <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"16px 18px"}}>
-          <div style={{color:T.rose,fontFamily:T.display,fontWeight:700,fontSize:13,marginBottom:12}}>LIABILITIES & EQUITY Ã¢ÂÂ {MONTHS[mo]} 2024</div>
+          <div style={{color:T.rose,fontFamily:T.display,fontWeight:700,fontSize:13,marginBottom:12}}>LIABILITIES & EQUITY â {MONTHS[mo]} 2024</div>
           <div style={{color:T.textDim,fontSize:9,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:8,paddingBottom:4,borderBottom:`1px solid ${T.border}`}}>Current Liabilities</div>
           <BSRow label="Accounts Payable"        value={ap}  indent color={T.rose}/>
           <BSRow label="Accrued Expenses"        value={acc} indent color={T.rose}/>
@@ -4433,7 +4433,7 @@ function BalanceSheet({aiContext}) {
       </div>
 
       <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"16px 18px",marginTop:16}}>
-        <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:14}}>Ã°ÂÂÂ Ratio Trends Ã¢ÂÂ Full Year</div>
+        <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:14}}>ð Ratio Trends â Full Year</div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:16}}>
           {[
             {l:"Current Ratio",data:MONTHS.map((_,i)=>{const ca=BS.cash[i]+BS.accountsReceivable[i]+BS.inventory_bs[i]+BS.prepaidExpenses[i];const cl=BS.accountsPayable[i]+BS.accruedExpenses[i]+BS.deferredRevenue[i]+BS.shortTermDebt[i];return ca/cl;}),c:T.cyan,fmt:v=>`${v.toFixed(2)}x`,thresh:1.5},
@@ -4459,7 +4459,7 @@ function BalanceSheet({aiContext}) {
   );
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Headcount Planning Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ Headcount Planning ââââââââââââââââââââââââââââââââââââââââââââ
 function HeadcountPlanning({aiContext}) {
   const [selDept,setSelDept]=useState(null);
   const [view,setView]=useState("overview");
@@ -4490,7 +4490,7 @@ function HeadcountPlanning({aiContext}) {
       </div>
 
       <div style={{display:"flex",gap:6,marginBottom:14}}>
-        {[["overview","Ã°ÂÂÂ¢ By Department"],["roster","Ã°ÂÂÂ¤ Full Roster"],["cost","Ã°ÂÂÂ° Cost Analysis"]].map(([v,l])=>(
+        {[["overview","ð¢ By Department"],["roster","ð¤ Full Roster"],["cost","ð° Cost Analysis"]].map(([v,l])=>(
           <button key={v} onClick={()=>setView(v)} style={{background:view===v?T.cyanDim:"transparent",border:`1px solid ${view===v?T.cyanMid:T.border}`,borderRadius:8,padding:"6px 14px",color:view===v?T.cyan:T.textMid,fontSize:11,fontFamily:T.sans,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>{l}</button>
         ))}
       </div>
@@ -4509,11 +4509,11 @@ function HeadcountPlanning({aiContext}) {
                     <div style={{display:"flex",alignItems:"center",gap:10}}>
                       <div style={{width:12,height:12,borderRadius:"50%",background:d.color,flexShrink:0}}/>
                       <span style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14}}>{d.name}</span>
-                      <span style={{fontSize:10,color:T.textDim,fontFamily:T.mono}}>{dActive.length} active{dOpen.length>0?` Â· ${dOpen.length} open`:""}</span>
+                      <span style={{fontSize:10,color:T.textDim,fontFamily:T.mono}}>{dActive.length} active{dOpen.length>0?` ÃÂ· ${dOpen.length} open`:""}</span>
                     </div>
                     <div style={{display:"flex",gap:20,alignItems:"center"}}>
                       <div style={{textAlign:"right"}}><div style={{fontSize:8,color:T.textDim,fontFamily:T.sans}}>ANNUAL COST</div><div style={{fontSize:14,color:d.color,fontFamily:T.mono,fontWeight:700}}>{fmt(dCost,true)}</div></div>
-                      <div style={{fontSize:14,color:T.textDim,transform:isSelected?"rotate(180deg)":"rotate(0)"}}>Ã¢ÂÂ¼</div>
+                      <div style={{fontSize:14,color:T.textDim,transform:isSelected?"rotate(180deg)":"rotate(0)"}}>â¼</div>
                     </div>
                   </div>
                   {isSelected&&(
@@ -4580,8 +4580,8 @@ function HeadcountPlanning({aiContext}) {
       {view==="cost"&&(
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
           <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"16px 18px"}}>
-            <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:2}}>Ã°ÂÂÂ° Payroll Cost by Department</div>
-            <div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,marginBottom:14}}>Fully loaded (salary + benefits) Â· Includes open req budgets</div>
+            <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:2}}>ð° Payroll Cost by Department</div>
+            <div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,marginBottom:14}}>Fully loaded (salary + benefits) ÃÂ· Includes open req budgets</div>
             {depts.map(d=>{
               const dc=d.employees.reduce((s,e)=>s+(e.salary*(1+e.benefits)),0);
               return (
@@ -4615,7 +4615,7 @@ function HeadcountPlanning({aiContext}) {
   );
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ SaaS Metrics Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ SaaS Metrics ââââââââââââââââââââââââââââââââââââââââââââââââââ
 function SaaSMetrics({aiContext}) {
   const [view,setView]=useState("overview");
   const latestMrr=SAAS.mrr[11], latestArr=latestMrr*12;
@@ -4630,8 +4630,8 @@ function SaaSMetrics({aiContext}) {
       <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:18}}>
         {[
           {l:"Monthly Recurring Rev",v:fmt(latestMrr,true),sub:`ARR: ${fmt(latestArr,true)}`,c:T.cyan,spark:SAAS.mrr},
-          {l:"MoM Growth",v:pct(mrrGrowth),sub:mrrGrowth>0?"Ã¢ÂÂ² Accelerating":"Ã¢ÂÂ¼ Decelerating",c:mrrGrowth>0?T.emerald:T.rose,spark:SAAS.mrr.map((v,i)=>i===0?safeDiv(SAAS.mrr[1]-SAAS.mrr[0],SAAS.mrr[0]):safeDiv(v-SAAS.mrr[i-1],SAAS.mrr[i-1]))},
-          {l:"Net Revenue Retention",v:pct(latestNrr),sub:latestNrr>=1.1?"Ã¢ÂÂ Best-in-class (Ã¢ÂÂ¥110%)":"Target: 110%+",c:latestNrr>=1.1?T.emerald:T.amber,spark:SAAS.nrr},
+          {l:"MoM Growth",v:pct(mrrGrowth),sub:mrrGrowth>0?"â² Accelerating":"â¼ Decelerating",c:mrrGrowth>0?T.emerald:T.rose,spark:SAAS.mrr.map((v,i)=>i===0?safeDiv(SAAS.mrr[1]-SAAS.mrr[0],SAAS.mrr[0]):safeDiv(v-SAAS.mrr[i-1],SAAS.mrr[i-1]))},
+          {l:"Net Revenue Retention",v:pct(latestNrr),sub:latestNrr>=1.1?"â Best-in-class (â¥110%)":"Target: 110%+",c:latestNrr>=1.1?T.emerald:T.amber,spark:SAAS.nrr},
           {l:"LTV : CAC Ratio",v:`${ltvCacRatio.toFixed(1)}x`,sub:ltvCacRatio>=3?"Healthy ratio":"Target: 3x+",c:ltvCacRatio>=3?T.emerald:T.rose,spark:SAAS.ltv.map((v,i)=>v/SAAS.cac[i])},
         ].map(k=>(
           <div key={k.l} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"14px 16px"}}>
@@ -4646,7 +4646,7 @@ function SaaSMetrics({aiContext}) {
       </div>
 
       <div style={{display:"flex",gap:6,marginBottom:14}}>
-        {[["overview","Ã°ÂÂÂ MRR Growth"],["waterfall","Ã°ÂÂÂ MRR Waterfall"],["customers","Ã°ÂÂÂ¥ Customers"],["unit","Ã°ÂÂÂ¡ Unit Economics"]].map(([v,l])=>(
+        {[["overview","ð MRR Growth"],["waterfall","ð MRR Waterfall"],["customers","ð¥ Customers"],["unit","ð¡ Unit Economics"]].map(([v,l])=>(
           <button key={v} onClick={()=>setView(v)} style={{background:view===v?T.cyanDim:"transparent",border:`1px solid ${view===v?T.cyanMid:T.border}`,borderRadius:8,padding:"6px 14px",color:view===v?T.cyan:T.textMid,fontSize:11,fontFamily:T.sans,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>{l}</button>
         ))}
       </div>
@@ -4654,7 +4654,7 @@ function SaaSMetrics({aiContext}) {
       {view==="overview"&&(
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
           <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"16px 18px"}}>
-            <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:14}}>Ã°ÂÂÂ MRR Trend Ã¢ÂÂ FY {new Date().getFullYear()}</div>
+            <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:14}}>ð MRR Trend â FY {new Date().getFullYear()}</div>
             <div style={{display:"flex",alignItems:"flex-end",gap:4,height:130}}>
               {SAAS.mrr.map((v,i)=>(
                 <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
@@ -4667,8 +4667,8 @@ function SaaSMetrics({aiContext}) {
           </div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}}>
             {[
-              {l:"Customers (EOM)",    v:latestCust,        sub:`+${SAAS.newCust[11]} new Â· -${SAAS.churnCust[11]} churned`,c:T.cyan},
-              {l:"Monthly Churn Rate", v:pct(churnRate),    sub:churnRate<0.02?"Ã¢ÂÂ Below 2% Ã¢ÂÂ healthy":"Ã¢ÂÂ  Watch churn rate",     c:churnRate<0.02?T.emerald:T.rose},
+              {l:"Customers (EOM)",    v:latestCust,        sub:`+${SAAS.newCust[11]} new ÃÂ· -${SAAS.churnCust[11]} churned`,c:T.cyan},
+              {l:"Monthly Churn Rate", v:pct(churnRate),    sub:churnRate<0.02?"â Below 2% â healthy":"â  Watch churn rate",     c:churnRate<0.02?T.emerald:T.rose},
               {l:"Avg Rev / Customer", v:fmt(latestMrr/latestCust,true), sub:"ARPU",                                        c:T.violet},
             ].map(k=>(
               <div key={k.l} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:10,padding:"14px 16px"}}>
@@ -4683,7 +4683,7 @@ function SaaSMetrics({aiContext}) {
 
       {view==="waterfall"&&(
         <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"16px 18px"}}>
-          <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:14}}>Ã°ÂÂÂ MRR Waterfall Ã¢ÂÂ Monthly Movement</div>
+          <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:14}}>ð MRR Waterfall â Monthly Movement</div>
           <div style={{overflowX:"auto"}}>
             <table style={{width:"100%",borderCollapse:"collapse",fontSize:10}}>
               <thead><tr style={{background:T.surface}}>
@@ -4705,7 +4705,7 @@ function SaaSMetrics({aiContext}) {
                       <td style={{padding:"8px 10px",textAlign:"right",fontFamily:T.mono,fontSize:10,color:T.rose}}>-{fmt(SAAS.churnMrr[i],true)}</td>
                       <td style={{padding:"8px 10px",textAlign:"right",fontFamily:T.mono,fontSize:10,color:net>=0?T.emerald:T.rose,fontWeight:700}}>{net>=0?"+":""}{fmt(net,true)}</td>
                       <td style={{padding:"8px 10px",textAlign:"right",fontFamily:T.mono,fontSize:10,fontWeight:700,color:T.cyan}}>{fmt(SAAS.mrr[i],true)}</td>
-                      <td style={{padding:"8px 10px",textAlign:"right",fontFamily:T.mono,fontSize:10,color:mom>=0?T.emerald:T.rose}}>{i===0?"Ã¢ÂÂ":(mom>=0?"+":"")+pct(mom)}</td>
+                      <td style={{padding:"8px 10px",textAlign:"right",fontFamily:T.mono,fontSize:10,color:mom>=0?T.emerald:T.rose}}>{i===0?"â":(mom>=0?"+":"")+pct(mom)}</td>
                     </tr>
                   );
                 })}
@@ -4719,7 +4719,7 @@ function SaaSMetrics({aiContext}) {
         <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"16px 18px"}}>
           {/* Header + legend row */}
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
-            <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14}}>Ã°ÂÂÂ¥ Customer Growth Ã¢ÂÂ Acquired vs. Churned</div>
+            <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14}}>ð¥ Customer Growth â Acquired vs. Churned</div>
             <div style={{display:"flex",alignItems:"center",gap:12}}>
               <div style={{display:"flex",alignItems:"center",gap:5}}>
                 <div style={{width:10,height:10,borderRadius:2,background:T.emerald}}/>
@@ -4778,8 +4778,8 @@ function SaaSMetrics({aiContext}) {
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
           <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14}}>
             {[
-              {l:"Customer Acquisition Cost",v:fmt(latestCac),sub:"Blended CAC Â· Dec",trend:SAAS.cac,c:T.amber,better:"lower"},
-              {l:"Customer Lifetime Value",  v:fmt(latestLtv),sub:"Avg LTV Â· Dec",    trend:SAAS.ltv,c:T.emerald,better:"higher"},
+              {l:"Customer Acquisition Cost",v:fmt(latestCac),sub:"Blended CAC ÃÂ· Dec",trend:SAAS.cac,c:T.amber,better:"lower"},
+              {l:"Customer Lifetime Value",  v:fmt(latestLtv),sub:"Avg LTV ÃÂ· Dec",    trend:SAAS.ltv,c:T.emerald,better:"higher"},
               {l:"LTV : CAC Ratio",          v:`${(ltvCacRatio||0).toFixed(1)}x`,sub:ltvCacRatio>=3?"Healthy (3x+ target)":ltvCacRatio>=2?"Improving":"Below benchmark",trend:SAAS.ltv.map((v,i)=>safeDiv(v,SAAS.cac[i])),c:ltvCacRatio>=3?T.emerald:T.amber,better:"higher"},
             ].map(k=>(
               <div key={k.l} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"16px 18px"}}>
@@ -4791,7 +4791,7 @@ function SaaSMetrics({aiContext}) {
             ))}
           </div>
           <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"16px 18px"}}>
-            <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:14}}>Ã°ÂÂÂ Net Revenue Retention Trend</div>
+            <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:14}}>ð Net Revenue Retention Trend</div>
             <div style={{display:"flex",alignItems:"flex-end",gap:4,height:100}}>
               {(()=>{
                 const nrrMin=Math.min(...SAAS.nrr)*0.998, nrrMax=Math.max(...SAAS.nrr)*1.002;
@@ -4809,7 +4809,7 @@ function SaaSMetrics({aiContext}) {
                 });
               })()}
             </div>
-            <div style={{marginTop:6,fontSize:9,color:T.textDim,fontFamily:T.sans}}>NRR = (Closing MRR Ã¢ÂÂ Starting MRR without new customers) / Starting MRR. Target: Ã¢ÂÂ¥110%</div>
+            <div style={{marginTop:6,fontSize:9,color:T.textDim,fontFamily:T.sans}}>NRR = (Closing MRR â Starting MRR without new customers) / Starting MRR. Target: â¥110%</div>
           </div>
         </div>
       )}
@@ -4817,10 +4817,10 @@ function SaaSMetrics({aiContext}) {
   );
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ C-Suite Strategic Highlights & Watch Items Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ C-Suite Strategic Highlights & Watch Items ââââââââââââââââââÃÂ¢ÃÂÃÂ
 const CSUITE_ROLES = {
   CEO: {
-    key:"CEO", label:"Chief Executive Officer", icon:"Ã¢ÂÂ",
+    key:"CEO", label:"Chief Executive Officer", icon:"â",
     accent:T.amber, accentMuted:T.amberDim,
     lens:"Strategic Direction, Growth & Organizational Risk",
     summary:"FY 2024 delivered the company's strongest quarter on record in Q4, with compounding revenue growth and confirmed profitability. The CEO lens focuses on trajectory, competitive positioning, and removing organizational blockers for 2025.",
@@ -4833,26 +4833,26 @@ const CSUITE_ROLES = {
         body:"NRR above 110% means the customer base grows revenue without new acquisition spend. Expansion MRR of $1.6K in December shows the upsell motion is beginning to compound." },
       { tag:"Profitability", color:T.violet, kpi:"$85.7K Net",  kpiSub:"7.5% net margin FY 2024",
         title:"Profitability turned on in Q2 and kept expanding",
-        body:"Company moved from Q1 loss of Ã¢ÂÂ$2.4K to Q4 net income of $49.1K Ã¢ÂÂ a structural shift. EBITDA margin expanded from 1.8% to 18.0%, confirming operating leverage is real." },
+        body:"Company moved from Q1 loss of â$2.4K to Q4 net income of $49.1K â a structural shift. EBITDA margin expanded from 1.8% to 18.0%, confirming operating leverage is real." },
       { tag:"Scale",        color:T.amber,   kpi:"$1.5M ARR",   kpiSub:"LTV:CAC at 20.3x",
         title:"$1.5M ARR run rate entering 2025 with 510 customers",
-        body:"MRR grew 52.4% from $82K to $125K. A 20.3x LTV:CAC ratio signals efficient growth Ã¢ÂÂ every acquisition dollar returns $20+ in lifetime value." },
+        body:"MRR grew 52.4% from $82K to $125K. A 20.3x LTV:CAC ratio signals efficient growth â every acquisition dollar returns $20+ in lifetime value." },
     ],
     watch:[
       { priority:"critical", effort:"Medium", trend:"stable",    tag:"Revenue",  owner:"VP Sales",       due:"Mar 21",
-        impact:"Ã¢ÂÂ$73.4K vs FY plan",
+        impact:"â$73.4K vs FY plan",
         title:"Revenue missed budget in all four quarters",
-        body:"Every quarter ran 5Ã¢ÂÂ7% below plan. Root cause is new customer ramp timing, not a demand problem Ã¢ÂÂ but the budget model needs to be rebuilt before Q1 2025 opens.",
+        body:"Every quarter ran 5â7% below plan. Root cause is new customer ramp timing, not a demand problem â but the budget model needs to be rebuilt before Q1 2025 opens.",
         action:"VP Sales and FP&A to rebuild 2025 revenue model with realistic ramp curves by March 21. CEO to sign off before Q1 board reporting.",
         data:{ label:"Attainment vs Plan (%)", vals:[94,93,94,95], max:100 }},
       { priority:"high",     effort:"High",   trend:"worsening", tag:"Talent",   owner:"HR / Dept Heads",due:"Apr 1",
         impact:"Q1 capacity risk",
         title:"3 open reqs unfilled since mid-2024",
-        body:"Engineering, Sales (SDR), and Finance (FP&A Analyst) roles have been open 6Ã¢ÂÂ9 months. Each department is at ~100% capacity. 2025 targets cannot be hit without these hires.",
+        body:"Engineering, Sales (SDR), and Finance (FP&A Analyst) roles have been open 6â9 months. Each department is at ~100% capacity. 2025 targets cannot be hit without these hires.",
         action:"HR to deliver confirmed offer timelines for all 3 roles by April 1. CEO to escalate to board if any role misses Q1 hire date.",
         data:{ label:"Open Reqs", vals:[1,2,3,3], max:4 }},
       { priority:"medium",   effort:"Medium", trend:"worsening", tag:"Retention",owner:"CS Director",    due:"Q1 2025",
-        impact:"Churn ~1.8% Ã¢ÂÂ approaching 2% target",
+        impact:"Churn ~1.8% â approaching 2% target",
         title:"Customer churn is trending toward the 2.0% threshold in Q4",
         body:"Monthly churn reached ~1.8% in December (9 customers lost vs 491 opening). NRR is still healthy at 111.5%, but continued churn acceleration will erode the expansion revenue buffer.",
         action:"CS Director to complete at-risk account audit and present early warning playbook to CEO by end of Q1.",
@@ -4866,21 +4866,21 @@ const CSUITE_ROLES = {
     ],
   },
   CFO: {
-    key:"CFO", label:"Chief Financial Officer", icon:"Ã¢ÂÂ",
+    key:"CFO", label:"Chief Financial Officer", icon:"â",
     accent:T.emerald, accentMuted:T.emeraldDim,
     lens:"Financial Controls, Liquidity, Variance Accountability & Risk Exposure",
-    summary:"The FY 2024 income statement confirms operating leverage and self-funded growth Ã¢ÂÂ but systemic budget variance and specific receivables exposure require immediate corrective action before Q1 2025 closes.",
+    summary:"The FY 2024 income statement confirms operating leverage and self-funded growth â but systemic budget variance and specific receivables exposure require immediate corrective action before Q1 2025 closes.",
     wins:[
-      { tag:"Margin Control",     color:T.emerald, kpi:"56.9% GM",     kpiSub:"Held ÃÂ±0.4pp all four quarters",
+      { tag:"Margin Control",     color:T.emerald, kpi:"56.9% GM",     kpiSub:"Held ÃÂÃÂ±0.4pp all four quarters",
         title:"Gross margin held stable despite 81% revenue growth",
-        body:"COGS scaled linearly with revenue Ã¢ÂÂ no adverse leverage on inventory, direct labor, or shipping. Holding ~57% gross margin through rapid growth confirms disciplined procurement." },
+        body:"COGS scaled linearly with revenue â no adverse leverage on inventory, direct labor, or shipping. Holding ~57% gross margin through rapid growth confirms disciplined procurement." },
       { tag:"Liquidity",          color:T.cyan,    kpi:"+$86K Cash FY",kpiSub:"$142K â $228K, self-funded",
-        title:"The business funded its own growth Ã¢ÂÂ no equity raise needed",
+        title:"The business funded its own growth â no equity raise needed",
         body:"Opening cash of $142K grew to $228K through organic operations. Long-term debt reduced by $24.2K on schedule. Current ratio 3.74x and quick ratio 2.92x are both comfortably in the safe zone." },
       { tag:"Operating Leverage", color:T.amber,   kpi:"16.2pp EBITDA",kpiSub:"1.8% Q1 â 18.0% Q4",
         title:"EBITDA margin expanded 16 percentage points across the year",
-        body:"EBITDA grew from $3.8K in Q1 to $68.3K in Q4 Ã¢ÂÂ 1,697% increase on 81% revenue growth. Fixed cost absorption is accelerating with each incremental revenue dollar." },
-      { tag:"Debt Management",    color:T.violet,  kpi:"Ã¢ÂÂ$24.2K LTD",  kpiSub:"All covenants current",
+        body:"EBITDA grew from $3.8K in Q1 to $68.3K in Q4 â 1,697% increase on 81% revenue growth. Fixed cost absorption is accelerating with each incremental revenue dollar." },
+      { tag:"Debt Management",    color:T.violet,  kpi:"â$24.2K LTD",  kpiSub:"All covenants current",
         title:"Debt service is on schedule with no covenant risk",
         body:"Long-term debt tracking to plan ($185K â $160.8K). Short-term debt retired mid-year. No refinancing or emergency credit events occurred." },
     ],
@@ -4892,27 +4892,27 @@ const CSUITE_ROLES = {
         action:"CFO to initiate formal collections for both accounts by March 21. Apex Logistics reviewed for credit hold. Bad-debt provision assessed by Controller.",
         data:{ label:"90d+ AR Exposure ($)", vals:[0,2100,5800,7900], max:10000 }},
       { priority:"high",     effort:"Medium", trend:"stable",    tag:"Budget Variance",owner:"CFO / FP&A",        due:"Apr 1",
-        impact:"Ã¢ÂÂ$73.4K vs plan FY",
-        title:"Systematic 5Ã¢ÂÂ7% revenue miss signals a flawed budget model",
+        impact:"â$73.4K vs plan FY",
+        title:"Systematic 5â7% revenue miss signals a flawed budget model",
         body:"Consistent variance pattern suggests the FY 2024 model was over-optimistic on new logo ramp velocity. The FY 2025 budget must be rebuilt from revised assumptions.",
         action:"FP&A to conduct full variance post-mortem and deliver revised 2025 revenue assumptions to CFO by April 1. New budget presented to board by April 15.",
         data:{ label:"Revenue Attainment (%)", vals:[94,93,94,95], max:100 }},
       { priority:"high",     effort:"Low",    trend:"stable",    tag:"OpEx Control",  owner:"CMO / Controller",  due:"Mar 31",
         impact:"$8K over budget FY",
-        title:"Marketing overspent by ~$8K Ã¢ÂÂ ROI attribution unvalidated",
+        title:"Marketing overspent by ~$8K â ROI attribution unvalidated",
         body:"Marketing ran over budget in Q3 and Q4 (up to 9% above plan in Q4). Cannot approve 2025 marketing budget without formal attribution analysis.",
         action:"CMO to deliver full CAC attribution analysis to CFO by March 31 before 2025 budget is locked.",
         data:{ label:"Mktg Budget Attainment (%)", vals:[83,92,106,109], max:115 }},
       { priority:"medium",   effort:"Low",    trend:"stable",    tag:"DSO",           owner:"Controller",        due:"Q2 2025",
         impact:"$16K+ tied in receivables",
-        title:"DSO at 42 days Ã¢ÂÂ approaching industry ceiling",
+        title:"DSO at 42 days â approaching industry ceiling",
         body:"Days Sales Outstanding approaching the 45-day industry average. Combined with 90d+ exposure, the AR portfolio carries concentration risk.",
         action:"Controller to implement automated AR follow-up and propose revised payment terms for new contracts. Present to CFO in Q2 business review.",
         data:{ label:"DSO (Days)", vals:[38,40,41,42], max:50 }},
     ],
   },
   CIO: {
-    key:"CIO", label:"Chief Information Officer", icon:"Ã¢Â¬Â¡",
+    key:"CIO", label:"Chief Information Officer", icon:"â¬¡",
     accent:T.cyan, accentMuted:T.cyanDim,
     lens:"Technology Platform, Data Infrastructure, Integrations & Digital Capacity",
     summary:"FY 2024 saw the successful deployment of the FinanceOS FP&A platform with AI capabilities. Three critical integration gaps and a looming infrastructure scaling ceiling need to be addressed in H1 2025.",
@@ -4923,7 +4923,7 @@ const CSUITE_ROLES = {
       { tag:"Integration",   color:T.emerald, kpi:"2 connectors",    kpiSub:"QuickBooks + Plaid live",
         title:"QuickBooks and Plaid integrations are operational",
         body:"OAuth 2.0 QuickBooks sync and Plaid bank feed reconciliation eliminate ~12 hrs/month of manual data entry. Bank-to-book reconciliation is now automated." },
-      { tag:"Data Coverage", color:T.violet,  kpi:"Full SaaS stack", kpiSub:"MRR Â· NRR Â· LTV:CAC Â· ARR",
+      { tag:"Data Coverage", color:T.violet,  kpi:"Full SaaS stack", kpiSub:"MRR ÃÂ· NRR ÃÂ· LTV:CAC ÃÂ· ARR",
         title:"Complete SaaS metric pipeline built from scratch this year",
         body:"MRR waterfall, NRR, LTV:CAC, CAC, churn cohorts, and ARR tracking did not exist as automated pipelines at the start of FY 2024. All are now tracked monthly." },
       { tag:"Cost Control",  color:T.amber,   kpi:"$26.4K total",    kpiSub:"+$400 vs prior year (+1.5%)",
@@ -4939,19 +4939,19 @@ const CSUITE_ROLES = {
         data:{ label:"Eng Headcount vs Target (FTE)", vals:[4,4,4,3], max:5 }},
       { priority:"high",     effort:"Medium", trend:"stable",    tag:"Integration", owner:"CIO / VP Sales",due:"Q2 2025",
         impact:"Revenue forecast blind spot",
-        title:"No CRM integration Ã¢ÂÂ pipeline data is disconnected from financials",
+        title:"No CRM integration â pipeline data is disconnected from financials",
         body:"Without Salesforce or HubSpot integration, revenue budget variances cannot be diagnosed at the deal or segment level. Every budget miss is a black box.",
         action:"CIO to evaluate CRM integration options and deliver scoping document to VP Sales by end of Q1. Target go-live: Q2 2025.",
         data:null},
       { priority:"high",     effort:"Medium", trend:"stable",    tag:"Integration", owner:"CIO / HR",      due:"Q2 2025",
-        impact:"2Ã¢ÂÂ3 week headcount data lag",
-        title:"Payroll system not connected Ã¢ÂÂ headcount data manually entered",
-        body:"ADP/Rippling integration does not exist. Headcount and payroll actuals are manually entered, creating a 2Ã¢ÂÂ3 week lag in headcount variance analysis during active hiring cycles.",
+        impact:"2â3 week headcount data lag",
+        title:"Payroll system not connected â headcount data manually entered",
+        body:"ADP/Rippling integration does not exist. Headcount and payroll actuals are manually entered, creating a 2â3 week lag in headcount variance analysis during active hiring cycles.",
         action:"CIO and HR to align on payroll system and begin integration scoping. Target: automated headcount sync by Q2 2025.",
         data:null},
       { priority:"medium",   effort:"High",   trend:"stable",    tag:"Infrastructure",owner:"CIO",         due:"Q3 2025",
         impact:"Scaling ceiling at ~$2M ARR",
-        title:"No data warehouse Ã¢ÂÂ direct API architecture has a growth ceiling",
+        title:"No data warehouse â direct API architecture has a growth ceiling",
         body:"Current architecture queries QuickBooks and Plaid APIs directly. This works at $1.5M ARR but will create latency and data quality issues as transaction volume grows.",
         action:"CIO to complete data architecture review by Q2 2025 and present warehouse options (BigQuery/Snowflake/DuckDB). Implementation target: Q3 2025.",
         data:null},
@@ -4966,9 +4966,9 @@ const CPRI = {
   low:     { label:"LOW",      fg:T.textDim, bg:"#1A2234",    border:T.textDim+"35" },
 };
 const CTREND = {
-  worsening:{ g:"Ã¢ÂÂ", label:"Worsening", c:T.rose    },
+  worsening:{ g:"â", label:"Worsening", c:T.rose    },
   stable:   { g:"â", label:"Stable",    c:T.amber   },
-  improving:{ g:"Ã¢ÂÂ", label:"Improving", c:T.emerald },
+  improving:{ g:"â", label:"Improving", c:T.emerald },
 };
 const CEFFORT = { High:T.rose, Medium:T.amber, Low:T.emerald };
 
@@ -4981,7 +4981,7 @@ function CsuiteStrategicPanel() {
 
   return (
     <div>
-      {/* Ã¢ÂÂÃ¢ÂÂ Role selector Ã¢ÂÂÃ¢ÂÂ */}
+      {/* ââ Role selector ââ */}
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,overflow:"hidden",marginBottom:20}}>
         {Object.values(CSUITE_ROLES).map((r,i)=>{
           const active = roleKey===r.key;
@@ -5014,7 +5014,7 @@ function CsuiteStrategicPanel() {
         })}
       </div>
 
-      {/* Ã¢ÂÂÃ¢ÂÂ Role lens summary Ã¢ÂÂÃ¢ÂÂ */}
+      {/* ââ Role lens summary ââ */}
       <div style={{background:`linear-gradient(135deg,${ac}10,${ac}04)`,border:`1px solid ${ac}28`,borderLeft:`3px solid ${ac}`,borderRadius:"0 10px 10px 0",padding:"12px 18px",marginBottom:20}}>
         <div style={{display:"flex",alignItems:"flex-start",gap:12}}>
           <span style={{fontFamily:T.mono,fontSize:9,color:ac,letterSpacing:3,textTransform:"uppercase",whiteSpace:"nowrap",marginTop:2}}>{R.key} VIEW</span>
@@ -5023,9 +5023,9 @@ function CsuiteStrategicPanel() {
         </div>
       </div>
 
-      {/* Ã¢ÂÂÃ¢ÂÂ Strategic wins Ã¢ÂÂÃ¢ÂÂ */}
+      {/* ââ Strategic wins ââ */}
       <div style={{marginBottom:4}}>
-        <CSuiteRowLabel color={T.emerald} label={`${R.key} Â· Strategic Wins`} sub="Four highest-signal positives from FY 2024"/>
+        <CSuiteRowLabel color={T.emerald} label={`${R.key} ÃÂ· Strategic Wins`} sub="Four highest-signal positives from FY 2024"/>
       </div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:20}}>
         {R.wins.map((w,i)=>(
@@ -5043,8 +5043,8 @@ function CsuiteStrategicPanel() {
         ))}
       </div>
 
-      {/* Ã¢ÂÂÃ¢ÂÂ Watch items Ã¢ÂÂÃ¢ÂÂ */}
-      <CSuiteRowLabel color={T.rose} label={`${R.key} Â· Watch Items & Required Actions`} sub="Issues ordered by priority and business impact"/>
+      {/* ââ Watch items ââ */}
+      <CSuiteRowLabel color={T.rose} label={`${R.key} ÃÂ· Watch Items & Required Actions`} sub="Issues ordered by priority and business impact"/>
       <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:20}}>
         {R.watch.map((w,i)=>{
           const p=CPRI[w.priority], tr=CTREND[w.trend]||CTREND.stable, isOpen=expanded===i;
@@ -5068,7 +5068,7 @@ function CsuiteStrategicPanel() {
                     <span style={{fontFamily:T.sans,fontSize:11,fontWeight:600,color:T.text}}>{w.title}</span>
                     <span style={{fontFamily:T.mono,fontSize:7,color:ac,letterSpacing:1,background:ac+"14",border:`1px solid ${ac}25`,borderRadius:3,padding:"1px 5px",flexShrink:0,textTransform:"uppercase"}}>{w.tag}</span>
                   </div>
-                  {!isOpen&&<div style={{fontFamily:T.sans,fontSize:9,color:T.textDim,marginTop:3}}>{w.body.substring(0,115)}Ã¢ÂÂ¦</div>}
+                  {!isOpen&&<div style={{fontFamily:T.sans,fontSize:9,color:T.textDim,marginTop:3}}>{w.body.substring(0,115)}â¦</div>}
                 </div>
                 <div style={{textAlign:"right",flexShrink:0}}>
                   <div style={{fontFamily:T.mono,fontSize:7,color:T.textDim,letterSpacing:1.5,marginBottom:2}}>IMPACT</div>
@@ -5082,7 +5082,7 @@ function CsuiteStrategicPanel() {
                   <div style={{fontFamily:T.mono,fontSize:7,color:T.textDim,letterSpacing:1.5,marginBottom:2}}>OWNER</div>
                   <div style={{fontFamily:T.sans,fontSize:10,color:T.textMid}}>{w.owner}</div>
                 </div>
-                <div style={{fontFamily:T.mono,fontSize:10,color:T.textDim,flexShrink:0,transform:isOpen?"rotate(180deg)":"none",transition:"transform 0.2s",userSelect:"none"}}>Ã¢ÂÂ</div>
+                <div style={{fontFamily:T.mono,fontSize:10,color:T.textDim,flexShrink:0,transform:isOpen?"rotate(180deg)":"none",transition:"transform 0.2s",userSelect:"none"}}>â</div>
               </div>
 
               {/* Expanded detail */}
@@ -5092,7 +5092,7 @@ function CsuiteStrategicPanel() {
                     <p style={{fontFamily:T.sans,fontSize:11,color:T.textMid,lineHeight:1.8,marginBottom:14}}>{w.body}</p>
                     {w.data&&(
                       <div style={{marginBottom:14}}>
-                        <div style={{fontFamily:T.mono,fontSize:8,color:T.textDim,letterSpacing:2,marginBottom:8}}>{w.data.label} Ã¢ÂÂ Q1 â Q4</div>
+                        <div style={{fontFamily:T.mono,fontSize:8,color:T.textDim,letterSpacing:2,marginBottom:8}}>{w.data.label} â Q1 â Q4</div>
                         <div style={{display:"flex",gap:8,alignItems:"flex-end",height:44}}>
                           {w.data.vals.map((v,qi)=>{
                             const qcs=[T.amber,T.cyan,T.emerald,T.violet];
@@ -5133,8 +5133,8 @@ function CsuiteStrategicPanel() {
         })}
       </div>
 
-      {/* Ã¢ÂÂÃ¢ÂÂ Priority ÃÂ Effort matrix Ã¢ÂÂÃ¢ÂÂ */}
-      <CSuiteRowLabel color={T.textDim} label="Priority ÃÂ Effort Matrix" sub="Resource allocation reference for leadership team"/>
+      {/* ââ Priority ÃÂÃÂ Effort matrix ââ */}
+      <CSuiteRowLabel color={T.textDim} label="Priority ÃÂÃÂ Effort Matrix" sub="Resource allocation reference for leadership team"/>
       <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,padding:"18px 22px"}}>
         <div style={{display:"grid",gridTemplateColumns:"88px 1fr 1fr 1fr",gap:5}}>
           <div/>
@@ -5161,10 +5161,10 @@ function CsuiteStrategicPanel() {
               return (
                 <div key={`${prio}-${eff}`} style={{background:cellBg,border:`1px solid ${cellBorder}`,borderRadius:7,padding:"8px 10px",minHeight:52}}>
                   {cellItems.length===0
-                    ? <span style={{fontFamily:T.mono,fontSize:9,color:T.border,opacity:0.5}}>Ã¢ÂÂ</span>
+                    ? <span style={{fontFamily:T.mono,fontSize:9,color:T.border,opacity:0.5}}>â</span>
                     : cellItems.map((item,ii)=>(
                         <div key={ii} style={{fontFamily:T.sans,fontSize:9,color:CPRI[prio].fg,fontWeight:600,lineHeight:1.3,marginBottom:ii<cellItems.length-1?4:0}}>
-                          {item.title.length>40?item.title.substring(0,40)+"Ã¢ÂÂ¦":item.title}
+                          {item.title.length>40?item.title.substring(0,40)+"â¦":item.title}
                         </div>
                       ))
                   }
@@ -5199,9 +5199,9 @@ function CSuiteRowLabel({color,label,sub}) {
   );
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Main App Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââÃÂ¢ÃÂÃÂ Main App ââââââââââââââââââââââââââââââââââââââââââââââââââââÃÂ¢ÃÂÃÂ
 function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
-  // Ã¢ÂÂÃ¢ÂÂ All useState hooks at the top Ã¢ÂÂ preserves hook order across renders Ã¢ÂÂÃ¢ÂÂ
+  // ââ All useState hooks at the top â preserves hook order across renders ââ
   const [tab,setTab]                         = useState("pnl");
   const [plan,setPlan]                       = useState(initialPlan);
   const [aiPanelOpen, setAiPanelOpen]        = useState(true);
@@ -5215,7 +5215,7 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
   // Sync if parent refreshes plan (e.g. post-Stripe redirect)
   useEffect(() => { setPlan(normalizePlan(initialPlan)); }, [initialPlan]);
 
-  // Ã¢ÂÂÃ¢ÂÂ Core computations Ã¢ÂÂÃ¢ÂÂ
+  // ââ Core computations ââ
   const pnl    = useMemo(()=>computePnL(BASE_PNL), []);
   const budPnL = useMemo(()=>computePnL(BUDGET_PNL), []);
 
@@ -5230,7 +5230,7 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
     ytdMarketing:sum(BASE_PNL.marketing), ytdRent:sum(BASE_PNL.rent),
   };
 
-  // Ã¢ÂÂÃ¢ÂÂ Cash flow Ã¢ÂÂÃ¢ÂÂ
+  // ââ Cash flow ââ
   const cfInflows  = CF.inflows.collections.map((v,i)=>v+CF.inflows.newContracts[i]+CF.inflows.recurring[i]+CF.inflows.other[i]);
   const cfOutflows = CF.outflows.payroll.map((v,i)=>v+CF.outflows.vendors[i]+CF.outflows.rent[i]+CF.outflows.taxes[i]+CF.outflows.debtService[i]+CF.outflows.capex[i]+CF.outflows.other[i]);
   const cfBal = cfInflows.reduce((acc,v,i)=>{
@@ -5240,26 +5240,26 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
   },[]);
   const cfMin=Math.min(...cfBal), cfMinWk=cfBal.indexOf(cfMin)+1;
 
-  // Ã¢ÂÂÃ¢ÂÂ AR Ã¢ÂÂÃ¢ÂÂ
+  // ââ AR ââ
   const arClients=AR_CLIENTS.map(c=>({...c,total:c.current+c.d30+c.d60+c.d90+c.d90p}));
   const arTot=sum(arClients.map(c=>c.total));
 
-  // Ã¢ÂÂÃ¢ÂÂ Regional Ã¢ÂÂÃ¢ÂÂ
+  // ââ Regional ââ
   const regions=[...new Set(REGIONAL_CLIENTS.map(c=>c.region))];
   const totalRev=sum(REGIONAL_CLIENTS.map(c=>c.revenue));
   const avgMargin=safeDiv(sum(REGIONAL_CLIENTS.map(c=>c.margin*c.revenue)),totalRev);
   const avgNps=Math.round(safeDiv(sum(REGIONAL_CLIENTS.map(c=>c.nps)),REGIONAL_CLIENTS.length));
 
-  // Ã¢ÂÂÃ¢ÂÂ Scenarios Ã¢ÂÂÃ¢ÂÂ
+  // ââ Scenarios ââ
   const scenRes=useMemo(()=>({bear:computePnL(BASE_PNL,SCENARIOS_DEF.bear),base:computePnL(BASE_PNL,SCENARIOS_DEF.base),bull:computePnL(BASE_PNL,SCENARIOS_DEF.bull)}), []);
   const sAn=r=>sum(r.map(m=>m.net)), sAr=r=>sum(r.map(m=>m.rev));
 
-  // Ã¢ÂÂÃ¢ÂÂ BvA context Ã¢ÂÂÃ¢ÂÂ
+  // ââ BvA context ââ
   const revVariance  = sum(pnl.map(m=>m.rev))  - sum(budPnL.map(m=>m.rev));
   const opexVariance = sum(pnl.map(m=>m.opex)) - sum(budPnL.map(m=>m.opex));
   const netVariance  = sum(pnl.map(m=>m.net))  - sum(budPnL.map(m=>m.net));
 
-  // Ã¢ÂÂÃ¢ÂÂ Balance sheet context Ã¢ÂÂÃ¢ÂÂ
+  // ââ Balance sheet context ââ
   const BS=BALANCE_SHEET, mo=11;
   const bsCurrA = BS.cash[mo]+BS.accountsReceivable[mo]+BS.inventory_bs[mo]+BS.prepaidExpenses[mo];
   const bsTotalA = bsCurrA+(BS.ppe_gross[mo]-BS.accumDeprec[mo])+BS.otherAssets[mo];
@@ -5269,48 +5269,48 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
   const bsCurrRatio=safeDiv(bsCurrA,bsCurrL,1);
   const bsDebtToEq=safeDiv(bsTotalL,bsEquity);
 
-  // Ã¢ÂÂÃ¢ÂÂ Headcount context Ã¢ÂÂÃ¢ÂÂ
+  // ââ Headcount context ââ
   const allEmp=HEADCOUNT_DATA.departments.flatMap(d=>d.employees);
   const activeEmp=allEmp.filter(e=>e.status==="active");
   const openReqs=allEmp.filter(e=>e.status==="open");
   const totalPayrollCost=activeEmp.reduce((s,e)=>s+(e.salary*(1+e.benefits)),0);
 
-  // Ã¢ÂÂÃ¢ÂÂ SaaS context Ã¢ÂÂÃ¢ÂÂ
+  // ââ SaaS context ââ
   const latestMrr=SAAS.mrr[11], latestNrr=SAAS.nrr[11];
   const latestCac=SAAS.cac[11], latestLtv=SAAS.ltv[11];
   const churnRate=safeDiv(SAAS.churnCust[11],SAAS.customers[10]);
 
-  // Ã¢ÂÂÃ¢ÂÂ Anomaly Detection Engine Ã¢ÂÂÃ¢ÂÂ
+  // ââ Anomaly Detection Engine ââ
   const buildAnomalies = () => {
     const items = [];
     // Revenue vs budget miss
     const revMissPct = safeDiv(revVariance, sum(budPnL.map(m=>m.rev)));
-    if(revMissPct < -0.05) items.push({severity:"critical", emoji:"Ã°ÂÂÂ", title:"Revenue below budget", detail:`YTD revenue is ${pct(Math.abs(revMissPct))} below budget Ã¢ÂÂ a ${fmt(Math.abs(revVariance),true)} shortfall. Product Sales are the primary driver of the miss.`, action:"Review pricing strategy & pipeline in Scenario Planner"});
+    if(revMissPct < -0.05) items.push({severity:"critical", emoji:"ð", title:"Revenue below budget", detail:`YTD revenue is ${pct(Math.abs(revMissPct))} below budget â a ${fmt(Math.abs(revVariance),true)} shortfall. Product Sales are the primary driver of the miss.`, action:"Review pricing strategy & pipeline in Scenario Planner"});
     // Marketing overspend
     const mktActual=sum(BASE_PNL.marketing), mktBudget=sum(BUDGET_PNL.marketing);
-    if(mktActual>mktBudget*1.08) items.push({severity:"warning", emoji:"Ã°ÂÂÂ¢", title:"Marketing over budget", detail:`Marketing spend is ${pct(safeDiv(mktActual-mktBudget,mktBudget))} over budget (${fmt(mktActual,true)} actual vs ${fmt(mktBudget,true)} budget). Check ROI on Q4 campaigns.`, action:"Analyze channel ROI in Dept Breakdown"});
+    if(mktActual>mktBudget*1.08) items.push({severity:"warning", emoji:"ð¢", title:"Marketing over budget", detail:`Marketing spend is ${pct(safeDiv(mktActual-mktBudget,mktBudget))} over budget (${fmt(mktActual,true)} actual vs ${fmt(mktBudget,true)} budget). Check ROI on Q4 campaigns.`, action:"Analyze channel ROI in Dept Breakdown"});
     // High AR overdue
     const overdue90=sum(AR_CLIENTS.map(c=>c.d90+c.d90p));
-    if(overdue90>5000) items.push({severity:"critical", emoji:"Ã¢ÂÂ Ã¯Â¸Â", title:"AR 90+ days overdue", detail:`${fmt(overdue90,true)} is 90+ days past due. Apex Logistics ($7,900) and Cascade Financial ($900) are primary risks. Collection probability drops below 50% after 90 days.`, action:"Prioritize collections call list in AR Aging"});
+    if(overdue90>5000) items.push({severity:"critical", emoji:"â ï¸", title:"AR 90+ days overdue", detail:`${fmt(overdue90,true)} is 90+ days past due. Apex Logistics ($7,900) and Cascade Financial ($900) are primary risks. Collection probability drops below 50% after 90 days.`, action:"Prioritize collections call list in AR Aging"});
     // Cash crunch risk
-    if(cfMin<80000) items.push({severity:"warning", emoji:"Ã°ÂÂÂ§", title:"Cash balance dips low", detail:`Projected minimum cash balance hits ${fmt(cfMin,true)} at Week ${cfMinWk}. This is driven by tax payments and CapEx overlap. Consider timing adjustments.`, action:"Review weekly detail in Cash Flow tab"});
+    if(cfMin<80000) items.push({severity:"warning", emoji:"ð§", title:"Cash balance dips low", detail:`Projected minimum cash balance hits ${fmt(cfMin,true)} at Week ${cfMinWk}. This is driven by tax payments and CapEx overlap. Consider timing adjustments.`, action:"Review weekly detail in Cash Flow tab"});
     // Churn rate
-    if(churnRate>0.018) items.push({severity:"warning", emoji:"Ã°ÂÂÂ", title:"Customer churn approaching target", detail:`Monthly customer churn is ${pct(churnRate)} vs 2.0% target. ${SAAS.churnCust[11]} customers churned in December. Review at-risk segments before churn accelerates.`, action:"Deep-dive customer cohorts in SaaS Metrics"});
+    if(churnRate>0.018) items.push({severity:"warning", emoji:"ð", title:"Customer churn approaching target", detail:`Monthly customer churn is ${pct(churnRate)} vs 2.0% target. ${SAAS.churnCust[11]} customers churned in December. Review at-risk segments before churn accelerates.`, action:"Deep-dive customer cohorts in SaaS Metrics"});
     // LTV:CAC health
     const ltvCac=latestLtv/latestCac;
-    if(ltvCac<3) items.push({severity:"warning", emoji:"Ã°ÂÂÂ¯", title:"LTV:CAC ratio below 3x", detail:`Current LTV:CAC is ${ltvCac.toFixed(1)}x Ã¢ÂÂ below the 3x benchmark. CAC has been volatile. Consider reducing acquisition spend or improving onboarding retention.`, action:"Analyze unit economics in SaaS Metrics"});
+    if(ltvCac<3) items.push({severity:"warning", emoji:"ð¯", title:"LTV:CAC ratio below 3x", detail:`Current LTV:CAC is ${ltvCac.toFixed(1)}x â below the 3x benchmark. CAC has been volatile. Consider reducing acquisition spend or improving onboarding retention.`, action:"Analyze unit economics in SaaS Metrics"});
     // Working capital
-    if(bsCurrRatio<1.5) items.push({severity:"info", emoji:"Ã°ÂÂÂ¦", title:"Current ratio trending low", detail:`Current ratio is ${bsCurrRatio.toFixed(2)}x. While above the 1.0x floor, approaching 1.5x warrants attention Ã¢ÂÂ especially with the short-term debt maturity.`, action:"Review Balance Sheet liquidity ratios"});
+    if(bsCurrRatio<1.5) items.push({severity:"info", emoji:"ð¦", title:"Current ratio trending low", detail:`Current ratio is ${bsCurrRatio.toFixed(2)}x. While above the 1.0x floor, approaching 1.5x warrants attention â especially with the short-term debt maturity.`, action:"Review Balance Sheet liquidity ratios"});
     // Net margin compression
     const netM=aiCtx.ytdNetMargin;
-    if(netM<0.08) items.push({severity:"info", emoji:"Ã°ÂÂÂ", title:"Net margin compression", detail:`Net margin at ${pct(netM)} is below the 8% healthy threshold. Payroll growth and marketing spend are outpacing revenue. Review P&L cost structure.`, action:"Examine expense trends in P&L Breakdown"});
+    if(netM<0.08) items.push({severity:"info", emoji:"ð", title:"Net margin compression", detail:`Net margin at ${pct(netM)} is below the 8% healthy threshold. Payroll growth and marketing spend are outpacing revenue. Review P&L cost structure.`, action:"Examine expense trends in P&L Breakdown"});
     // NRR below 110%
-    if(latestNrr<1.10) items.push({severity:"info", emoji:"Ã°ÂÂÂ", title:"NRR below 110% benchmark", detail:`Net Revenue Retention of ${pct(latestNrr-1)} is below best-in-class SaaS benchmark of 110%+. Focus on expansion revenue and reducing contraction MRR.`, action:"Review expansion MRR in SaaS Waterfall"});
+    if(latestNrr<1.10) items.push({severity:"info", emoji:"ð", title:"NRR below 110% benchmark", detail:`Net Revenue Retention of ${pct(latestNrr-1)} is below best-in-class SaaS benchmark of 110%+. Focus on expansion revenue and reducing contraction MRR.`, action:"Review expansion MRR in SaaS Waterfall"});
     return items;
   };
   const anomalies = useMemo(()=>buildAnomalies(), [revVariance, cfMin, churnRate, latestNrr, latestLtv, latestCac, bsCurrRatio]);
 
-  // Ã¢ÂÂÃ¢ÂÂ Tab-aware AI contexts Ã¢ÂÂÃ¢ÂÂ
+  // ââ Tab-aware AI contexts ââ
   const tabCtx = {
     pnl:          aiCtx,
     scenario:     {...aiCtx, bearAnnualNet:sAn(scenRes.bear), baseAnnualNet:sAn(scenRes.base), bullAnnualNet:sAn(scenRes.bull), bearRevenue:sAr(scenRes.bear), bullRevenue:sAr(scenRes.bull), activeScenario:"base"},
@@ -5328,23 +5328,23 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
   };
 
   const TABS=[
-    {id:"pnl",         label:"P&L",            icon:"Ã°ÂÂÂ", group:"core",  feature:FEATURES.PNL},
-    {id:"bva",         label:"Budget vs Actual",icon:"Ã°ÂÂÂ", group:"core",  feature:FEATURES.BUDGET_VS_ACTUAL},
-    {id:"scenario",    label:"Scenarios",       icon:"Ã°ÂÂÂ®", group:"core",  feature:FEATURES.SCENARIOS},
-    {id:"cashflow",    label:"Cash Flow",       icon:"Ã°ÂÂÂ§", group:"core",  feature:FEATURES.CASH_FLOW},
-    {id:"balancesheet",label:"Balance Sheet",   icon:"Ã°ÂÂÂ¦", group:"core",  feature:FEATURES.BALANCE_SHEET},
-    {id:"headcount",   label:"Headcount",       icon:"Ã°ÂÂÂ¥", group:"core",  feature:FEATURES.HEADCOUNT},
-    {id:"saas",        label:"SaaS Metrics",    icon:"Ã°ÂÂÂ", group:"core",  feature:FEATURES.SAAS_METRICS},
-    {id:"ar",          label:"AR Aging",        icon:"Ã°ÂÂÂ¬", group:"ops",   feature:FEATURES.AR_AGING},
-    {id:"regional",    label:"Clients",         icon:"Ã°ÂÂÂºÃ¯Â¸Â", group:"ops",   feature:FEATURES.CLIENTS},
-    {id:"csuite",      label:"C-Suite Report",  icon:"Ã¢ÂÂ",  group:"ops",   feature:FEATURES.CSUITE_REPORT},
-    {id:"cfo-sim",     label:"CFO Simulation",  icon:"Ã°ÂÂÂ¯", group:"ops",   feature:FEATURES.CFO_SIMULATION},
-    {id:"budgeting",   label:"Budgeting",        icon:"Ã°ÂÂÂ¼", group:"ops",   feature:FEATURES.BUDGETING},
-    {id:"integrations",label:"Integrations",    icon:"Ã°ÂÂÂ", group:"ops",   feature:FEATURES.INTEGRATIONS_READ},
-    {id:"pricing",     label:"Pricing",         icon:"Ã°ÂÂÂ³", group:"ops",   feature:null},
+    {id:"pnl",         label:"P&L",            icon:"ð", group:"core",  feature:FEATURES.PNL},
+    {id:"bva",         label:"Budget vs Actual",icon:"ð", group:"core",  feature:FEATURES.BUDGET_VS_ACTUAL},
+    {id:"scenario",    label:"Scenarios",       icon:"ð®", group:"core",  feature:FEATURES.SCENARIOS},
+    {id:"cashflow",    label:"Cash Flow",       icon:"ð§", group:"core",  feature:FEATURES.CASH_FLOW},
+    {id:"balancesheet",label:"Balance Sheet",   icon:"ð¦", group:"core",  feature:FEATURES.BALANCE_SHEET},
+    {id:"headcount",   label:"Headcount",       icon:"ð¥", group:"core",  feature:FEATURES.HEADCOUNT},
+    {id:"saas",        label:"SaaS Metrics",    icon:"ð", group:"core",  feature:FEATURES.SAAS_METRICS},
+    {id:"ar",          label:"AR Aging",        icon:"ð¬", group:"ops",   feature:FEATURES.AR_AGING},
+    {id:"regional",    label:"Clients",         icon:"ðºï¸", group:"ops",   feature:FEATURES.CLIENTS},
+    {id:"csuite",      label:"C-Suite Report",  icon:"â",  group:"ops",   feature:FEATURES.CSUITE_REPORT},
+    {id:"cfo-sim",     label:"CFO Simulation",  icon:"ð¯", group:"ops",   feature:FEATURES.CFO_SIMULATION},
+    {id:"budgeting",   label:"Budgeting",        icon:"ð¼", group:"ops",   feature:FEATURES.BUDGETING},
+    {id:"integrations",label:"Integrations",    icon:"ð", group:"ops",   feature:FEATURES.INTEGRATIONS_READ},
+    {id:"pricing",     label:"Pricing",         icon:"ð³", group:"ops",   feature:null},
   ];
 
-  // Ã¢ÂÂÃ¢ÂÂ Plan capability gates Ã¢ÂÂ derived from feature-flag system Ã¢ÂÂÃ¢ÂÂ
+  // ââ Plan capability gates â derived from feature-flag system ââ
   const canUseScenarios = hasFeature(plan, FEATURES.SCENARIOS);
   const canUseHeadcount = hasFeature(plan, FEATURES.HEADCOUNT);
   const canUseSaaS      = hasFeature(plan, FEATURES.SAAS_METRICS);
@@ -5360,37 +5360,37 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
   const showPanel=["pnl","scenario","cashflow","ar","regional","bva","balancesheet","headcount","saas","csuite","cfo-sim"].includes(tab);
   const criticalCount=canUseAlerts ? anomalies.filter(a=>a.severity==="critical").length : 0;
 
-  // Ã¢ÂÂÃ¢ÂÂ Starter upgrade banner Ã¢ÂÂ computed once per render, used in JSX Ã¢ÂÂÃ¢ÂÂ
+  // ââ Starter upgrade banner â computed once per render, used in JSX ââ
   const starterBanner = (!bannerDismissed && false && tab!=="pricing") ? (()=>{
     const isProTab=["scenario","headcount","saas","cfo-sim","csuite","budgeting"].includes(tab);
     const isEntTab=false; // All key features are now in Professional
     if(isEntTab) return {
-      color: T.violet, icon:"Ã¢ÂÂ",
+      color: T.violet, icon:"â",
       headline:"Enterprise feature",
-      text:"C-Suite Reports are exclusive to the Enterprise plan Ã¢ÂÂ executive-ready summaries for your CEO, CFO, and CIO.",
+      text:"C-Suite Reports are exclusive to the Enterprise plan â executive-ready summaries for your CEO, CFO, and CIO.",
       cta:"Contact Sales",
     };
     if(isProTab) {
       const cfg = {
-        scenario:{headline:"You're 1 click from Scenario Planning",text:"Test pricing, hiring, and revenue changes before committing Ã¢ÂÂ Bear, Base, and Bull case in one view."},
+        scenario:{headline:"You're 1 click from Scenario Planning",text:"Test pricing, hiring, and revenue changes before committing â Bear, Base, and Bull case in one view."},
         headcount:{headline:"Plan your next hire before you post the role",text:"See the true cost of every headcount decision and track payroll against budget automatically."},
-        saas:{headline:"See what's driving your MRR growth",text:"Track churn, NRR, and CAC:LTV in real time. Investors ask for these metrics Ã¢ÂÂ now you'll have them ready."},
-        "cfo-sim":{headline:"Get a CFO's honest verdict on your dashboard",text:"See how a real CFO would evaluate your financials, workflows, and readiness to compete Ã¢ÂÂ across a simulated 30-day review."},
+        saas:{headline:"See what's driving your MRR growth",text:"Track churn, NRR, and CAC:LTV in real time. Investors ask for these metrics â now you'll have them ready."},
+        "cfo-sim":{headline:"Get a CFO's honest verdict on your dashboard",text:"See how a real CFO would evaluate your financials, workflows, and readiness to compete â across a simulated 30-day review."},
         csuite:{headline:"C-Suite Report is now on Professional",text:"Get executive-ready CEO, CFO, and CIO summaries. Share with leadership and investors directly from FinanceOS."},
-        budgeting:{headline:"Build your first budget in minutes",text:"Create department budgets, route them for approval, and track actuals vs plan Ã¢ÂÂ all in one place."},
+        budgeting:{headline:"Build your first budget in minutes",text:"Create department budgets, route them for approval, and track actuals vs plan â all in one place."},
       }[tab]||{headline:"Professional feature",text:"Upgrade to unlock this and 8 other planning tools."};
       return { color: T.cyan, icon:"â", ...cfg, cta:"Start 14-Day Free Trial" };
     }
     if(tab==="integrations") return {
-      color:T.amber, icon:"Ã°ÂÂÂ",
+      color:T.amber, icon:"ð",
       headline:"Live sync requires Professional",
       text:"You're viewing read-only integration data. Upgrade to connect QuickBooks and Plaid and sync live financial data.",
       cta:"Upgrade to Professional",
     };
     return {
-      color: T.teal, icon:"Ã°ÂÂÂ±",
+      color: T.teal, icon:"ð±",
       headline:"You're on Starter",
-      text:"Unlock Scenario Planning, SaaS Metrics, Headcount Planning, anomaly alerts, and full AI FP&A Ã¢ÂÂ all for less than a bookkeeper.",
+      text:"Unlock Scenario Planning, SaaS Metrics, Headcount Planning, anomaly alerts, and full AI FP&A â all for less than a bookkeeper.",
       cta:"See what's included â",
     };
   })() : null;
@@ -5423,13 +5423,13 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
         .skeleton{background:linear-gradient(90deg,${T.surface} 25%,${T.border} 50%,${T.surface} 75%);background-size:200% 100%;animation:shimmer 1.4s infinite}
       `}</style>
 
-      {/* Ã¢ÂÂÃ¢ÂÂ Top Nav Ã¢ÂÂÃ¢ÂÂ */}
+      {/* ââ Top Nav ââ */}
       <div style={{background:`linear-gradient(180deg,${T.surface} 0%,${T.bg}ee 100%)`,borderBottom:`1px solid ${T.border}`,padding:"0 24px",display:"flex",alignItems:"stretch",position:"sticky",top:0,zIndex:100,flexDirection:"column",backdropFilter:"blur(12px)"}}>
         {/* Logo + KPIs row */}
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           {/* Logo */}
           <div style={{display:"flex",alignItems:"center",gap:9,flexShrink:0,paddingRight:16,borderRight:`1px solid ${T.border}`,height:60,alignSelf:"stretch",alignContent:"center",flexWrap:"wrap"}}>
-            <div style={{width:38,height:38,borderRadius:10,background:`linear-gradient(135deg,${T.cyan},${T.violet})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,boxShadow:`0 0 20px ${T.cyan}50`,flexShrink:0}}>Ã¢Â¬Â¡</div>
+            <div style={{width:38,height:38,borderRadius:10,background:`linear-gradient(135deg,${T.cyan},${T.violet})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,boxShadow:`0 0 20px ${T.cyan}50`,flexShrink:0}}>â¬¡</div>
             <div>
               <div style={{color:T.text,fontFamily:T.display,fontWeight:800,fontSize:17,lineHeight:1,letterSpacing:"-0.3px"}}>FinanceOS</div>
               <div style={{color:T.textDim,fontFamily:T.mono,fontSize:8,letterSpacing:2,marginTop:3,textTransform:"uppercase"}}>FP&A SUITE</div>
@@ -5453,7 +5453,7 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
           {/* Alert chip */}
           {canUseAlerts&&criticalCount>0&&(
             <button onClick={()=>{setAiPanelOpen(true);setAiAlertTab("alerts");}} style={{display:"flex",alignItems:"center",gap:6,background:T.roseDim,border:`1px solid ${T.rose}40`,borderRadius:10,padding:"6px 12px",cursor:"pointer",animation:"pulse 2s infinite",flexShrink:0}}>
-              <span style={{fontSize:11}}>Ã°ÂÂÂ¨</span>
+              <span style={{fontSize:11}}>ð¨</span>
               <span style={{fontSize:10,color:T.rose,fontFamily:T.sans,fontWeight:700}}>{criticalCount} Alert{criticalCount>1?"s":""}</span>
             </button>
           )}
@@ -5476,7 +5476,7 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
         </div>
 
         </div>
-        {/* Tab nav Ã¢ÂÂ two rows */}
+        {/* Tab nav â two rows */}
         <div className="tab-scroll" style={{display:"flex",flexDirection:"column",gap:4,padding:"10px 0 8px",overflowX:"auto",msOverflowStyle:"none",scrollbarWidth:"none"}}>
           <div role="tablist" aria-label="Core financial modules" style={{display:"flex",gap:2,flexWrap:"nowrap",overflow:"visible"}}>
             {TABS.filter(t=>t.group==="core").map(t=>{
@@ -5484,7 +5484,7 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
               return (
                 <button key={t.id} role="tab" aria-selected={active}
                   onClick={()=>locked?setTab("pricing"):setTab(t.id)}
-                  title={locked?`${t.label} Ã¢ÂÂ Upgrade to unlock`:t.label}
+                  title={locked?`${t.label} â Upgrade to unlock`:t.label}
                   style={{
                     background:active?T.cyanDim:locked?`${T.amber}08`:"transparent",
                     border:`1px solid ${active?T.cyanMid:locked?`${T.amber}20`:"transparent"}`,
@@ -5495,7 +5495,7 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
                   }}
                   onMouseEnter={e=>{if(!active)e.currentTarget.style.background=active?T.cyanDim:T.border+"40"}}
                   onMouseLeave={e=>{if(!active)e.currentTarget.style.background=active?T.cyanDim:locked?`${T.amber}08`:"transparent"}}
-                >{locked?"Ã°ÂÂÂ":t.icon} {t.label}</button>
+                >{locked?"ð":t.icon} {t.label}</button>
               );
             })}
           </div>
@@ -5505,7 +5505,7 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
               return (
                 <button key={t.id}
                   onClick={()=>locked?setTab("pricing"):setTab(t.id)}
-                  title={locked?`${t.label} Ã¢ÂÂ Upgrade to unlock`:t.label}
+                  title={locked?`${t.label} â Upgrade to unlock`:t.label}
                   style={{
                     background:active?(isPricing?`${T.violet}20`:T.cyanDim):locked?`${T.violet}08`:"transparent",
                     border:`1px solid ${active?(isPricing?`${T.violet}50`:T.cyanMid):locked?`${T.violet}20`:"transparent"}`,
@@ -5516,13 +5516,13 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
                   }}
                   onMouseEnter={e=>{if(!active)e.currentTarget.style.background=T.border+"40"}}
                   onMouseLeave={e=>{if(!active)e.currentTarget.style.background=active?(isPricing?`${T.violet}20`:T.cyanDim):locked?`${T.violet}08`:"transparent"}}
-                >{locked?"Ã°ÂÂÂ":t.icon} {t.label}</button>
+                >{locked?"ð":t.icon} {t.label}</button>
               );
             })}
           </div>
         </div>      </div>
 
-      {/* Ã¢ÂÂÃ¢ÂÂ Page header strip (tab title + subtitle) Ã¢ÂÂÃ¢ÂÂ */}
+      {/* ââ Page header strip (tab title + subtitle) ââ */}
       <div style={{background:`${T.surface}cc`,borderBottom:`1px solid ${T.border}60`,padding:"11px 32px",display:"flex",alignItems:"center",gap:12,backdropFilter:"blur(8px)"}}>
         <span style={{fontSize:16}}>{TABS.find(t=>t.id===tab)?.icon}</span>
         <div>
@@ -5541,7 +5541,7 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
               integrations:"Connect QuickBooks, Plaid, CSV upload and other data sources",
               pricing:"Plans, pricing and payment options",
               csuite:"Role-differentiated strategic highlights and watch items for CEO, CFO and CIO",
-              "cfo-sim":"AI-powered 30-day CFO simulation Ã¢ÂÂ competitive gap analysis, scorecard, and top improvements",
+              "cfo-sim":"AI-powered 30-day CFO simulation â competitive gap analysis, scorecard, and top improvements",
               budgeting:"Collaborative department budgeting with approval workflow and comment threads",
             }[tab]||""}</div>
             {["pnl","bva","cashflow","balancesheet","ar","saas","headcount","regional","csuite"].includes(tab) && (
@@ -5549,7 +5549,7 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
             )}
           </div>
         </div>
-        {/* Ã¢ÂÂÃ¢ÂÂ Export + CSV buttons Ã¢ÂÂÃ¢ÂÂ */}
+        {/* ââ Export + CSV buttons ââ */}
         <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:8}}>
           {["pnl","bva","saas","ar","cashflow"].includes(tab) && (
             <ExportButton
@@ -5562,7 +5562,7 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
           )}
           {tab==="integrations" && hasFeature(plan, FEATURES.CSV_IMPORT) && (
             <button onClick={()=>setCsvImportOpen(true)} style={{display:"flex",alignItems:"center",gap:6,background:T.surface,border:`1px solid ${T.border}`,borderRadius:8,padding:"6px 13px",cursor:"pointer",color:T.textMid,fontSize:11,fontFamily:T.sans,fontWeight:600}}>
-              <span style={{fontSize:13}}>Ã°ÂÂÂ¤</span> Import CSV
+              <span style={{fontSize:13}}>ð¤</span> Import CSV
             </button>
           )}
           {canUseAlerts&&anomalies.filter(a=>["pnl","bva","cashflow","ar","saas"].includes(
@@ -5581,16 +5581,16 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
           )}
         </div>
       </div>
-      {/* Ã¢ÂÂÃ¢ÂÂ CSV Import Modal Ã¢ÂÂÃ¢ÂÂ */}
+      {/* ââ CSV Import Modal ââ */}
       {csvImportOpen && <CSVImportModal onClose={()=>setCsvImportOpen(false)} onSuccess={()=>setCsvImportOpen(false)}/>}
 
-      {/* Ã¢ÂÂÃ¢ÂÂ Main content Ã¢ÂÂÃ¢ÂÂ */}
+      {/* ââ Main content ââ */}
       <div className="fadein" key={tab} style={{padding:"24px 32px", paddingBottom: showPanel ? 380 : 28, width:"100%"}}>
-        {/* Ã¢ÂÂÃ¢ÂÂ Onboarding checklist Ã¢ÂÂ shown on pnl tab until dismissed Ã¢ÂÂÃ¢ÂÂ */}
+        {/* ââ Onboarding checklist â shown on pnl tab until dismissed ââ */}
         {tab==="pnl" && !checklistDismissed && (
           <OnboardingChecklist onNavigate={id=>setTab(id)} onDismiss={()=>{setChecklistDismissed(true);try{localStorage.setItem('fo_checklist_dismissed','true')}catch{};}}/>
         )}
-        {/* Ã¢ÂÂÃ¢ÂÂ CFO Scorecard Ã¢ÂÂ shown on pnl tab Ã¢ÂÂÃ¢ÂÂ */}
+        {/* ââ CFO Scorecard â shown on pnl tab ââ */}
         {tab==="pnl" && (
           <CFOScorecard
             plan={plan}
@@ -5645,7 +5645,7 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
             ]}
           />
         )}
-        {/* Ã¢ÂÂÃ¢ÂÂ Starter upgrade banner Ã¢ÂÂ contextual per tab Ã¢ÂÂÃ¢ÂÂ */}
+        {/* ââ Starter upgrade banner â contextual per tab ââ */}
         {starterBanner && (
           <div style={{marginBottom:18,background:`linear-gradient(135deg,${starterBanner.color}12,${T.violet}08)`,border:`1.5px solid ${starterBanner.color}35`,borderRadius:12,padding:"12px 18px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,position:"relative",overflow:"hidden"}}>
             <div style={{position:"absolute",top:-20,right:80,width:120,height:60,borderRadius:"50%",background:`${starterBanner.color}10`,filter:"blur(20px)",pointerEvents:"none"}}/>
@@ -5658,7 +5658,7 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
             </div>
             <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
               <button onClick={()=>setTab("pricing")} style={{background:`linear-gradient(135deg,${starterBanner.color},${T.violet})`,border:"none",borderRadius:8,padding:"8px 18px",color:T.bg,fontSize:11,fontFamily:T.sans,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap",boxShadow:`0 2px 12px ${starterBanner.color}35`,letterSpacing:0.2}}>{starterBanner.cta}</button>
-              <button onClick={()=>setBannerDismissed(true)} style={{background:"transparent",border:"none",color:T.textDim,fontSize:16,cursor:"pointer",padding:"4px 6px",lineHeight:1,flexShrink:0}} title="Dismiss">ÃÂ</button>
+              <button onClick={()=>setBannerDismissed(true)} style={{background:"transparent",border:"none",color:T.textDim,fontSize:16,cursor:"pointer",padding:"4px 6px",lineHeight:1,flexShrink:0}} title="Dismiss">ÃÂÃÂ</button>
             </div>
           </div>
         )}
@@ -5697,7 +5697,7 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
         {tab==="pricing"      && <PricingPage currentPlan={plan} onPlanChange={p=>{setPlan(normalizePlan(p));setTab("pnl");if(onPlanRefresh)onPlanRefresh();}}/>}
       </div>
 
-      {/* Ã¢ÂÂÃ¢ÂÂ Fixed bottom AI panel Ã¢ÂÂÃ¢ÂÂ */}
+      {/* ââ Fixed bottom AI panel ââ */}
       {showPanel && <BottomAIPanel activeTab={tab} context={tabCtx[tab]||aiCtx} anomalies={canUseAlerts?anomalies:[]} panelOpen={aiPanelOpen} setPanelOpen={setAiPanelOpen} alertTab={aiAlertTab} setAlertTab={setAiAlertTab} plan={plan} onUpgrade={()=>setTab("pricing")}/>}
     </div>
   );
@@ -5714,7 +5714,7 @@ export default function FPADashboard() {
         const { plan } = await api.billing.status();
         if (plan) setInitialPlan(normalizePlan(plan));
       } catch {
-        // Backend unreachable Ã¢ÂÂ stay on starter
+        // Backend unreachable â stay on starter
       }
     }, 0);
 
