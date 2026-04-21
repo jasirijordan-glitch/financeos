@@ -1083,7 +1083,7 @@ function CSVImportModal({ onClose, onSuccess }) {
         headers: { "Content-Type": "text/plain" },
         body: csvText,
       });
-      const d = await res.json();
+      const d = await res.json().catch(()=>({}));
       if (!res.ok) throw new Error(d.message || "Upload failed.");
       setResult(d);
       setStatus("done");
@@ -4380,10 +4380,10 @@ function BalanceSheet({aiContext}) {
 
       <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:18}}>
         {[
-          {l:"Current Ratio",   v:currRatio.toFixed(2)+"x", sub:currRatio>=2?"Strong":currRatio>=1.5?"Healthy":"Watch", c:currRatio>=1.5?T.emerald:currRatio>=1?T.amber:T.rose},
+          {l:"Current Ratio",   v:currLiab===0?"—":currRatio.toFixed(2)+"x", sub:currLiab===0?"No liabilities":currRatio>=2?"Strong":currRatio>=1.5?"Healthy":"Watch", c:currLiab===0?T.emerald:currRatio>=1.5?T.emerald:currRatio>=1?T.amber:T.rose},
           {l:"Quick Ratio",     v:quickRatio.toFixed(2)+"x", sub:quickRatio>=1?"Healthy":"Below 1x — risk", c:quickRatio>=1?T.emerald:T.rose},
           {l:"Debt-to-Equity",  v:debtToEquity.toFixed(2)+"x", sub:debtToEquity<=1.5?"Manageable":"High leverage", c:debtToEquity<=1.5?T.emerald:T.amber},
-          {l:"Working Capital", v:fmt(workingCapital,true), sub:`${pct(workingCapital/totalAssets)} of assets`, c:workingCapital>0?T.emerald:T.rose},
+          {l:"Working Capital", v:fmt(workingCapital,true), sub:`${pct(safeDiv(workingCapital,totalAssets))} of assets`, c:workingCapital>0?T.emerald:T.rose},
         ].map(k=>(
           <div key={k.l} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"14px 16px"}}>
             <div style={{fontSize:9,color:T.textDim,fontFamily:T.sans,textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>{k.l}</div>
@@ -4436,8 +4436,8 @@ function BalanceSheet({aiContext}) {
         <div style={{color:T.text,fontFamily:T.display,fontWeight:700,fontSize:14,marginBottom:14}}>📈 Ratio Trends — Full Year</div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:16}}>
           {[
-            {l:"Current Ratio",data:MONTHS.map((_,i)=>{const ca=BS.cash[i]+BS.accountsReceivable[i]+BS.inventory_bs[i]+BS.prepaidExpenses[i];const cl=BS.accountsPayable[i]+BS.accruedExpenses[i]+BS.deferredRevenue[i]+BS.shortTermDebt[i];return ca/cl;}),c:T.cyan,fmt:v=>`${v.toFixed(2)}x`,thresh:1.5},
-            {l:"Quick Ratio",  data:MONTHS.map((_,i)=>{const qa=BS.cash[i]+BS.accountsReceivable[i];const cl=BS.accountsPayable[i]+BS.accruedExpenses[i]+BS.deferredRevenue[i]+BS.shortTermDebt[i];return qa/cl;}),c:T.emerald,fmt:v=>`${v.toFixed(2)}x`,thresh:1.0},
+            {l:"Current Ratio",data:MONTHS.map((_,i)=>{const ca=BS.cash[i]+BS.accountsReceivable[i]+BS.inventory_bs[i]+BS.prepaidExpenses[i];const cl=BS.accountsPayable[i]+BS.accruedExpenses[i]+BS.deferredRevenue[i]+BS.shortTermDebt[i];return cl>0?ca/cl:0;}),c:T.cyan,fmt:v=>`${v.toFixed(2)}x`,thresh:1.5},
+            {l:"Quick Ratio",  data:MONTHS.map((_,i)=>{const qa=BS.cash[i]+BS.accountsReceivable[i];const cl=BS.accountsPayable[i]+BS.accruedExpenses[i]+BS.deferredRevenue[i]+BS.shortTermDebt[i];return cl>0?qa/cl:0;}),c:T.emerald,fmt:v=>`${v.toFixed(2)}x`,thresh:1.0},
           ].map(chart=>(
             <div key={chart.l}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}>
@@ -4619,7 +4619,7 @@ function HeadcountPlanning({aiContext}) {
 function SaaSMetrics({aiContext}) {
   const [view,setView]=useState("overview");
   const latestMrr=SAAS.mrr[11], latestArr=latestMrr*12;
-  const latestNrr=SAAS.nrr[11], latestCac=SAAS.cac[11], latestLtv=SAAS.ltv[11];
+  const latestNrr=SAAS.nrr?.[11]??SAAS.nrr?.at(-1)??0, latestCac=SAAS.cac?.[11]??SAAS.cac?.at(-1)??0, latestLtv=SAAS.ltv?.[11]??SAAS.ltv?.at(-1)??0;
   const latestCust=SAAS.customers[11];
   const mrrGrowth=(SAAS.mrr[11]-SAAS.mrr[10])/SAAS.mrr[10];
   const churnRate=safeDiv(SAAS.churnCust[11],SAAS.customers[10]);
@@ -5266,7 +5266,7 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
   const bsCurrL = BS.accountsPayable[mo]+BS.accruedExpenses[mo]+BS.deferredRevenue[mo]+BS.shortTermDebt[mo];
   const bsTotalL = bsCurrL+BS.longTermDebt[mo];
   const bsEquity = bsTotalA-bsTotalL;
-  const bsCurrRatio=safeDiv(bsCurrA,bsCurrL,1);
+  const bsCurrRatio=bsCurrL===0?Infinity:safeDiv(bsCurrA,bsCurrL);
   const bsDebtToEq=safeDiv(bsTotalL,bsEquity);
 
   // ── Headcount context ──
@@ -5277,7 +5277,7 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
 
   // ── SaaS context ──
   const latestMrr=SAAS.mrr[11], latestNrr=SAAS.nrr[11];
-  const latestCac=SAAS.cac[11], latestLtv=SAAS.ltv[11];
+  const latestCac=SAAS.cac?.[11]??SAAS.cac?.at(-1)??0, latestLtv=SAAS.ltv?.[11]??SAAS.ltv?.at(-1)??0;
   const churnRate=safeDiv(SAAS.churnCust[11],SAAS.customers[10]);
 
   // ── Anomaly Detection Engine ──
@@ -5297,8 +5297,8 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
     // Churn rate
     if(churnRate>0.018) items.push({severity:"warning", emoji:"🔄", title:"Customer churn approaching target", detail:`Monthly customer churn is ${pct(churnRate)} vs 2.0% target. ${SAAS.churnCust[11]} customers churned in December. Review at-risk segments before churn accelerates.`, action:"Deep-dive customer cohorts in SaaS Metrics"});
     // LTV:CAC health
-    const ltvCac=latestLtv/latestCac;
-    if(ltvCac<3) items.push({severity:"warning", emoji:"🎯", title:"LTV:CAC ratio below 3x", detail:`Current LTV:CAC is ${ltvCac.toFixed(1)}x — below the 3x benchmark. CAC has been volatile. Consider reducing acquisition spend or improving onboarding retention.`, action:"Analyze unit economics in SaaS Metrics"});
+    const ltvCac=safeDiv(latestLtv,latestCac);
+    if(latestCac>0 && ltvCac<3) items.push({severity:"warning", emoji:"🎯", title:"LTV:CAC ratio below 3x", detail:`Current LTV:CAC is ${ltvCac.toFixed(1)}x — below the 3x benchmark. CAC has been volatile. Consider reducing acquisition spend or improving onboarding retention.`, action:"Analyze unit economics in SaaS Metrics"});
     // Working capital
     if(bsCurrRatio<1.5) items.push({severity:"info", emoji:"🏦", title:"Current ratio trending low", detail:`Current ratio is ${bsCurrRatio.toFixed(2)}x. While above the 1.0x floor, approaching 1.5x warrants attention — especially with the short-term debt maturity.`, action:"Review Balance Sheet liquidity ratios"});
     // Net margin compression
