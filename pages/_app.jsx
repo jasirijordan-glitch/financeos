@@ -1,4 +1,5 @@
 import Head from "next/head";
+import { Analytics } from "@vercel/analytics/next";
 
 export default function App({ Component, pageProps }) {
   return (
@@ -46,6 +47,7 @@ export default function App({ Component, pageProps }) {
         ::-webkit-scrollbar-thumb:hover { background: #2C3550; }
       `}</style>
       <Component {...pageProps} />
+      <Analytics />
     </>
   );
 }
