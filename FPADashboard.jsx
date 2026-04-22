@@ -5704,7 +5704,14 @@ function FPADashboardInner({ initialPlan = "starter", onPlanRefresh }) {
 }
 
 export default function FPADashboard() {
-  const [initialPlan, setInitialPlan] = useState("starter");
+  // Owner override: set VITE_OWNER_PLAN=enterprise in .env.local for full dev access.
+  // This env var is git-ignored and never present on Vercel, so production customers
+  // are always served by the real billing API result — gates stay enforced for them.
+  const OWNER_PLAN = (typeof import.meta !== "undefined" && import.meta.env?.VITE_OWNER_PLAN)
+    ? normalizePlan(import.meta.env.VITE_OWNER_PLAN)
+    : null;
+
+  const [initialPlan, setInitialPlan] = useState(OWNER_PLAN ?? "starter");
 
   useEffect(() => {
     // Defer plan fetch so the dashboard always paints on the first frame.
@@ -5714,7 +5721,8 @@ export default function FPADashboard() {
         const { plan } = await api.billing.status();
         if (plan) setInitialPlan(normalizePlan(plan));
       } catch {
-        // Backend unreachable — stay on starter
+        // Backend unreachable — use OWNER_PLAN if set (dev), else stay on starter (production).
+        if (OWNER_PLAN) setInitialPlan(OWNER_PLAN);
       }
     }, 0);
 
@@ -5722,7 +5730,7 @@ export default function FPADashboard() {
       clearTimeout(timer);
       api.billing.status()
         .then(({ plan }) => { if (plan) setInitialPlan(normalizePlan(plan)); })
-        .catch(() => {});
+        .catch(() => { if (OWNER_PLAN) setInitialPlan(OWNER_PLAN); });
     };
     window.addEventListener("focus", onFocus);
     return () => {
